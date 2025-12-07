@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/sakura.xyz/static/css/main.7914036e.css",
+    "main.js": "/sakura.xyz/static/js/main.603101d9.js",
+    "static/js/453.94335910.chunk.js": "/sakura.xyz/static/js/453.94335910.chunk.js",
+    "index.html": "/sakura.xyz/index.html",
+    "main.7914036e.css.map": "/sakura.xyz/static/css/main.7914036e.css.map",
+    "main.603101d9.js.map": "/sakura.xyz/static/js/main.603101d9.js.map",
+    "453.94335910.chunk.js.map": "/sakura.xyz/static/js/453.94335910.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.7914036e.css",
+    "static/js/main.603101d9.js"
+  ]
+}
