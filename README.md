@@ -50,7 +50,7 @@ Before installing and running Sakura, ensure you have the following installed:
 
 *   **Node.js:** Version 16 or higher.  Download from [nodejs.org](https://nodejs.org/).
 *   **npm (Node Package Manager):**  Usually comes with Node.js.
-
+*   **Git (Git Bash): Download from .[git-scm.com](https://git-scm.com/install/windows)**
 ## Installation & Setup Instructions
 
 Follow these steps to set up Sakura:
@@ -109,6 +109,7 @@ In the project directory, you can run:
 
 Runs the app in the development mode.
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Please note that running multiple dev servers requires killing the previous ones for better performance 
 
 The page will reload when you make changes.
 You may also see any lint errors in the console.
