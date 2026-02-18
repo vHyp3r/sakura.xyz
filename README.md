@@ -50,7 +50,7 @@ Before installing and running Sakura, ensure you have the following installed:
 
 *   **Node.js:** Version 16 or higher.  Download from [nodejs.org](https://nodejs.org/).
 *   **npm (Node Package Manager):**  Usually comes with Node.js.
-*   **Git (Git Bash): Download from .[git-scm.com](https://git-scm.com/install/windows)**
+*   **Git (Git Bash): Download from [git-scm.com](https://git-scm.com/install/windows)**
 ## Installation & Setup Instructions
 
 Follow these steps to set up Sakura:
