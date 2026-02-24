@@ -169,9 +169,9 @@ export default function App() {
         )}
         <div className="footer-text">
           By continuing, you agree to our
-          <a href="#" className="footer-link"> Terms of Service </a>
+          <a href="/terms" className="footer-link"> Terms of Service </a>
           and
-          <a href="#" className="footer-link"> Privacy Policy</a>
+          <a href="/privacy" className="footer-link"> Privacy Policy</a>
         </div>
       </div>
     </div>
