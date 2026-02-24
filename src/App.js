@@ -15,7 +15,7 @@ export default function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [user, setUser] = useState(() => auth.currentUser);
+  const [user, setUser] = useState(() => auth !== null ? auth.currentUser : null);
   const [loading, setLoading] = useState(false);
 
   // Forgot password states
@@ -24,6 +24,7 @@ export default function App() {
   const [forgotMsg, setForgotMsg] = useState("");
 
   React.useEffect(() => {
+    if (!auth) return;
     const unsub = auth.onAuthStateChanged(u => setUser(u));
     return () => unsub();
   }, []);
@@ -31,6 +32,7 @@ export default function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    if (!auth) { setError("Authentication service is unavailable."); return; }
     setLoading(true);
     try {
       if (tab === 'signin') {
@@ -47,6 +49,7 @@ export default function App() {
   };
 
   const handleLogout = async () => {
+    if (!auth) return;
     await signOut(auth);
   };
 
@@ -54,6 +57,7 @@ export default function App() {
     e.preventDefault();
     setForgotMsg("");
     setError("");
+    if (!auth) { setError("Authentication service is unavailable."); return; }
     setLoading(true);
     try {
       await sendPasswordResetEmail(auth, forgotEmail);
