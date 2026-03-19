@@ -1,7 +1,7 @@
 Administrative Rights: You must run this script as an Administrator.
 Appx/Msix Package: Have the .appx or .msixbundle file ready.
 Dependencies: Ensure you have the required dependency packages (usually Microsoft.VCLibs and Microsoft.UI.Xaml) that come with the main app package, or install them via PowerShell if necessary.
-Developer Mode: Enable Developer Mode in Windows 11 Settings to install custom packages. 
+Developer Mode: Enable Developer Mode in Windows 10/11 Settings to install custom packages. 
 
 @echo off
 :: Check for administrative permissions
