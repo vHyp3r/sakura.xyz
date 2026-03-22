@@ -68,26 +68,33 @@ Follow these steps to set up Sakura:
     npm install
     ```
 
-3.  **Configure Firebase (Optional):**
+3.  **Configure Firebase:**
 
-    Sakura utilizes Firebase for certain functionalities.  To enable these features, you need to configure Firebase.
+    Sakura requires Firebase for authentication and other features.  To enable these features, you need to configure Firebase:
 
     *   Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com/).
-    *   Enable the necessary Firebase services (e.g., Authentication, Database, Hosting).
-    *   Copy your Firebase configuration object and replace the placeholders in `src/firebaseConfig.js` (if it exists) or add it to your environment variables.
+    *   Enable the necessary Firebase services (e.g., Authentication).
+    *   Go to **Project Settings > General > Your apps > SDK setup and configuration** to find your credentials.
+    *   Copy `.env.example` to `.env.local` and fill in your Firebase project credentials:
 
-    ```javascript
-    // Example Firebase configuration (replace with your actual configuration)
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID",
-      measurementId: "YOUR_MEASUREMENT_ID"
-    };
+    ```bash
+    cp .env.example .env.local
     ```
+
+    Then edit `.env.local` with your actual values:
+
+    ```
+    REACT_APP_FIREBASE_API_KEY=your_api_key_here
+    REACT_APP_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
+    REACT_APP_FIREBASE_PROJECT_ID=your_project_id
+    REACT_APP_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
+    REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+    REACT_APP_FIREBASE_APP_ID=your_app_id
+    ```
+
+    > **Note:** If these variables are not set, the app will log a descriptive error in the browser console and Firebase authentication will be unavailable.
+
+    **For GitHub Actions CI/CD:** Add the same variables as repository secrets (`REACT_APP_FIREBASE_API_KEY`, etc.) in **Settings > Secrets and variables > Actions**.
 
 4.  **Start the Application:**
 
