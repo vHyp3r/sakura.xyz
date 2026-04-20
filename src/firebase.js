@@ -10,23 +10,11 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
 
-const requiredKeys = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
-const missingKeys = requiredKeys.filter((key) => !firebaseConfig[key]);
-
 let auth = null;
-if (missingKeys.length > 0) {
-  console.error(
-    `Firebase configuration is incomplete. Missing environment variable(s): ${missingKeys
-      .map((k) => `REACT_APP_FIREBASE_${k.replace(/([A-Z])/g, '_$1').toUpperCase()}`)
-      .join(', ')}. ` +
-    'Copy .env.example to .env.local and fill in your Firebase project credentials.'
-  );
-} else {
-  try {
-    const app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-  } catch (e) {
-    console.error('Firebase initialization error:', e);
-  }
+try {
+  const app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+} catch (e) {
+  console.error('Firebase initialization error:', e);
 }
 export { auth };
