@@ -32,15 +32,16 @@ const isPlaceholderValue = (value) => {
   const normalized = value.toLowerCase();
   return placeholderValues.has(normalized) || /^<.+>$/.test(normalized);
 };
-const hasValidFirebaseConfig = (config) => requiredConfigKeys.every((key) => {
+const getInvalidFirebaseConfigKeys = (config) => requiredConfigKeys.filter((key) => {
   const value = config[key];
-  if (typeof value !== 'string') return false;
+  if (typeof value !== 'string') return true;
   const trimmedValue = value.trim();
-  return trimmedValue !== '' && !isPlaceholderValue(trimmedValue);
+  return trimmedValue === '' || isPlaceholderValue(trimmedValue);
 });
 
 let auth = null;
-if (hasValidFirebaseConfig(firebaseConfig)) {
+const invalidFirebaseConfigKeys = getInvalidFirebaseConfigKeys(firebaseConfig);
+if (invalidFirebaseConfigKeys.length === 0) {
   try {
     const app = initializeApp(firebaseConfig);
     auth = getAuth(app);
@@ -48,6 +49,8 @@ if (hasValidFirebaseConfig(firebaseConfig)) {
     console.error('Firebase initialization error:', e);
   }
 } else {
-  console.warn('Firebase is disabled: missing or placeholder Firebase environment variables.');
+  console.warn(
+    `Firebase is disabled: missing or placeholder Firebase environment variables (${invalidFirebaseConfigKeys.join(', ')}).`
+  );
 }
 export { auth };
