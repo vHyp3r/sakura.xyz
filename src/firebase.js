@@ -28,18 +28,19 @@ const placeholderValues = new Set([
   'your_app_id',
 ]);
 const isPlaceholderValue = (value) => {
+  if (typeof value !== 'string') return false;
   const normalized = value.toLowerCase();
   return placeholderValues.has(normalized) || /^<.+>$/.test(normalized);
 };
-const hasValidFirebaseConfig = requiredConfigKeys.every((key) => {
-  const value = firebaseConfig[key];
+const hasValidFirebaseConfig = (config) => requiredConfigKeys.every((key) => {
+  const value = config[key];
   if (typeof value !== 'string') return false;
   const trimmedValue = value.trim();
   return trimmedValue !== '' && !isPlaceholderValue(trimmedValue);
 });
 
 let auth = null;
-if (hasValidFirebaseConfig) {
+if (hasValidFirebaseConfig(firebaseConfig)) {
   try {
     const app = initializeApp(firebaseConfig);
     auth = getAuth(app);
