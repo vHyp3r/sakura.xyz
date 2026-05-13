@@ -19,10 +19,23 @@ const requiredConfigKeys = [
   'appId',
 ];
 
-const isPlaceholderValue = (value) => /^your_.*_here$/i.test(value);
+const placeholderValues = new Set([
+  'your_api_key_here',
+  'your_project_id.firebaseapp.com',
+  'your_project_id',
+  'your_project_id.appspot.com',
+  'your_messaging_sender_id',
+  'your_app_id',
+]);
+const isPlaceholderValue = (value) => {
+  const normalized = value.toLowerCase();
+  return placeholderValues.has(normalized) || /^<.+>$/.test(normalized);
+};
 const hasValidFirebaseConfig = requiredConfigKeys.every((key) => {
   const value = firebaseConfig[key];
-  return typeof value === 'string' && value.trim() !== '' && !isPlaceholderValue(value.trim());
+  if (typeof value !== 'string') return false;
+  const trimmedValue = value.trim();
+  return trimmedValue !== '' && !isPlaceholderValue(trimmedValue);
 });
 
 let auth = null;
