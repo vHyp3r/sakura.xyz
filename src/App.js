@@ -11,6 +11,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import Button from './components/shared/Button';
 import TabButton from './components/shared/TabButton';
 import Card from './components/shared/Card';
+import ThemeSwitcher from './components/shared/ThemeSwitcher';
 
 const SAKURA_ICON_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAKACAIAAACP/WnKAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAlRJREFUeNrs2rENACEIBNE67z/yN9BGNshiVITEE1WJnXO/zrjeu7PwgAAAAAAAAAAAAAAAAAAD8ZsmfMt+Z8K2bp6X7XXvLYux6i6ZPLEw+XoLpovIYMvV6/h+9y+jw+dgRQBX9MsyeX1mNd3raYuCynj+1gOXd3mUvFiUQc4aGs+ytxw1pI6m8/wcB5l2fdjqEmQ3CZXBQJCsFFwVsWBauk/Pf9OMAECBABAgQAECECAAAQIQIEECBAAAQIQIECAAAQP+uAQPmxnAArPYpPAfsmtP2AAAAAElFTkSuQmCC';
 
@@ -82,6 +83,9 @@ export default function App() {
         <img src={SAKURA_ICON_PNG} alt="Sakura Icon" className="sakura-icon" />
         <h1 className="title">Welcome to <b>sakura.xyz</b></h1>
         <h2 className="subtitle">Minecraft Bedrock & Java Hub</h2>
+        <div style={{ position: 'absolute', top: 18, right: 18 }}>
+          <ThemeSwitcher />
+        </div>
         <div style={{ maxWidth: 680, margin: '12px auto 18px', color: '#cfcfd6' }}>
           Sakura.xyz provides curated tools, texture packs, and community utilities
           for Minecraft Bedrock and Java. Sign in to access your dashboard, manage
@@ -157,11 +161,11 @@ export default function App() {
         )}
         <div className="footer-text">
           By continuing, you agree to our
-          <a href="/terms" className="footer-link"> Terms of Service </a>
+          <a href="#/terms" className="footer-link"> Terms of Service </a>
           and
-          <a href="/privacy" className="footer-link"> Privacy Policy</a>
+          <a href="#/privacy" className="footer-link"> Privacy Policy</a>
           <span style={{ display: 'block', marginTop: 8 }}>
-            Quick links: <a href="/dashboard" className="footer-link">Dashboard</a>
+            Quick links: <a href="#/dashboard" className="footer-link">Dashboard</a>
           </span>
         </div>
       </div>

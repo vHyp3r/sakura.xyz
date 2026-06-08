@@ -6,31 +6,41 @@ import Dashboard from './Dashboard';
 import Terms from './Terms';
 import Privacy from './Privacy';
 import reportWebVitals from './reportWebVitals';
+import { ThemeProvider } from './theme';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 function renderApp() {
   const path = window.location.pathname || '/';
-  if (path.startsWith('/dashboard')) {
+  const hash = window.location.hash || '';
+  // Support both normal path routing and hash-based routing (e.g. gh-pages)
+  const effective = hash.startsWith('#/') ? hash.slice(1) : path;
+  if (effective.startsWith('/dashboard')) {
     root.render(
       <React.StrictMode>
-        <Dashboard />
+        <ThemeProvider>
+          <Dashboard />
+        </ThemeProvider>
       </React.StrictMode>
     );
     return;
   }
-  if (path === '/terms') {
+  if (effective === '/terms') {
     root.render(
       <React.StrictMode>
-        <Terms />
+        <ThemeProvider>
+          <Terms />
+        </ThemeProvider>
       </React.StrictMode>
     );
     return;
   }
-  if (path === '/privacy') {
+  if (effective === '/privacy') {
     root.render(
       <React.StrictMode>
-        <Privacy />
+        <ThemeProvider>
+          <Privacy />
+        </ThemeProvider>
       </React.StrictMode>
     );
     return;
@@ -38,7 +48,9 @@ function renderApp() {
 
   root.render(
     <React.StrictMode>
-      <App />
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
     </React.StrictMode>
   );
 }
