@@ -17,9 +17,26 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:web": "react-scripts build",
+    "electron:dev": "electron .",
+    "electron:build": "npm run build && electron-builder",
     "test": "react-scripts test",
     "test:e2e": "npx playwright test tests/e2e --project=chromium --reporter=list",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "electron": "^26.0.0",
+    "electron-builder": "^24.6.0"
+  },
+  "build": {
+    "appId": "xyz.sakura.app",
+    "files": [
+      "build/**/*",
+      "electron/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    }
   },
   "eslintConfig": {
     "extends": [

@@ -1,7 +1,7 @@
 
 # sakura.xyz 🌸
 
-Welcome to sakura.xyz, we also go by sakura.dev or sakura.dll is a Minecraft utility menu that strives to create availability along with reliability for all users. This app can suit all your needs, eg: Texture Packs, Mods, Cheat / Utility Clients etc.
+Welcome to sakura.xyz, we also go by sakura.dev or sakura.dll is a Minecraft utility menu that strives to create availability  along with reliability for all users. This app can suit all your needs, eg: Texture Packs, Mods, Cheat / Utility Clients etc.
 
 
 
