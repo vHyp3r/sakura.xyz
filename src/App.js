@@ -79,6 +79,16 @@ export default function App() {
         <img src={SAKURA_ICON_PNG} alt="Sakura Icon" className="sakura-icon" />
         <h1 className="title">Welcome to <b>sakura.xyz</b></h1>
         <h2 className="subtitle">Minecraft Bedrock & Java Hub</h2>
+        <div style={{ maxWidth: 680, margin: '12px auto 18px', color: '#cfcfd6' }}>
+          Sakura.xyz provides curated tools, texture packs, and community utilities
+          for Minecraft Bedrock and Java. Sign in to access your dashboard, manage
+          uploads, and sync your preferences across devices.
+        </div>
+        <ul style={{ listStyle: 'none', padding: 0, marginBottom: 18, color: '#cfcfd6' }}>
+          <li>- Lightweight account-based authentication and password reset</li>
+          <li>- Secure storage for your uploads and proxies</li>
+          <li>- Cross-platform support and easy downloads</li>
+        </ul>
         {user ? (
           <div className="form-card" style={{ textAlign: 'center' }}>
             <div style={{ marginBottom: 20 }}>Signed in as <b>{user.email}</b></div>
@@ -179,6 +189,9 @@ export default function App() {
           <a href="/terms" className="footer-link"> Terms of Service </a>
           and
           <a href="/privacy" className="footer-link"> Privacy Policy</a>
+          <span style={{ display: 'block', marginTop: 8 }}>
+            Quick links: <a href="/dashboard" className="footer-link">Dashboard</a>
+          </span>
         </div>
       </div>
     </div>
