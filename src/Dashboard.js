@@ -1,21 +1,8 @@
 import React from 'react';
-
-export default function Dashboard() {
-  return (
-    <div style={{padding: 24, color: '#fff'}}>
-      <h1>Dashboard</h1>
-      <p>This is the restored dashboard page. Build your admin UI here.</p>
-      <p>
-        <a href="/" style={{color: '#9ad'}}>Back to Home</a>
-      </p>
-    </div>
-  );
-}
-import React from 'react';
 import { auth } from './firebase';
 
 export default function Dashboard() {
-  const [user, setUser] = React.useState(() => auth ? auth.currentUser : null);
+  const [user, setUser] = React.useState(() => (auth ? auth.currentUser : null));
 
   React.useEffect(() => {
     if (!auth) return;
