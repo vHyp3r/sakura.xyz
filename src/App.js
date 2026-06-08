@@ -8,6 +8,9 @@ import {
   sendPasswordResetEmail
 } from 'firebase/auth';
 import { onAuthStateChanged } from 'firebase/auth';
+import Button from './components/shared/Button';
+import TabButton from './components/shared/TabButton';
+import Card from './components/shared/Card';
 
 const SAKURA_ICON_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAKACAIAAACP/WnKAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAlRJREFUeNrs2rENACEIBNE67z/yN9BGNshiVITEE1WJnXO/zrjeu7PwgAAAAAAAAAAAAAAAAAAD8ZsmfMt+Z8K2bp6X7XXvLYux6i6ZPLEw+XoLpovIYMvV6/h+9y+jw+dgRQBX9MsyeX1mNd3raYuCynj+1gOXd3mUvFiUQc4aGs+ytxw1pI6m8/wcB5l2fdjqEmQ3CZXBQJCsFFwVsWBauk/Pf9OMAECBABAgQAECECAAAQIQIEECBAAAQIQIECAAAQP+uAQPmxnAArPYpPAfsmtP2AAAAAElFTkSuQmCC';
 
@@ -90,12 +93,12 @@ export default function App() {
           <li>- Cross-platform support and easy downloads</li>
         </ul>
         {user ? (
-          <div className="form-card" style={{ textAlign: 'center' }}>
+          <Card style={{ textAlign: 'center' }}>
             <div style={{ marginBottom: 20 }}>Signed in as <b>{user.email}</b></div>
-            <button className="main-btn" onClick={handleLogout} style={{ marginBottom: 0 }}>Logout</button>
-          </div>
+            <Button className="main-btn" onClick={handleLogout} style={{ marginBottom: 0 }}>Logout</Button>
+          </Card>
         ) : forgot ? (
-          <div className="form-card">
+          <Card>
             <form autoComplete="off" onSubmit={handleForgotPassword}>
               <label className="input-label">Reset password for:</label>
               <input
@@ -110,35 +113,17 @@ export default function App() {
               />
               {forgotMsg && <div style={{ color: '#7afa99', marginBottom: 8 }}>{forgotMsg}</div>}
               {error && <div style={{ color: '#fa7897', marginBottom: 8 }}>{error}</div>}
-              <button type="submit" className="main-btn" disabled={loading}>
-                {loading ? "Sending..." : "Send Reset Email"}
-              </button>
+              <Button type="submit" className="main-btn" disabled={loading}>{loading ? 'Sending...' : 'Send Reset Email'}</Button>
             </form>
-            <button
-              className="footer-link"
-              type="button"
-              onClick={() => {
-                setForgot(false);
-                setForgotEmail("");
-                setError("");
-                setForgotMsg("");
-              }}
-              style={{ marginTop: 16 }}
-            >
-              Back to Sign In
-            </button>
-          </div>
+            <Button className="footer-link" onClick={() => { setForgot(false); setForgotEmail(''); setError(''); setForgotMsg(''); }} style={{ marginTop: 16 }}>Back to Sign In</Button>
+          </Card>
         ) : (
           <>
             <div className="tab-row">
-              <button onClick={() => { setTab('signin'); setError(""); setForgot(false); }} className={tab === 'signin' ? 'tab active' : 'tab'}>
-                Sign In
-              </button>
-              <button onClick={() => { setTab('signup'); setError(""); setForgot(false); }} className={tab === 'signup' ? 'tab active' : 'tab'}>
-                Sign Up
-              </button>
+              <TabButton active={tab === 'signin'} onClick={() => { setTab('signin'); setError(''); setForgot(false); }}>Sign In</TabButton>
+              <TabButton active={tab === 'signup'} onClick={() => { setTab('signup'); setError(''); setForgot(false); }}>Sign Up</TabButton>
             </div>
-            <div className="form-card">
+            <Card>
               <form autoComplete="off" onSubmit={handleSubmit}>
                 <label className="input-label">Email</label>
                 <input
@@ -162,26 +147,12 @@ export default function App() {
                   disabled={loading}
                 />
                 {error && <div style={{ color: '#fa7897', margin: '5px 0', fontSize: '1em' }}>{error}</div>}
-                <button type="submit" className="main-btn" disabled={loading}>
-                  {loading ? (tab === 'signin' ? 'Signing In...' : 'Signing Up...') : (tab === 'signin' ? 'Sign In' : 'Sign Up')}
-                </button>
+                <Button type="submit" className="main-btn" disabled={loading}>{loading ? (tab === 'signin' ? 'Signing In...' : 'Signing Up...') : (tab === 'signin' ? 'Sign In' : 'Sign Up')}</Button>
               </form>
               {tab === 'signin' && (
-                <button
-                  type="button"
-                  className="footer-link"
-                  style={{ marginTop: 12, fontSize: '1em', border: 'none', background: 'none', padding: 0 }}
-                  onClick={() => {
-                    setForgot(true);
-                    setEmail("");
-                    setPassword("");
-                    setError("");
-                  }}
-                >
-                  Forgot password?
-                </button>
+                <Button className="footer-link" onClick={() => { setForgot(true); setEmail(''); setPassword(''); setError(''); }} style={{ marginTop: 12, fontSize: '1em', border: 'none', background: 'none', padding: 0 }}>Forgot password?</Button>
               )}
-            </div>
+            </Card>
           </>
         )}
         <div className="footer-text">
