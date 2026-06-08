@@ -1,13 +1,22 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
+const firebaseFallbackConfig = {
+  apiKey: 'AIzaSyCBJKtfJHmUnW5kBhY6HrRG8c1aQK8P2ek',
+  authDomain: 'sakura-auth-66415.firebaseapp.com',
+  projectId: 'sakura-auth-66415',
+  storageBucket: 'sakura-auth-66415.firebasestorage.app',
+  messagingSenderId: '589825392559',
+  appId: '1:589825392559:web:f8b671e0646669f510395a',
+};
+
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || firebaseFallbackConfig.apiKey,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || firebaseFallbackConfig.authDomain,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || firebaseFallbackConfig.projectId,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || firebaseFallbackConfig.storageBucket,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || firebaseFallbackConfig.messagingSenderId,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID || firebaseFallbackConfig.appId,
 };
 
 const requiredConfigKeys = [
@@ -19,18 +28,10 @@ const requiredConfigKeys = [
   'appId',
 ];
 
-const placeholderValues = new Set([
-  'your_api_key_here',
-  'your_project_id.firebaseapp.com',
-  'your_project_id',
-  'your_project_id.appspot.com',
-  'your_messaging_sender_id',
-  'your_app_id',
-]);
 const isPlaceholderValue = (value) => {
   if (typeof value !== 'string') return false;
   const normalized = value.toLowerCase();
-  return placeholderValues.has(normalized) || /^<.+>$/.test(normalized);
+  return /^your_|^<.+>$/.test(normalized);
 };
 const getInvalidFirebaseConfigKeys = (config) => requiredConfigKeys.filter((key) => {
   const value = config[key];
