@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import './App.css';
-import { auth } from './firebase';
+import { auth, firebaseAuthStatus } from './firebase';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail
 } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const SAKURA_ICON_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAKACAIAAACP/WnKAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAlRJREFUeNrs2rENACEIBNE67z/yN9BGNshiVITEE1WJnXO/zrjeu7PwgAAAAAAAAAAAAAAAAAAD8ZsmfMt+Z8K2bp6X7XXvLYux6i6ZPLEw+XoLpovIYMvV6/h+9y+jw+dgRQBX9MsyeX1mNd3raYuCynj+1gOXd3mUvFiUQc4aGs+ytxw1pI6m8/wcB5l2fdjqEmQ3CZXBQJCsFFwVsWBauk/Pf9OMAECBABAgQAECECAAAQIQIEECBAAAQIQIECAAAQP+uAQPmxnAArPYpPAfsmtP2AAAAAElFTkSuQmCC';
 
@@ -23,16 +24,18 @@ export default function App() {
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotMsg, setForgotMsg] = useState("");
 
+  const getAuthUnavailableMessage = () => firebaseAuthStatus.message || 'Authentication service is unavailable.';
+
   React.useEffect(() => {
     if (!auth) return;
-    const unsub = auth.onAuthStateChanged(u => setUser(u));
+    const unsub = onAuthStateChanged(auth, u => setUser(u));
     return () => unsub();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (!auth) { setError("Authentication service is unavailable."); return; }
+    if (!auth) { setError(getAuthUnavailableMessage()); return; }
     setLoading(true);
     try {
       if (tab === 'signin') {
@@ -57,7 +60,7 @@ export default function App() {
     e.preventDefault();
     setForgotMsg("");
     setError("");
-    if (!auth) { setError("Authentication service is unavailable."); return; }
+    if (!auth) { setError(getAuthUnavailableMessage()); return; }
     setLoading(true);
     try {
       await sendPasswordResetEmail(auth, forgotEmail);

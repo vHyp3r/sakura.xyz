@@ -40,17 +40,32 @@ const getInvalidFirebaseConfigKeys = (config) => requiredConfigKeys.filter((key)
 });
 
 let auth = null;
+let firebaseAuthStatus = {
+  available: false,
+  message: 'Authentication service is unavailable.',
+};
 const invalidFirebaseConfigKeys = getInvalidFirebaseConfigKeys(firebaseConfig);
 if (invalidFirebaseConfigKeys.length === 0) {
   try {
     const app = initializeApp(firebaseConfig);
     auth = getAuth(app);
+    firebaseAuthStatus = {
+      available: true,
+      message: '',
+    };
   } catch (e) {
     console.error('Firebase initialization error:', e);
+    firebaseAuthStatus = {
+      available: false,
+      message: `Firebase initialization failed: ${e.message}`,
+    };
   }
 } else {
-  console.warn(
-    `Firebase is disabled: missing or placeholder Firebase environment variables (${invalidFirebaseConfigKeys.join(', ')}).`
-  );
+  const message = `Firebase is disabled: missing or placeholder Firebase environment variables (${invalidFirebaseConfigKeys.join(', ')}).`;
+  console.warn(message);
+  firebaseAuthStatus = {
+    available: false,
+    message,
+  };
 }
-export { auth };
+export { auth, firebaseAuthStatus };
