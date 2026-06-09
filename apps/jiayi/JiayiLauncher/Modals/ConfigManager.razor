@@ -1,0 +1,67 @@
+﻿@using JiayiLauncher.Features.Mods
+@using System.IO
+@using JiayiLauncher.Localization
+
+<div class="config-manager">
+    @if (Mod!.DataFolderName == string.Empty)
+    {
+        <p>@Strings.ConfManNoModDataFolder</p>
+    }
+    else if (_configManager!.ConfigPath == string.Empty)
+    {
+        <p>@Strings.ConfManInvalidDataFolder</p>
+    }
+    else
+    {
+        <ul class="config-list">
+            @foreach (var config in _configManager!.GetConfigs())
+            {
+                <li class="config-item">
+                    <p style="margin: 0">@Path.GetFileNameWithoutExtension(config)</p>
+                    <div class="config-item-buttons">
+                        <span class="material-symbols-sharp" title="@Strings.ConfManEdit" 
+                              @onclick="() => _configManager!.OpenConfig(config)">edit</span>
+                        <span class="material-symbols-sharp" title="@Strings.ConfManDelete" style="color: darkred"
+                              @onclick="() => _configManager!.RemoveConfig(config)">delete</span>
+                    </div>
+                </li>
+            }
+        </ul>
+        
+        <label class="drag-area">
+            @Strings.ConfManDragDrop
+            <InputFile OnChange="FileDropped" multiple />
+        </label>
+    }
+    
+    <JiayiButton Size="JiayiButton.ButtonSize.Small" OnClick="Close">@Strings.Okay</JiayiButton>
+</div>
+
+@code {
+    [Parameter]
+    public Mod? Mod { get; set; }
+    
+    [CascadingParameter]
+    private BlazoredModalInstance Modal { get; set; } = default!;
+    
+    private ModConfigManager? _configManager;
+
+    protected override void OnInitialized()
+    {
+        _configManager = new ModConfigManager(Mod!);
+    }
+
+    private async Task Close()
+    {
+        await Modal.CloseAsync();
+    }
+
+    private async Task FileDropped(InputFileChangeEventArgs arg)
+    {
+        foreach (var file in arg.GetMultipleFiles())
+        {
+            await _configManager!.AddConfig(file);
+        }
+    }
+
+}

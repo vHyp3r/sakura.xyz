@@ -1,0 +1,186 @@
+﻿@page "/Profiles"
+@using JiayiLauncher.Features.Profiles
+@using JiayiLauncher.Settings
+@using System.IO
+
+<h3>@Strings.ProfilesMenuName</h3>
+
+<div class="find-tools">
+    <span class="material-symbols-sharp">search</span>
+    <JiayiTextBox Placeholder="@Strings.ProfilesMenuSearch" @ref="_searchBox" Changed="StateHasChanged" />
+    <div class="separator"></div>
+
+    <JiayiButton Size="JiayiButton.ButtonSize.Small" Style="padding: 0.5rem 1rem" OnClick="CreateClicked" Disabled="@_creating">
+        @Strings.Create
+    </JiayiButton>
+    <span class="material-symbols-sharp" title="@Strings.WhatsThis" id="help-button" @onclick="HelpClicked">help</span>
+
+    @* invisible paragraph to make the div's height consistent with the other pages *@
+    <p class="invisible-normalizer">invisible</p>
+</div>
+
+<div class="profiles-page">
+    <ul class="profiles">
+        @if (ProfileCollection.Current == null || ProfileCollection.Current.Profiles.Count == 0)
+        {
+            <li class="no-profiles">
+                @Strings.DashboardNoProfiles
+            </li>
+        }
+        else
+        {
+            _searchResults = 0;
+            foreach (var profile in ProfileCollection.Current.Profiles)
+            {
+                if (!profile.Name.ToLower().Contains(_searchBox?.Value?.ToLower() ?? ""))
+                    continue;
+
+                _searchResults++;
+                var info = profile.GetInfo();
+
+                <li class="profile-item">
+                    <div>
+                        <div class="profile-name">
+                            <strong>@profile.Name</strong>
+
+                            @if (!profile.IsValid())
+                            {
+                                <span class="material-symbols-sharp" style="color: darkorange" title="@Strings.ProfilesMenuBrokenProfile">
+                                    error
+                                </span>
+                            }
+                        </div>
+                        <p class="profile-info">
+                            @string.Format(Strings.ProfilesMenuWorlds, info.Worlds) &#x2022;
+                            @string.Format(Strings.ProfilesMenuResourcePacks, info.ResourcePacks) &#x2022;
+                            @string.Format(Strings.ProfilesMenuBehaviorPacks, info.BehaviorPacks)
+                        </p>
+                    </div>
+
+                    <div class="modify-buttons">
+                        @if (profile.IsValid())
+                        {
+                            <span class="material-symbols-sharp modify-button"
+                                  title="@Strings.ProfilesMenuEditProfile" @onclick="() => EditClicked(profile)">edit</span>
+                            <span class="material-symbols-sharp modify-button" style="color: darkred"
+                                  title="@Strings.ProfilesMenuDeleteProfile" @onclick="() => DeleteClicked(profile)">delete</span>
+
+                            <JiayiButton Size="JiayiButton.ButtonSize.Small" Style="margin-left: 0.2rem"
+                                         OnClick="() => ApplyClicked(profile)">@Strings.Apply</JiayiButton>
+                        }
+                        else
+                        {
+                            <JiayiButton Size="JiayiButton.ButtonSize.Small"
+                                         OnClick="() => DeleteNoConfirm(profile)">@Strings.Remove</JiayiButton>
+                        }
+                    </div>
+                </li>
+            }
+        }
+    </ul>
+    @if (_searchResults == 0 && ProfileCollection.Current?.Profiles.Count > 0)
+    {
+        <p style="text-align: center; margin-top: 0;">@Strings.ProfilesMenuNoProfiles</p>
+    }
+</div>
+
+@code {
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
+
+    private JiayiTextBox? _searchBox;
+    private bool _creating;
+
+    private int _searchResults;
+
+    private void HelpClicked()
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(MessageBox.Message),
+                Strings.ProfilesMenuAboutProfiles);
+
+        ModalService.Show<MessageBox>(Strings.ProfilesMenuName, parameters);
+    }
+
+    private async Task CreateClicked()
+    {
+        if (_creating) return;
+
+        if (JiayiSettings.Instance!.ProfileCollectionPath == string.Empty)
+        {
+            var path = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "JiayiLauncher", "Profiles");
+
+            JiayiSettings.Instance.ProfileCollectionPath = path;
+            ProfileCollection.Create(path);
+            JiayiSettings.Instance.Save();
+        }
+        
+        _creating = true;
+        var profile = await Profile.Create(Strings.ProfilesMenuMyProfile, ProfileCollection.Current!);
+        _creating = false;
+
+        var parameters = new ModalParameters()
+            .Add(nameof(EditProfile.Profile), profile);
+
+        var modal = ModalService.Show<EditProfile>(Strings.EditProfileCreateName, parameters);
+        var result = await modal.Result;
+        if (result.Cancelled)
+        {
+            profile.Delete();
+            return;
+        }
+        
+        StateHasChanged();
+    }
+
+    private async Task EditClicked(Profile profile)
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(EditProfile.Profile), profile);
+
+        var modal = ModalService.Show<EditProfile>(Strings.EditProfileName, parameters);
+        await modal.Result;
+        StateHasChanged();
+    }
+
+    private void DeleteClicked(Profile profile)
+    {
+        var options = new List<(string, EventCallback)>
+        {
+            (Strings.Yes, new EventCallback(null, () => {
+                profile.Delete();
+                StateHasChanged();
+            })),
+            (Strings.No, EventCallback.Empty)
+        };
+
+        var parameters = new ModalParameters()
+            .Add(nameof(MessageBox.Buttons), options)
+            .Add(nameof(MessageBox.Message), Strings.ProfilesMenuDeleteProfileConfirm);
+
+        ModalService.Show<MessageBox>(Strings.ProfilesMenuDeleteProfile, parameters);
+    }
+
+    private void ApplyClicked(Profile profile)
+    {
+        var options = new List<(string, EventCallback)>
+        {
+            (Strings.Yes, new EventCallback(null, profile.Apply)),
+            (Strings.No, EventCallback.Empty)
+        };
+
+        var parameters = new ModalParameters()
+            .Add(nameof(MessageBox.Buttons), options)
+            .Add(nameof(MessageBox.Message),
+                Strings.ProfilesMenuApplyProfileConfirm);
+
+        ModalService.Show<MessageBox>(Strings.ProfilesMenuApplyProfile, parameters);
+    }
+
+    private void DeleteNoConfirm(Profile profile)
+    {
+        profile.Delete();
+        StateHasChanged();
+    }
+}

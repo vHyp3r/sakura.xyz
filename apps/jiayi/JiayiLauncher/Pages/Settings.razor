@@ -1,0 +1,37 @@
+﻿@page "/Settings"
+@using JiayiLauncher.Settings
+@using System.Reflection
+@using JiayiLauncher.Shared.Components.Settings
+
+<h3>@Strings.SettingsMenuName</h3>
+
+<div class="tabs">
+    <span class="material-symbols-sharp">sort</span>
+    <p>@Strings.SettingsCategories</p>
+    @foreach (var category in JiayiSettings.Instance!.GetCategories())
+    {
+        @* i sincerely hope this is the last bit of javascript i have to write for this project *@
+        <a class="tab-button" onclick="document.getElementById('@category.ToLower()').scrollIntoView({behavior: 'smooth'})">
+            @JiayiSettings.Instance.GetLocalizedCategory(category)
+        </a>
+    }
+    
+    <a class="tab-button" href="About">@Strings.SettingsAbout</a>
+</div>
+
+<div class="settings-container">
+    @foreach (var category in JiayiSettings.Instance.GetCategories())
+    {
+        <h4 id="@category.ToLower()">@JiayiSettings.Instance.GetLocalizedCategory(category)</h4>
+                    
+        @foreach (var setting in JiayiSettings.Instance.GetSettingsInCategory(category))
+        {
+            <JiayiSettingView Setting="@setting" />
+        }
+    }
+</div>
+
+@code {
+    
+
+}

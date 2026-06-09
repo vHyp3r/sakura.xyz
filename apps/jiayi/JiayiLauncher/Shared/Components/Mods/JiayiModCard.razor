@@ -1,0 +1,256 @@
+﻿@using JiayiLauncher.Features.Mods
+@using JiayiLauncher.Pages
+@using JiayiLauncher.Features.Launch
+@using System.Diagnostics
+@using JiayiLauncher.Features.Discord
+@using JiayiLauncher.Features.Game
+@using JiayiLauncher.Shared.Components.Toasts
+@using JiayiLauncher.Utils
+
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+
+<div class="mod-background">
+    <div class="mod-header">
+        <strong>@Mod.Name</strong>
+
+        <div class="right">
+            @if (!_isValid)
+            {
+                @if (Mod.FromInternet)
+                {
+                    <span class="material-symbols-sharp"
+                          style="color: darkorange;"
+                          title="@Strings.ModCardInvalidLink">
+                        error
+                    </span>
+                }
+                else
+                {
+                    <span class="material-symbols-sharp"
+                          style="color: darkorange;"
+                          title="@Strings.ModCardMissingFile">
+                        error
+                    </span>
+                }
+            }
+            else
+            {
+                @if (Mod.FromInternet)
+                {
+                    if (_internet.OfflineMode)
+                    {
+                        <span class="material-symbols-sharp" title="@Strings.ModCardOffline"
+                              style="color: var(--text-grayed)">cloud_off</span>
+                    }
+                    else
+                    {
+                        <span class="material-symbols-sharp" title="@Strings.ModCardInternetMod">cloud_download</span>
+                    }
+                }
+                else
+                {
+                    <span class="material-symbols-sharp" title="@Strings.ModCardLocalMod">hard_drive_2</span>
+                }
+            }
+        </div>
+    </div>
+    <p class="mod-version">@string.Format(Strings.ModCardSupportedVersions, string.Join(", ", Mod.SupportedVersions).ToLower())</p>
+    <div class="mod-controls" style="@(_expanded ? "margin-left: -7rem" : "")">
+        @if (_isValid)
+        {
+            <div class="left">
+                @if (Mod.FromInternet && _internet.OfflineMode)
+                {
+                    <JiayiButton Size="JiayiButton.ButtonSize.Small" Disabled="true">@Strings.Launch</JiayiButton>
+                }
+                else
+                {
+                    <JiayiButton OnClick="LaunchClicked" @ref="_launchButton" Disabled="@_launching"
+                                 Size="JiayiButton.ButtonSize.Small">
+                        <div class="loading-bar" style="width: @_launcher.LaunchProgress%; opacity: @_showLoadingBar;"></div>
+                        @Strings.Launch
+                    </JiayiButton>
+                }
+                
+                <span class="material-symbols-sharp" title="@(_expanded ? Strings.ModCardHideControls : Strings.ModCardShowControls)"
+                      @onclick="() => _expanded = !_expanded">
+                    @(_expanded ? "remove" : "more_horiz")
+                </span>
+            </div>
+
+            <div class="right">
+                <span class="material-symbols-sharp" title="@Strings.ModCardManageConfigs" @onclick="ConfigManagerClicked">folder_managed</span>
+                <span class="material-symbols-sharp" title="@Strings.ModCardEditMod" @onclick="EditClicked">edit</span>
+                <span class="material-symbols-sharp" style="color: darkred"
+                      title="@Strings.ModCardDeleteMod" @onclick="DeleteClicked">delete</span>
+            </div>
+        }
+        else
+        {
+            <JiayiButton OnClick="DeleteNoConfirm" Size="JiayiButton.ButtonSize.Small">@Strings.Remove</JiayiButton>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public Mod Mod { get; set; } = null!;
+
+    [CascadingParameter]
+    public IModalService ModalService { get; set; } = default!;
+
+    private bool _launching;
+    private bool _isValid = true;
+    private bool _expanded;
+    private string _showLoadingBar => _launching ? "0.2" : "0";
+
+    private JiayiButton? _launchButton;
+    
+    private readonly Launcher _launcher = Singletons.Get<Launcher>();
+    private readonly InternetManager _internet = Singletons.Get<InternetManager>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        _isValid = await Mod.IsValid();
+        StateHasChanged();
+    }
+
+    private async Task LaunchClicked()
+    {
+        if (_launcher.Launching) return;
+
+        var parameters = new ModalParameters();
+        
+        var minecraft = Singletons.Get<Minecraft>();
+
+        if (minecraft.ModsLoaded.Count > 0)
+        {
+            var options = new List<(string, EventCallback)>
+            {
+                (Strings.Yes, new EventCallback(null, async () =>
+                {
+                    await FinishLaunch();
+                })),
+                (Strings.No, EventCallback.Empty)
+            };
+
+            parameters
+                .Add(nameof(MessageBox.Buttons), options)
+                .Add(nameof(MessageBox.Message),
+                    string.Format(Strings.ModCardLaunchMultipleModsConfirm, Mod.Name));
+
+            ModalService.Show<MessageBox>(Strings.Warning, parameters);
+            return;
+        }
+        
+        await FinishLaunch();
+    }
+
+    private async Task FinishLaunch()
+    {
+        var parameters = new ModalParameters();
+        _launching = true;
+
+        _launcher.LaunchProgressChanged += (_, _) => StateHasChanged();
+        var result = await _launcher.Launch(Mod);
+
+        _launching = false;
+
+        switch (result)
+        {
+            // only cases that are errors
+            case Launcher.LaunchResult.DownloadFailed:
+                parameters.Add(nameof(MessageBox.Message), Strings.ModCardDownloadFailed);
+                ModalService.Show<MessageBox>(Mod.Name, parameters);
+                break;
+            case Launcher.LaunchResult.ModNotFound:
+                parameters.Add(nameof(MessageBox.Message), Strings.ModCardModNotFound);
+                ModalService.Show<MessageBox>(Mod.Name, parameters);
+                break;
+            case Launcher.LaunchResult.GameNotFound:
+                parameters.Add(nameof(MessageBox.Message), Strings.ModCardGameNotFound);
+                ModalService.Show<MessageBox>(Mod.Name, parameters);
+                break;
+            case Launcher.LaunchResult.VersionMismatch:
+                // something different
+                var supportedVersion = Mod.SupportedVersions[0];
+                
+                var buttons = new List<(string, EventCallback)>
+                {
+                    (Strings.Yes, new EventCallback(null, () =>
+                    {
+                        NavigationManager.NavigateTo($"/Versions/Full/{supportedVersion}");
+                    })),
+                    (Strings.No, EventCallback.Empty)
+                };
+
+                parameters
+                    .Add(nameof(MessageBox.Buttons), buttons)
+                    .Add(nameof(MessageBox.Message), string.Format(Strings.ModCardVersionMismatch, Mod.Name, supportedVersion));
+
+                ModalService.Show<MessageBox>(Mod.Name, parameters);
+                break;
+            case Launcher.LaunchResult.InjectionFailed:
+                parameters.Add(nameof(MessageBox.Message), Strings.ModCardInjectionFailed);
+                ModalService.Show<MessageBox>(Mod.Name, parameters);
+                break;
+            case Launcher.LaunchResult.AlreadyLoaded:
+                var toastParams = new ToastParameters()
+                    .Add(nameof(JiayiToast.Title), Strings.ModCardAlreadyLoaded)
+                    .Add(nameof(JiayiToast.Level), ToastLevel.Warning);
+            
+                ToastService.ShowToast<JiayiToast>(toastParams, settings =>
+                {
+                    settings.Timeout = 5;
+                    settings.ShowProgressBar = true;
+                });
+                return;
+        }
+
+        StateHasChanged();
+    }
+
+    private void EditClicked()
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(EditMod.Mod), Mod);
+
+        ModalService.Show<EditMod>(Strings.EditModName, parameters);
+    }
+
+    private void DeleteClicked()
+    {
+        var options = new List<(string, EventCallback)>
+        {
+            (Strings.Yes, new EventCallback(null, () =>
+            {
+                Mod.Delete();
+                Mods.Instance?.Refresh();
+            })),
+            (Strings.No, EventCallback.Empty)
+        };
+
+        var parameters = new ModalParameters()
+            .Add(nameof(MessageBox.Buttons), options)
+            .Add(nameof(MessageBox.Message), string.Format(Strings.ModCardDeleteModConfirm, Mod.Name));
+
+        ModalService.Show<MessageBox>(Mod.Name, parameters);
+    }
+
+    private void DeleteNoConfirm()
+    {
+        Mod.Delete();
+        Mods.Instance?.Refresh();
+    }
+
+    private void ConfigManagerClicked()
+    {
+        var parameters = new ModalParameters()
+            .Add(nameof(ConfigManager.Mod), Mod);
+        
+        ModalService.Show<ConfigManager>(Strings.ConfManName, parameters);
+    }
+
+}
