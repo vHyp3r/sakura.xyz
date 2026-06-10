@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/nav') %>
+
+  <main class="min-h-screen pt-24 pb-16">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <span class="section-label">Admin</span>
+          <h1 class="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">Dashboard</h1>
+          <p class="mt-2 text-gray-400">Live data from your Firebase project.</p>
+        </div>
+
+        <% if (summary.status.connected) { %>
+          <div class="glass-card inline-flex items-center gap-2 px-4 py-2 text-sm">
+            <span class="inline-flex h-2 w-2 rounded-full bg-green-400"></span>
+            <span class="text-gray-300">Connected to <strong class="text-white"><%= summary.status.projectId %></strong></span>
+          </div>
+        <% } else { %>
+          <div class="glass-card inline-flex items-center gap-2 px-4 py-2 text-sm text-amber-300">
+            <span class="inline-flex h-2 w-2 rounded-full bg-amber-400"></span>
+            Not connected
+          </div>
+        <% } %>
+      </div>
+
+      <% if (setupRequired) { %>
+        <section class="mt-8 glass-card p-6 sm:p-8">
+          <h2 class="text-xl font-semibold text-white">Connect Firebase</h2>
+          <p class="mt-2 text-sm leading-relaxed text-gray-400">
+            Add your Firebase service account credentials so this dashboard can read your existing Firestore data.
+          </p>
+          <ol class="mt-6 space-y-4 text-sm text-gray-300">
+            <li>1. In Firebase Console, go to <strong class="text-white">Project Settings → Service accounts</strong>.</li>
+            <li>2. Generate a new private key and save the JSON file locally.</li>
+            <li>3. Copy <code class="rounded bg-glass-light px-1.5 py-0.5 text-pink-300">.env.example</code> to <code class="rounded bg-glass-light px-1.5 py-0.5 text-pink-300">.env</code> and set your credentials path.</li>
+            <li>4. Restart the server with <code class="rounded bg-glass-light px-1.5 py-0.5 text-pink-300">npm start</code>.</li>
+          </ol>
+          <pre class="mt-6 overflow-x-auto rounded-xl border border-subtle bg-glass-subtle p-4 text-xs text-gray-300">FIREBASE_PROJECT_ID=your-project-id
+GOOGLE_APPLICATION_CREDENTIALS=./config/firebase-service-account.json
+FIREBASE_DASHBOARD_COLLECTIONS=users,texturePacks</pre>
+        </section>
+      <% } else if (!summary.status.connected) { %>
+        <section class="mt-8 glass-card p-6 sm:p-8">
+          <h2 class="text-xl font-semibold text-white">Connection Error</h2>
+          <p class="mt-2 text-sm text-red-300"><%= summary.status.message %></p>
+        </section>
+      <% } else { %>
+        <section class="mt-8 grid gap-6 sm:grid-cols-3">
+          <div class="glass-card p-6">
+            <p class="text-sm text-gray-400">Collections</p>
+            <p class="stat-value mt-2"><%= summary.collections.length %></p>
+          </div>
+          <div class="glass-card p-6">
+            <p class="text-sm text-gray-400">Total documents</p>
+            <p class="stat-value mt-2"><%= summary.totalDocuments %></p>
+          </div>
+          <div class="glass-card p-6">
+            <p class="text-sm text-gray-400">Project</p>
+            <p class="mt-2 text-lg font-semibold text-white truncate"><%= summary.status.projectId %></p>
+          </div>
+        </section>
+
+        <section class="mt-10">
+          <div class="flex items-center justify-between gap-4">
+            <h2 class="text-xl font-semibold text-white">Firestore Collections</h2>
+            <% if (summary.configuredCollections.length) { %>
+              <span class="text-xs text-gray-500">Filtered by FIREBASE_DASHBOARD_COLLECTIONS</span>
+            <% } %>
+          </div>
+
+          <% if (!summary.collections.length) { %>
+            <div class="mt-6 glass-card p-8 text-center text-gray-400">
+              No collections found. Create documents in Firestore or update FIREBASE_DASHBOARD_COLLECTIONS.
+            </div>
+          <% } else { %>
+            <div class="mt-6 overflow-hidden rounded-2xl border border-subtle">
+              <table class="min-w-full divide-y divide-white/5">
+                <thead class="bg-glass-subtle">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Collection</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Documents</th>
+                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-400">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                  <% summary.collections.forEach(function(collection) { %>
+                    <tr class="hover-bg-glass-light">
+                      <td class="px-6 py-4 text-sm font-medium text-white"><%= collection.id %></td>
+                      <td class="px-6 py-4 text-sm text-gray-400"><%= collection.documentCount %></td>
+                      <td class="px-6 py-4 text-right">
+                        <a href="/dashboard/collections/<%= collection.id %>" class="text-sm font-medium text-pink-400 hover:text-pink-300">View data</a>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </section>
+      <% } %>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+  <script src="/js/main.js"></script>
+</body>
+</html>

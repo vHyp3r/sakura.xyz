@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/tailwind.css">
+    <style>
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+    <nav class="bg-white border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+            <div class="flex-shrink-0">
+                <h1 class="text-xl font-bold text-gray-800">TexturePack.xyz</h1>
+            </div>
+            <div class="hidden md:flex md:items-center md:space-x-8">
+                <a href="/" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Home</a>
+                <a href="/search" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Search</a>
+                <a href="/discover" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Discover</a>
+                <a href="/upload" class="text-indigo-600 font-semibold border-b-2 border-indigo-600 pb-1">Upload</a>
+                <a href="/random" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Random</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="py-12">
+        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
+            <h1 class="text-2xl font-bold text-gray-900 mb-6">Upload a Texture Pack</h1>
+            <p class="text-gray-600 mb-8">Share your Minecraft Bedrock texture packs with the community</p>
+
+            <form action="/upload" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <div>
+                    <label for="packName" class="block text-sm font-medium text-gray-700 mb-2">Pack Name:</label>
+                    <input type="text" id="packName" name="packName" required
+                        class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-base">
+                </div>
+
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description (optional):</label>
+                    <textarea id="description" name="description" rows="4"
+                        class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-base"></textarea>
+                </div>
+
+                <div>
+                    <label for="packFile" class="block text-sm font-medium text-gray-700 mb-2">Texture Pack File (.mcpack):</label>
+                    <input type="file" id="packFile" name="packFile" accept=".mcpack" required
+                        class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-base">
+                    <p class="mt-2 text-xs text-gray-500">Maximum file size: 50MB</p>
+                </div>
+
+                <div>
+                    <label for="thumbnail" class="block text-sm font-medium text-gray-700 mb-2">Thumbnail Image (optional):</label>
+                    <input type="file" id="thumbnail" name="thumbnail" accept="image/*"
+                        class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-base">
+                    <p class="mt-2 text-xs text-gray-500">Recommended size: 400x400px</p>
+                </div>
+
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category:</label>
+                    <select id="category" name="category"
+                        class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-base">
+                        <option value="">Select a category</option>
+                        <option value="Bedwars">Bedwars</option>
+                        <option value="Skywars">Skywars</option>
+                        <option value="16x">16x</option>
+                        <option value="32x">32x</option>
+                        <option value="64x">64x</option>
+                        <option value="PvP">PvP</option>
+                        <option value="Vanilla">Vanilla</option>
+                    </select>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105 disabled:opacity-50">
+                    Upload Pack
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-gray-300 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm">&copy; 2026 TexturePack.xyz. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>

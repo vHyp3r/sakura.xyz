@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/tailwind.css">
+    <style>
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+    <nav class="bg-white border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+            <div class="flex-shrink-0">
+                <h1 class="text-xl font-bold text-gray-800">TexturePack.xyz</h1>
+            </div>
+            <div class="hidden md:flex md:items-center md:space-x-8">
+                <a href="/" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Home</a>
+                <a href="/search" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Search</a>
+                <a href="/discover" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Discover</a>
+                <a href="/upload" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Upload</a>
+                <a href="/random" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Random</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="py-12">
+        <div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
+            <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+                <h1 class="text-2xl font-bold text-gray-900 mb-4"><%= title %></h1>
+                <p class="text-gray-600 mb-6"><%= message %></p>
+                <a href="/"
+                    class="bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105">
+                    Go to Home
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-gray-300 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm">&copy; 2026 TexturePack.xyz. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>

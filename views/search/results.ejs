@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/tailwind.css">
+    <style>
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+    <nav class="bg-white border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+            <div class="flex-shrink-0">
+                <h1 class="text-xl font-bold text-gray-800">TexturePack.xyz</h1>
+            </div>
+            <div class="hidden md:flex md:items-center md:space-x-8">
+                <a href="/" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Home</a>
+                <a href="/search" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Search</a>
+                <a href="/discover" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Discover</a>
+                <a href="/upload" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Upload</a>
+                <a href="/random" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Random</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="py-12">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h1 class="text-2xl font-bold text-gray-900 mb-4">Search Texture Packs</h1>
+                <form action="/search" method="GET" class="mb-6 flex items-center space-x-3">
+                    <input type="text" name="q" value="<%= query || '' %>" placeholder="Search for texture packs..."
+                        class="px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-96">
+                    <button type="submit"
+                        class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        Search
+                    </button>
+                </form>
+
+                <% if (results.length > 0) { %>
+                    <div class="mb-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-2">
+                            Found <%= results.length %> result<%= results.length !== 1 ? 's' : '' %>
+                        </h2>
+                    </div>
+                    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        <% results.forEach(function(pack) { %>
+                            <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow transform hover:-translate-y-1 group">
+                                <a href="/packs/<%= pack.id %>" class="block">
+                                    <img src="<%= pack.thumbnail || '/images/default-thumbnail.png' %>" alt="<%= pack.name %> Thumbnail"
+                                        class="w-full h-48 object-cover">
+                                </a>
+                                <div class="p-5">
+                                    <h3 class="font-semibold text-gray-900 mb-2">
+                                        <a href="/packs/<%= pack.id %>" class="hover:text-indigo-600 transition-colors"><%= pack.name %></a>
+                                    </h3>
+                                    <div class="flex flex-wrap gap-3 mb-3">
+                                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full"><%= pack.resolution %></span>
+                                        <% if (pack.isPort) { %>
+                                            <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Port</span>
+                                        <% } %>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm text-gray-500">
+                                        <span>
+                                            <img src="/images/default-avatar.png" alt="Uploader Avatar" class="w-8 h-8 rounded-full mr-2">
+                                            <%= pack.uploader %>
+                                        </span>
+                                        <span><%= pack.downloads.toLocaleString() %> downloads</span>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else if (query) { %>
+                    <div class="text-center py-12">
+                        <p class="text-gray-500">No texture packs found matching "<%= query %>".</p>
+                        <a href="/upload"
+                            class="mt-4 inline-block bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105">
+                            Upload Your First Pack
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-gray-300 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm">&copy; 2026 TexturePack.xyz. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>

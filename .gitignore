@@ -1,0 +1,5 @@
+node_modules/
+.env
+config/firebase-service-account.json
+public/uploads/
+*.log

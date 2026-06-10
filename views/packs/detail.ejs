@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/tailwind.css">
+    <style>
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+    <nav class="bg-white border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+            <div class="flex-shrink-0">
+                <h1 class="text-xl font-bold text-gray-800">TexturePack.xyz</h1>
+            </div>
+            <div class="hidden md:flex md:items-center md:space-x-8">
+                <a href="/" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Home</a>
+                <a href="/search" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Search</a>
+                <a href="/discover" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Discover</a>
+                <a href="/upload" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Upload</a>
+                <a href="/random" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Random</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="py-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="mb-6">
+                    <h1 class="text-3xl font-bold text-gray-900"><%= pack.name %></h1>
+                    <div class="flex flex-wrap gap-3 mb-4">
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full"><%= pack.resolution %></span>
+                        <% if (pack.isPort) { %>
+                            <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Port</span>
+                        <% } %>
+                        <% if (pack.category) { %>
+                            <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full"><%= pack.category %></span>
+                        <% } %>
+                    </div>
+                </div>
+
+                <% if (pack.thumbnail && pack.thumbnail !== '/images/default-thumbnail.png') { %>
+                    <div class="mb-6">
+                        <img src="<%= pack.thumbnail %>" alt="<%= pack.name %> Thumbnail"
+                            class="w-full h-64 object-cover rounded-lg shadow-sm">
+                    </div>
+                <% } %>
+
+                <div class="space-y-4 text-gray-600">
+                    <p><strong class="text-gray-800">Description:</strong></p>
+                    <p class="text-gray-600">
+                        Texture pack description would go here. In a full implementation, this would be stored in the database and displayed.
+                    </p>
+                </div>
+
+                <div class="grid gap-6 sm:grid-cols-2">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500 mb-1">Downloads</h3>
+                        <p class="text-2xl font-semibold text-gray-900"><%= pack.downloads.toLocaleString() %></p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500 mb-1">Uploaded by</h3>
+                        <p class="flex items-center">
+                            <img src="/images/default-avatar.png" alt="Uploader Avatar" class="w-10 h-10 rounded-full mr-2">
+                            <span class="font-semibold"><%= pack.uploader %></span>
+                        </p>
+                    </div>
+                    <% if (pack.uploadDate) { %>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 mb-1">Upload Date</h3>
+                            <p class="text-gray-600"><%= new Date(pack.uploadDate).toLocaleDateString() %></p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <a href="<%= pack.file %>" download
+                    class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105 flex justify-center items-center">
+                    Download Pack
+                </a>
+            </div>
+
+            <div class="mt-6">
+                <a href="/packs"
+                    class="inline-block bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-transform transform hover:scale-105">
+                    Back to All Packs
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-gray-300 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm">&copy; 2026 TexturePack.xyz. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
