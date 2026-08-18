@@ -9,11 +9,16 @@
 
   body {
     @apply text-gray-100 antialiased;
-    background-color: #09090d;
+    font-family: 'DM Sans', sans-serif;
+    background-color: #0b0b10;
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(244, 114, 182, 0.15), transparent),
-      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(56, 189, 248, 0.08), transparent),
-      radial-gradient(ellipse 50% 30% at 0% 100%, rgba(167, 139, 250, 0.06), transparent);
+      radial-gradient(ellipse 75% 45% at 50% -20%, rgba(244, 114, 182, 0.12), transparent),
+      linear-gradient(180deg, #0b0b10 0%, #0e0e14 52%, #0b0b10 100%);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4, .brand-wordmark {
+    font-family: 'Space Grotesk', sans-serif;
   }
 
   ::selection {
@@ -24,9 +29,9 @@
 
 @layer components {
   .glass-card {
-    @apply rounded-2xl backdrop-blur-xl;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background-color: rgba(255, 255, 255, 0.03);
+    @apply rounded-xl backdrop-blur-xl;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: rgba(20, 20, 28, 0.72);
   }
 
   .glass-card-hover {
@@ -34,13 +39,14 @@
   }
 
   .glass-card-hover:hover {
-    border-color: rgba(244, 114, 182, 0.3);
-    background-color: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 10px 40px rgba(236, 72, 153, 0.05);
+    border-color: rgba(244, 114, 182, 0.28);
+    background-color: rgba(28, 27, 37, 0.82);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px);
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white transition-all duration-300 focus:outline-none;
+    @apply inline-flex items-center justify-center rounded-lg px-6 py-3 text-sm font-semibold text-white transition-all duration-300 focus:outline-none;
     background-image: linear-gradient(to right, #ec4899, #db2777);
     box-shadow: 0 10px 25px rgba(236, 72, 153, 0.25);
   }
@@ -56,7 +62,7 @@
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-gray-200 transition-all duration-300 focus:outline-none;
+    @apply inline-flex items-center justify-center rounded-lg px-6 py-3 text-sm font-semibold text-gray-200 transition-all duration-300 focus:outline-none;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background-color: rgba(255, 255, 255, 0.05);
   }
@@ -88,6 +94,18 @@
 
   .nav-link:hover {
     @apply text-white;
+  }
+
+  .nav-link[aria-current='page'] {
+    @apply text-white;
+  }
+
+  .site-nav {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  }
+
+  .brand-mark {
+    background-image: linear-gradient(135deg, #f9a8d4, #db2777);
   }
 
   .feature-icon {
