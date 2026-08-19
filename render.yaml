@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: sakura-xyz
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build-css
+    startCommand: node server.js
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
