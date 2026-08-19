@@ -9,3 +9,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: FIREBASE_PROJECT_ID
+        value: sakura-auth-66415
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
