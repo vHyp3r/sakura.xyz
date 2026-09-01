@@ -7,6 +7,8 @@ services:
     startCommand: node server.js
     autoDeploy: true
     envVars:
+      - key: MONGODB_URI
+        value: mongodb+srv://<user>:<pass>@cluster.mongodb.net/sakura
       - key: NODE_ENV
         value: production
       - key: FIREBASE_PROJECT_ID
