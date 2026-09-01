@@ -1,4 +1,5 @@
 const express = require('express');
+const { getDashboardSummary: getMongoDashboardSummary, getDataStoreStatus, isMongoConfigured } = require('../src/services/dataStore');
 const {
   getDashboardSummary,
   getDocuments,
@@ -8,12 +9,15 @@ const { getFirebaseStatus, isFirebaseConfigured } = require('../src/config/fireb
 
 const router = express.Router();
 
-router.get('/firebase/status', (req, res) => {
+router.get('/firebase/status', async (req, res) => {
+    });
+  }
+
   if (!isFirebaseConfigured()) {
     return res.status(503).json({
       connected: false,
       configured: false,
-      message: 'Firebase credentials are not configured.',
+      message: 'No database credentials are configured.',
     });
   }
 
@@ -21,6 +25,7 @@ router.get('/firebase/status', (req, res) => {
   return res.json({
     ...status,
     configured: true,
+    kind: 'firebase',
   });
 });
 
@@ -49,7 +54,9 @@ router.get('/firebase/collections/:collectionName', async (req, res, next) => {
 
 router.get('/firebase/summary', async (req, res, next) => {
   try {
-    const summary = await getDashboardSummary();
+    const summary = isMongoConfigured()
+      ? await getMongoDashboardSummary()
+      : await getDashboardSummary();
     res.json(summary);
   } catch (error) {
     next(error);

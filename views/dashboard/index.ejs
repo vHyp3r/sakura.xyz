@@ -6,22 +6,22 @@
 <body>
   <%- include('../partials/nav') %>
 
-  <main class="min-h-screen pt-24 pb-16">
+  <main class="dashboard-page min-h-screen pt-24 pb-16">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <span class="section-label">Admin</span>
+          <span class="dashboard-badge">Admin</span>
           <h1 class="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">Dashboard</h1>
           <p class="mt-2 text-gray-400">Live data from your Firebase project.</p>
         </div>
 
         <% if (summary.status.connected) { %>
-          <div class="glass-card inline-flex items-center gap-2 px-4 py-2 text-sm">
+          <div class="dashboard-status connected inline-flex items-center gap-2 px-4 py-2 text-sm">
             <span class="inline-flex h-2 w-2 rounded-full bg-green-400"></span>
             <span class="text-gray-300">Connected to <strong class="text-white"><%= summary.status.projectId %></strong></span>
           </div>
         <% } else { %>
-          <div class="glass-card inline-flex items-center gap-2 px-4 py-2 text-sm text-amber-300">
+          <div class="dashboard-status inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-300">
             <span class="inline-flex h-2 w-2 rounded-full bg-amber-400"></span>
             Not connected
           </div>
@@ -29,18 +29,18 @@
       </div>
 
       <% if (setupRequired) { %>
-        <section class="mt-8 glass-card p-6 sm:p-8">
-          <h2 class="text-xl font-semibold text-white">Connect Firebase</h2>
-          <p class="mt-2 text-sm leading-relaxed text-gray-400">
+        <section class="dashboard-card mt-8 p-6 sm:p-8">
+          <h2 class="text-2xl font-semibold text-white">Connect Firebase</h2>
+          <p class="mt-3 text-sm leading-relaxed text-gray-400">
             Add your Firebase service account credentials so this dashboard can read your existing Firestore data.
           </p>
-          <ol class="mt-6 space-y-4 text-sm text-gray-300">
+          <ol class="dashboard-steps mt-6 text-sm text-gray-300">
             <li>1. In Firebase Console, go to <strong class="text-white">Project Settings → Service accounts</strong>.</li>
             <li>2. Generate a new private key and save the JSON file locally.</li>
-            <li>3. Copy <code class="rounded bg-glass-light px-1.5 py-0.5 text-pink-300">.env.example</code> to <code class="rounded bg-glass-light px-1.5 py-0.5 text-pink-300">.env</code> and set your credentials path.</li>
-            <li>4. Restart the server with <code class="rounded bg-glass-light px-1.5 py-0.5 text-pink-300">npm start</code>.</li>
+            <li>3. Copy <code class="inline-code">.env.example</code> to <code class="inline-code">.env</code> and set your credentials path.</li>
+            <li>4. Restart the server with <code class="inline-code">npm start</code>.</li>
           </ol>
-          <pre class="mt-6 overflow-x-auto rounded-xl border border-subtle bg-glass-subtle p-4 text-xs text-gray-300">FIREBASE_PROJECT_ID=your-project-id
+          <pre class="dashboard-code mt-6 overflow-x-auto rounded-xl border border-subtle bg-glass-subtle p-4 text-xs text-gray-300">FIREBASE_PROJECT_ID=your-project-id
 GOOGLE_APPLICATION_CREDENTIALS=./config/firebase-service-account.json
 FIREBASE_DASHBOARD_COLLECTIONS=users,texturePacks</pre>
         </section>

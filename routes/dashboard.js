@@ -1,4 +1,5 @@
 const express = require('express');
+const { getDashboardSummary: getMongoDashboardSummary, isMongoConfigured } = require('../src/services/dataStore');
 const {
   getDashboardSummary,
   getDocuments,
@@ -10,24 +11,29 @@ const router = express.Router();
 
 router.get('/', async (req, res, next) => {
   try {
-    const summary = isFirebaseConfigured()
-      ? await getDashboardSummary()
-      : {
-          status: {
-            connected: false,
-            projectId: process.env.FIREBASE_PROJECT_ID || null,
-            message:
-              'Firebase is not configured yet. Add your service account credentials to .env.',
-          },
-          configuredCollections: [],
-          collections: [],
-          totalDocuments: 0,
-        };
+    const mongoConfigured = isMongoConfigured();
+    const firebaseConfigured = isFirebaseConfigured();
+
+    const summary = mongoConfigured
+      ? await getMongoDashboardSummary()
+      : firebaseConfigured
+        ? await getDashboardSummary()
+        : {
+            status: {
+              connected: false,
+              projectId: process.env.FIREBASE_PROJECT_ID || process.env.MONGODB_URI || null,
+              message:
+                'No database is configured yet. Add MongoDB or Firebase credentials to .env.',
+            },
+            configuredCollections: [],
+            collections: [],
+            totalDocuments: 0,
+          };
 
     res.render('dashboard/index', {
       title: 'Dashboard — sakura.xyz',
       summary,
-      setupRequired: !isFirebaseConfigured(),
+      setupRequired: !(mongoConfigured || firebaseConfigured),
     });
   } catch (error) {
     next(error);

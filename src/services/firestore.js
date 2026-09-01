@@ -109,12 +109,25 @@ async function getDashboardSummary() {
 
   let collections;
 
-  if (configuredCollections.length) {
-    collections = await Promise.all(
-      configuredCollections.map((collectionName) => getCollectionMeta(collectionName))
-    );
-  } else {
-    collections = await listCollections();
+  try {
+    if (configuredCollections.length) {
+      collections = await Promise.all(
+        configuredCollections.map((collectionName) => getCollectionMeta(collectionName))
+      );
+    } else {
+      collections = await listCollections();
+    }
+  } catch (error) {
+    return {
+      status: {
+        ...status,
+        connected: false,
+        message: `Firebase authentication failed: ${error.message}`,
+      },
+      configuredCollections,
+      collections: [],
+      totalDocuments: 0,
+    };
   }
 
   const totalDocuments = collections.reduce(

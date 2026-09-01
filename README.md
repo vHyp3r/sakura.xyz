@@ -119,3 +119,11 @@ This project is licensed under the ISC License.
 
 - Inspired by [texturepack.be](https://texturepack.be/)
 - Built with Node.js and Express.js
+
+## Goals
+
+Create a discord bot to handle in-server requests.
+Add support members to help with support tickets and requests
+Revamp the old rating system to be up to date
+Continue working on fixing errors ie: "Dashboard"
+Create a texture porter

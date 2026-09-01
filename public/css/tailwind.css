@@ -821,6 +821,63 @@ h1, h2, h3, h4, .brand-wordmark {
   background-image: linear-gradient(135deg, #f9a8d4, #db2777);
 }
 
+.dashboard-page {
+  background: transparent;
+}
+
+.dashboard-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(244, 114, 182, 0.2);
+  background: rgba(236, 72, 153, 0.12);
+  padding: 0.25rem 0.75rem;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #f9a8d4;
+}
+
+.dashboard-status {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(17, 17, 22, 0.85);
+  border-radius: 0.875rem;
+}
+
+.dashboard-card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(17, 17, 22, 0.9);
+  border-radius: 1.25rem;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+.dashboard-steps {
+  list-style: none;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.dashboard-steps li {
+  color: rgba(229, 231, 235, 0.85);
+  line-height: 1.8;
+}
+
+.inline-code {
+  border-radius: 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.14rem 0.45rem;
+  color: #f9a8d4;
+}
+
+.dashboard-code {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  color: #d5d7de;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
 .feature-icon {
   display: flex;
   height: 3rem;
