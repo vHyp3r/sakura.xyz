@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const { initFirebase, getFirebaseStatus, isFirebaseConfigured } = require('./src/config/firebase');
+const { isMongoConfigured, getDataStoreStatus } = require('./src/services/dataStore');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,7 +15,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-if (isFirebaseConfigured()) {
+if (isMongoConfigured()) {
+  getDataStoreStatus().then((status) => {
+    if (status.connected) {
+      console.log('MongoDB connected');
+    } else {
+      console.warn(`MongoDB setup issue: ${status.message}`);
+    }
+  });
+} else if (isFirebaseConfigured()) {
   initFirebase();
   const status = getFirebaseStatus();
   if (status.connected) {
@@ -23,7 +32,7 @@ if (isFirebaseConfigured()) {
     console.warn(`Firebase setup issue: ${status.message}`);
   }
 } else {
-  console.warn('Firebase is not configured. Copy .env.example to .env to connect your project.');
+  console.warn('No database configured. Add MONGODB_URI or Firebase credentials.');
 }
 
 const indexRouter = require('./routes/index');

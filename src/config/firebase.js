@@ -95,6 +95,10 @@ function getFirebaseStatus() {
 }
 
 function isFirebaseConfigured() {
+  if (process.env.MONGODB_URI) {
+    return false;
+  }
+
   return Boolean(
     process.env.FIREBASE_SERVICE_ACCOUNT_JSON ||
       process.env.GOOGLE_APPLICATION_CREDENTIALS ||
