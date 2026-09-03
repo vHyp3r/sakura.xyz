@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title">
+  <title id="title">Texture pack preview unavailable</title>
+  <rect width="640" height="360" fill="#18212f"/>
+  <path d="M0 270 150 130l100 95 90-75 300 210H0Z" fill="#2f8f83"/>
+  <path d="m370 360 110-145 160 145H370Z" fill="#e5b85c"/>
+  <circle cx="500" cy="105" r="42" fill="#f4d58a"/>
+  <text x="32" y="324" fill="#fff" font-family="sans-serif" font-size="24">Texture Pack</text>
+</svg>

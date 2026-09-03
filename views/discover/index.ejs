@@ -40,7 +40,7 @@
                         <% packs.forEach(function(pack) { %>
                             <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow transform hover:-translate-y-1 group">
                                 <a href="/packs/<%= pack.id %>" class="block">
-                                    <img src="<%= pack.thumbnail || '/images/default-thumbnail.png' %>" alt="<%= pack.name %> Thumbnail"
+                                    <img src="<%= pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="<%= pack.name %> Thumbnail"
                                         class="w-full h-48 object-cover">
                                 </a>
                                 <div class="p-5">
@@ -55,7 +55,7 @@
                                     </div>
                                     <div class="flex items-center justify-between text-sm text-gray-500">
                                         <span>
-                                            <img src="/images/default-avatar.png" alt="Uploader Avatar" class="w-8 h-8 rounded-full mr-2">
+                                            <img src="/images/default-avatar.svg" alt="Uploader Avatar" class="w-8 h-8 rounded-full mr-2">
                                             <%= pack.uploader %>
                                         </span>
                                         <span><%= pack.downloads.toLocaleString() %> downloads</span>

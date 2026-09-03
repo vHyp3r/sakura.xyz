@@ -11,7 +11,7 @@ const mockPacks = [
         category: "PvP",
         downloads: 1240,
         uploader: "PackCreator123",
-        thumbnail: "/images/default-thumbnail.png",
+        thumbnail: "/images/default-thumbnail.svg",
         file: "/uploads/pvp-pack-32x.mcpack",
         isPort: true
     },
@@ -22,7 +22,7 @@ const mockPacks = [
         category: "Bedwars",
         downloads: 890,
         uploader: "TextureArtist",
-        thumbnail: "/images/default-thumbnail.png",
+        thumbnail: "/images/default-thumbnail.svg",
         file: "/uploads/bedwars-dreams.mcpack",
         isPort: false
     },
@@ -33,7 +33,7 @@ const mockPacks = [
         category: "Skywars",
         downloads: 2100,
         uploader: "SkyGod420",
-        thumbnail: "/images/default-thumbnail.png",
+        thumbnail: "/images/default-thumbnail.svg",
         file: "/uploads/skywars-supreme.mcpack",
         isPort: true
     }
