@@ -1,5 +1,9 @@
 const express = require('express');
-const { getDashboardSummary: getMongoDashboardSummary, getDataStoreStatus, isMongoConfigured } = require('../src/services/dataStore');
+const {
+  getDashboardSummary: getMongoDashboardSummary,
+  getDataStoreStatus,
+  isMongoConfigured,
+} = require('../src/services/dataStore');
 const {
   getDashboardSummary,
   getDocuments,
@@ -10,6 +14,12 @@ const { getFirebaseStatus, isFirebaseConfigured } = require('../src/config/fireb
 const router = express.Router();
 
 router.get('/firebase/status', async (req, res) => {
+  if (isMongoConfigured()) {
+    const mongoStatus = await getDataStoreStatus();
+    return res.json({
+      ...mongoStatus,
+      configured: true,
+      kind: 'mongodb',
     });
   }
 

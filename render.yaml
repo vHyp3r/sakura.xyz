@@ -8,7 +8,7 @@ services:
     autoDeploy: true
     envVars:
       - key: MONGODB_URI
-        value: mongodb+srv://<user>:<pass>@cluster.mongodb.net/sakura
+        value: mongodb+srv://videoclippz3_db_user:3FnruptAORrWedW6@sakuracluster.jhmmlq0.mongodb.net/sakura
       - key: NODE_ENV
         value: production
       - key: FIREBASE_PROJECT_ID
