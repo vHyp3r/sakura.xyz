@@ -13,9 +13,9 @@ async function seedDatabase() {
     await packsCollection.deleteMany({}); // Clear existing data
 
     const testPacks = [
-      { title: 'Anime Clips', description: 'Popular anime moments', category: 'anime', clips: [] },
-      { title: 'Gaming Highlights', description: 'Video game clips', category: 'gaming', clips: [] },
-      { title: 'Movie Scenes', description: 'Iconic film moments', category: 'movies', clips: [] }
+      { title: 'PvP Clips', description: 'Popular pvp moments', category: '2b2e', clips: [] },
+      { title: '2b2e Highlights', description: '2b2e clips', category: 'gaming', clips: [] },
+      { title: 'Sneak Peaks', description: 'wips', category: 'wips', clips: [] }
     ];
 
     const result = await packsCollection.insertMany(testPacks);
