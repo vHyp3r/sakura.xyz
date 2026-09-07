@@ -8,7 +8,7 @@ services:
     autoDeploy: true
     envVars:
       - key: MONGODB_URI
-        value: mongodb+srv://videoclippz3_db_user:iamhyp3r_jpk5A@sakuracluster.jhmmlq0.mongodb.net/?appName=SakuraCluster
+        sync: false
       - key: NODE_ENV
         value: production
       - key: FIREBASE_PROJECT_ID
