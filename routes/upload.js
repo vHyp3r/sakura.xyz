@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { createPack } = require('../src/services/packService');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -28,8 +29,7 @@ const upload = multer({
     },
     fileFilter: function (req, file, cb) {
         // Accept .mcpack files and images for thumbnails
-        if (file.mimetype === 'application/octet-stream' &&
-            file.originalname.endsWith('.mcpack')) {
+        if (path.extname(file.originalname).toLowerCase() === '.mcpack') {
             cb(null, true);
         } else if (file.mimetype.startsWith('image/')) {
             cb(null, true);
@@ -48,25 +48,43 @@ router.get('/', (req, res) => {
 router.post('/', upload.fields([
     { name: 'packFile', maxCount: 1 },
     { name: 'thumbnail', maxCount: 1 }
-]), (req, res) => {
+]), async (req, res) => {
     try {
-        if (!req.files.packFile) {
+        if (!req.files || !req.files.packFile) {
             return res.status(400).send('No pack file uploaded.');
         }
 
         const packFile = req.files.packFile[0];
         const thumbnailFile = req.files.thumbnail ? req.files.thumbnail[0] : null;
 
-        // Here you would typically save pack metadata to a database
-        // For now, we'll just return success
+        const pack = await createPack({
+            name: req.body.packName,
+            description: req.body.description,
+            category: req.body.category,
+            resolution: req.body.resolution,
+            uploader: req.body.uploader || 'Anonymous',
+            file: `/uploads/${packFile.filename}`,
+            originalFileName: packFile.originalname,
+            thumbnail: thumbnailFile
+                ? `/uploads/${thumbnailFile.filename}`
+                : '/images/default-thumbnail.svg',
+        });
+
         res.render('upload-success', {
             title: 'Upload Successful',
-            packName: req.body.packName || 'Unknown Pack',
+            packName: pack.name,
             fileName: packFile.filename,
             originalName: packFile.originalname,
-            thumbnail: thumbnailFile ? thumbnailFile.filename : null
+            thumbnail: thumbnailFile ? thumbnailFile.filename : null,
+            packId: pack._id,
         });
     } catch (error) {
+        const uploadedFiles = req.files
+            ? Object.values(req.files).flat()
+            : [];
+        uploadedFiles.forEach((file) => {
+            fs.unlink(file.path, () => {});
+        });
         res.status(500).send(`Upload failed: ${error.message}`);
     }
 });

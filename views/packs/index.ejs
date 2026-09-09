@@ -58,13 +58,13 @@
                 <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     <% packs.forEach(function(pack) { %>
                         <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow transform hover:-translate-y-1 group">
-                            <a href="/packs/<%= pack.id %>" class="block">
+                            <a href="/packs/<%= pack._id %>" class="block">
                                 <img src="<%= pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="<%= pack.name %> Thumbnail"
                                     class="w-full h-48 object-cover">
                             </a>
                             <div class="p-5">
                                 <h3 class="font-semibold text-gray-900 mb-2">
-                                    <a href="/packs/<%= pack.id %>" class="hover:text-indigo-600 transition-colors"><%= pack.name %></a>
+                                    <a href="/packs/<%= pack._id %>" class="hover:text-indigo-600 transition-colors"><%= pack.name %></a>
                                 </h3>
                                 <div class="flex flex-wrap gap-3 mb-3">
                                     <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full"><%= pack.resolution %></span>
