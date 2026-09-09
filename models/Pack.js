@@ -12,6 +12,7 @@ const packSchema = new mongoose.Schema(
     originalFileName: { type: String, default: '' },
     downloads: { type: Number, default: 0 },
     isPort: { type: Boolean, default: false },
+    isRecolor: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Profile settings</title>
+	<style>
+		:root { --bg:#f7f8fc; --card:#fff; --ink:#172033; --muted:#697386; --line:#e5e8ef; --accent:#7857e8; --accent-soft:#f0edff; --danger:#c84257; }
+		* { box-sizing:border-box; }
+		body { margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font:15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; }
+		.shell { width:min(1040px, calc(100% - 32px)); margin:0 auto; padding:42px 0 64px; }
+		header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+		h1 { margin:0 0 5px; font-size:28px; letter-spacing:-.03em; }
+		.subtitle { color:var(--muted); margin:0; }
+		.layout { display:grid; grid-template-columns:220px 1fr; gap:24px; align-items:start; }
+		nav, .card { background:var(--card); border:1px solid var(--line); border-radius:16px; box-shadow:0 6px 24px #252d4110; }
+		nav { padding:8px; }
+		nav a { display:block; padding:11px 13px; color:var(--muted); text-decoration:none; border-radius:10px; font-weight:600; }
+		nav a.active, nav a:hover { color:var(--accent); background:var(--accent-soft); }
+		.card { overflow:hidden; margin-bottom:18px; }
+		.card-head { padding:22px 24px 17px; border-bottom:1px solid var(--line); }
+		.card-head h2 { margin:0 0 3px; font-size:17px; }
+		.card-head p { margin:0; color:var(--muted); font-size:13px; }
+		form { padding:24px; }
+		.avatar-row { display:flex; align-items:center; gap:15px; margin-bottom:24px; }
+		.avatar { width:72px; height:72px; display:grid; place-items:center; border-radius:50%; color:#fff; font-size:24px; font-weight:750; background:linear-gradient(135deg,#a789ff,#6845d7); }
+		.avatar-row strong { display:block; margin-bottom:3px; }
+		.avatar-row small { display:block; color:var(--muted); margin-bottom:9px; }
+		button { border:0; cursor:pointer; font:inherit; font-weight:650; }
+		.button { padding:8px 13px; border:1px solid var(--line); border-radius:8px; color:var(--ink); background:#fff; }
+		.button:hover { border-color:var(--accent); color:var(--accent); }
+		.grid { display:grid; grid-template-columns:1fr 1fr; gap:18px 16px; }
+		label { display:block; font-weight:650; font-size:13px; }
+		input, textarea, select { width:100%; margin-top:7px; padding:11px 12px; border:1px solid #d9dde6; border-radius:9px; color:var(--ink); background:#fff; font:inherit; outline:none; }
+		textarea { min-height:88px; resize:vertical; }
+		input:focus, textarea:focus, select:focus { border-color:var(--accent); box-shadow:0 0 0 3px #7857e822; }
+		.full { grid-column:1/-1; }
+		.hint { color:var(--muted); font-size:12px; font-weight:400; }
+		.actions { display:flex; justify-content:flex-end; gap:10px; margin-top:24px; padding-top:20px; border-top:1px solid var(--line); }
+		.primary { padding:10px 17px; border-radius:9px; color:#fff; background:var(--accent); }
+		.primary:hover { background:#6442d1; }
+		.privacy { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:19px 24px; }
+		.privacy h3 { margin:0 0 3px; font-size:15px; }
+		.privacy p { margin:0; color:var(--muted); font-size:13px; }
+		.switch { position:relative; width:43px; height:24px; flex:none; }
+		.switch input { opacity:0; width:0; height:0; margin:0; }
+		.slider { position:absolute; inset:0; background:#cbd1dc; border-radius:30px; cursor:pointer; transition:.2s; }
+		.slider:before { content:""; position:absolute; width:18px; height:18px; left:3px; top:3px; border-radius:50%; background:#fff; transition:.2s; }
+		.switch input:checked + .slider { background:var(--accent); }
+		.switch input:checked + .slider:before { transform:translateX(19px); }
+		.danger { color:var(--danger); }
+		@media (max-width:700px) { .shell { padding-top:26px; } .layout { grid-template-columns:1fr; } nav { display:flex; overflow:auto; gap:3px; } nav a { white-space:nowrap; } .grid { grid-template-columns:1fr; } .full { grid-column:auto; } }
+	</style>
+</head>
+<body>
+	<main class="shell">
+		<header>
+			<div><h1>Profile</h1><p class="subtitle">Manage how you appear to the community.</p></div>
+		</header>
+		<div class="layout">
+			<nav aria-label="Settings navigation">
+				<a class="active" href="#profile">Profile</a><a href="#account">Account</a><a href="#notifications">Notifications</a><a href="#appearance">Appearance</a>
+			</nav>
+			<section>
+				<div class="card" id="profile">
+					<div class="card-head"><h2>Public profile</h2><p>Your name and bio are visible on your profile.</p></div>
+					<form>
+						<div class="avatar-row"><div class="avatar" aria-label="Avatar preview">SK</div><div><strong>Profile picture</strong><small>JPG, PNG or GIF · max 5 MB</small><button class="button" type="button">Change photo</button></div></div>
+						<div class="grid">
+							<label>Username<input type="text" value="sakura" aria-describedby="username-hint"><span class="hint" id="username-hint">sakura.xyz/@sakura</span></label>
+							<label>Display name<input type="text" value="Sakura Kim"></label>
+							<label class="full">Bio<textarea maxlength="160">Building thoughtful things for the web.</textarea><span class="hint">160 characters maximum</span></label>
+							<label>Pronouns<select><option>Prefer not to say</option><option>she / her</option><option>he / him</option><option>they / them</option></select></label>
+							<label>Location<input type="text" value="Tokyo, Japan"></label>
+							<label class="full">Website<input type="url" value="https://sakura.xyz"></label>
+						</div>
+						<div class="actions"><button class="button" type="reset">Cancel</button><button class="primary" type="submit">Save changes</button></div>
+					</form>
+				</div>
+				<div class="card" id="notifications"><div class="privacy"><div><h3>Show email address</h3><p>Let other members contact you by email.</p></div><label class="switch"><input type="checkbox"><span class="slider"></span></label></div></div>
+				<div class="card"><div class="privacy"><div><h3>Profile discoverability</h3><p>Allow your profile to appear in search results.</p></div><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div></div>
+				<button class="button danger" type="button">Delete profile</button>
+			</section>
+		</div>
+	</main>
+</body>
+</html>
