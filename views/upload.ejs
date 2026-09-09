@@ -13,58 +13,61 @@
       .animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 antialiased">
-    <nav class="bg-white border-b border-gray-200 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+<body class="bg-surface text-gray-100 antialiased">
+    <nav class="site-nav bg-nav fixed inset-x-0 top-0 z-50 border-b border-white/5 backdrop-blur-xl">
+        <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
             <div class="flex-shrink-0">
-                <h1 class="text-xl font-bold text-gray-800">TexturePack.xyz</h1>
+                <a href="/" class="brand-wordmark text-xl font-bold text-white">Sakura<span class="text-pink-400">.xyz</span></a>
             </div>
-            <div class="hidden md:flex md:items-center md:space-x-8">
-                <a href="/" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Home</a>
-                <a href="/search" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Search</a>
-                <a href="/discover" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Discover</a>
-                <a href="/upload" class="text-indigo-600 font-semibold border-b-2 border-indigo-600 pb-1">Upload</a>
-                <a href="/random" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Random</a>
+            <div class="hidden items-center gap-8 md:flex">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/search" class="nav-link">Search</a>
+                <a href="/discover" class="nav-link">Discover</a>
+                <a href="/upload" class="nav-link" aria-current="page">Upload</a>
+                <a href="/random" class="nav-link">Random</a>
             </div>
         </div>
     </nav>
 
-    <main class="py-12">
-        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
-            <h1 class="text-2xl font-bold text-gray-900 mb-6">Upload a Texture Pack</h1>
-            <p class="text-gray-600 mb-8">Share your Minecraft Bedrock texture packs with the community</p>
+    <main class="min-h-screen px-4 pb-16 pt-28 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl animate-fade-in-up">
+            <div class="mb-8">
+                <span class="section-label">Community uploads</span>
+                <h1 class="mt-5 text-3xl font-bold tracking-tight text-white sm:text-4xl">Upload a Texture Pack</h1>
+                <p class="mt-3 text-gray-400">Share your Minecraft Bedrock texture packs with the community.</p>
+            </div>
 
-            <form action="/upload" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <form action="/upload" method="POST" enctype="multipart/form-data" class="glass-card space-y-6 p-6 sm:p-8">
                 <div>
-                    <label for="packName" class="block text-sm font-medium text-gray-700 mb-2">Pack Name:</label>
+                    <label for="packName" class="mb-2 block text-sm font-medium text-gray-200">Pack Name</label>
                     <input type="text" id="packName" name="packName" required
-                        class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-base">
+                        class="w-full rounded-lg border border-white/10 bg-white/[0.06] px-4 py-3 text-white placeholder-gray-500 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-400/20 sm:text-base">
                 </div>
 
                 <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description (optional):</label>
+                    <label for="description" class="mb-2 block text-sm font-medium text-gray-200">Description <span class="text-gray-500">(optional)</span></label>
                     <textarea id="description" name="description" rows="4"
-                        class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-base"></textarea>
+                        class="w-full resize-y rounded-lg border border-white/10 bg-white/[0.06] px-4 py-3 text-white placeholder-gray-500 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-400/20 sm:text-base"></textarea>
                 </div>
 
                 <div>
-                    <label for="packFile" class="block text-sm font-medium text-gray-700 mb-2">Texture Pack File (.mcpack):</label>
+                    <label for="packFile" class="mb-2 block text-sm font-medium text-gray-200">Texture Pack File <span class="text-gray-500">(.mcpack)</span></label>
                     <input type="file" id="packFile" name="packFile" accept=".mcpack" required
-                        class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-base">
-                    <p class="mt-2 text-xs text-gray-500">Maximum file size: 50MB</p>
+                        class="upload-file w-full rounded-lg border border-dashed border-white/15 bg-white/[0.04] px-4 py-3 text-sm text-gray-300 outline-none transition file:mr-4 file:rounded-md file:border-0 file:bg-pink-500/15 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-pink-200 hover:border-pink-400/50 focus:border-pink-400">
+                    <p class="mt-2 text-xs text-gray-500">Maximum file size: 50 MB</p>
                 </div>
 
                 <div>
-                    <label for="thumbnail" class="block text-sm font-medium text-gray-700 mb-2">Thumbnail Image (optional):</label>
+                    <label for="thumbnail" class="mb-2 block text-sm font-medium text-gray-200">Thumbnail Image <span class="text-gray-500">(optional)</span></label>
                     <input type="file" id="thumbnail" name="thumbnail" accept="image/*"
-                        class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-base">
-                    <p class="mt-2 text-xs text-gray-500">Recommended size: 400x400px</p>
+                        class="upload-file w-full rounded-lg border border-dashed border-white/15 bg-white/[0.04] px-4 py-3 text-sm text-gray-300 outline-none transition file:mr-4 file:rounded-md file:border-0 file:bg-pink-500/15 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-pink-200 hover:border-pink-400/50 focus:border-pink-400">
+                    <p class="mt-2 text-xs text-gray-500">Recommended size: 400 x 400 px</p>
                 </div>
 
                 <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category:</label>
+                    <label for="category" class="mb-2 block text-sm font-medium text-gray-200">Category</label>
                     <select id="category" name="category"
-                        class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-base">
+                        class="w-full rounded-lg border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-400/20 sm:text-base">
                         <option value="">Select a category</option>
                         <option value="Bedwars">Bedwars</option>
                         <option value="Skywars">Skywars</option>
@@ -77,14 +80,14 @@
                 </div>
 
                 <button type="submit"
-                    class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105 disabled:opacity-50">
+                    class="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-50">
                     Upload Pack
                 </button>
             </form>
         </div>
     </main>
 
-    <footer class="bg-gray-800 text-gray-300 py-12">
+    <footer class="border-t border-white/5 bg-black/20 py-12 text-gray-400">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p class="text-center text-sm">&copy; 2026 TexturePack.xyz. All rights reserved.</p>
         </div>
