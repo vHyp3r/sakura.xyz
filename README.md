@@ -24,6 +24,14 @@ A Minecraft Bedrock texture pack gallery website inspired by [texturepack.be](ht
 
 ```
 texturepack.xyz/
+├── css/
+│   ├── profile.css
+│   └── validate.css
+├── html/
+│   ├── profile.html
+│   └── validate.html
+├── js/
+│   └── profile.js
 ├── public/
 │   ├── css/
 │   │   └── style.css
