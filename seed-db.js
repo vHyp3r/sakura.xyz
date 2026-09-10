@@ -1,9 +1,15 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
+const { getMongoUri } = require('./src/services/dataStore');
 
 async function seedDatabase() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    const mongoUri = getMongoUri();
+    if (!mongoUri) {
+      throw new Error('MongoDB is not configured. Set MONGODB_URI in the environment.');
+    }
+
+    await mongoose.connect(mongoUri);
     console.log('Connected to MongoDB');
 
     const db = mongoose.connection.db;

@@ -1,7 +1,17 @@
 const mongoose = require('mongoose');
 
+function getMongoUri() {
+  const configuredUri =
+    process.env.MONGODB_URI ||
+    process.env.MONGO_URI ||
+    process.env.MONGODB_URL ||
+    process.env.DATABASE_URL;
+
+  return configuredUri?.trim() || null;
+}
+
 function isMongoConfigured() {
-  return Boolean(process.env.MONGODB_URI);
+  return Boolean(getMongoUri());
 }
 
 async function connectMongo() {
@@ -14,7 +24,7 @@ async function connectMongo() {
       return { connected: true, message: 'Connected to MongoDB.' };
     }
 
-    await mongoose.connect(process.env.MONGODB_URI, {
+    await mongoose.connect(getMongoUri(), {
       serverSelectionTimeoutMS: 5000,
     });
 
@@ -59,6 +69,7 @@ async function getDashboardSummary() {
 }
 
 module.exports = {
+  getMongoUri,
   isMongoConfigured,
   connectMongo,
   getDataStoreStatus,

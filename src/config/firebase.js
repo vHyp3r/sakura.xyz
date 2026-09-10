@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const admin = require('firebase-admin');
+const { isMongoConfigured } = require('../services/dataStore');
 
 let app = null;
 let db = null;
@@ -95,7 +96,7 @@ function getFirebaseStatus() {
 }
 
 function isFirebaseConfigured() {
-  if (process.env.MONGODB_URI) {
+  if (isMongoConfigured()) {
     return false;
   }
 
