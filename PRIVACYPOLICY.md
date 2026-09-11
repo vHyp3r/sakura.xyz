@@ -54,6 +54,4 @@ The Services may contain links to or integrations with third-party services. The
 
 We may update this policy from time to time. We will post the revised version and update the “Last updated” date. Material changes will be communicated as required by applicable law.
 
-## Contact Us
 
-For privacy questions or requests, contact the project operator at the contact address provided with the Services. Replace this sentence with the project’s legal name and privacy contact email before publication.
