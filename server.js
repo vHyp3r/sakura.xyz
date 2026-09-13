@@ -4,6 +4,7 @@ const express = require('express');
 const path = require('path');
 const { initFirebase, getFirebaseStatus, isFirebaseConfigured } = require('./src/config/firebase');
 const { isMongoConfigured, getDataStoreStatus } = require('./src/services/dataStore');
+const { requireAdmin } = require('./src/services/adminAuth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,6 +12,12 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/admin-assets', express.static(path.join(__dirname, 'css')));
+app.use('/admin-assets', express.static(path.join(__dirname, 'js')));
+app.use('/profile-assets', express.static(path.join(__dirname, 'js')));
+app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, 'html', 'adminLogin.html')));
+app.get('/admin', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, 'html', 'adminPanel.html')));
+app.get('/profile', (req, res) => res.sendFile(path.join(__dirname, 'html', 'profile.html')));
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));

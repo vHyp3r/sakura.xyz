@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="/admin-assets/adminPanel.css">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand" href="/"><span class="brand-mark">S</span><span>Sakura</span></a>
+            <div class="workspace-switcher"><span class="status-dot"></span><span><small>Workspace</small><strong>Production</strong></span><span class="chevron">⌄</span></div>
+            <nav class="nav-list">
+                <p class="nav-label">Workspace</p>
+                <button class="nav-item is-active" data-view="overview"><span class="nav-icon">⌂</span>Overview</button>
+                <button class="nav-item" data-view="collections"><span class="nav-icon">▦</span>Collections</button>
+                <button class="nav-item" data-view="activity"><span class="nav-icon">◷</span>Activity log</button>
+                <p class="nav-label">Site tools</p>
+                <a class="nav-item" href="/upload"><span class="nav-icon">＋</span>Upload a pack</a>
+                <a class="nav-item" href="/packs"><span class="nav-icon">▤</span>Browse packs</a>
+                <a class="nav-item" href="/discover"><span class="nav-icon">✦</span>Discover</a>
+                <a class="nav-item" href="/dashboard"><span class="nav-icon">◉</span>User dashboard</a>
+            </nav>
+            <div class="sidebar-footer"><a href="/" class="back-link">← Back to site</a><div class="admin-chip"><span class="avatar">A</span><span><strong>Administrator</strong><small>Site manager</small></span></div></div>
+        </aside>
+        <main class="main-content">
+            <header class="topbar"><div class="mobile-brand"><span class="brand-mark">S</span>Sakura</div><label class="global-search"><span>⌕</span><input id="globalSearch" type="search" placeholder="Search collections and documents"><kbd>/</kbd></label><div class="topbar-actions"><span class="live-label"><span class="status-dot"></span> System live</span><button class="icon-button" id="refreshButton" title="Refresh data">↻</button><button class="icon-button" title="Notifications">♢</button></div></header>
+            <div class="content-wrap">
+                <section class="page-heading"><div><p class="eyebrow">Control room / <span id="viewCrumb">Overview</span></p><h1 id="pageTitle">Good morning, admin.</h1><p class="subheading">Keep an eye on your texture pack library and the people shaping it.</p></div><div class="heading-actions"><span class="last-updated" id="lastUpdated">Waiting for data</span><button class="button button-primary" id="refreshCta">Refresh dashboard <span>↻</span></button></div></section>
+                <div id="connectionNotice" class="connection-notice" hidden></div>
+                <section class="view-panel is-visible" data-panel="overview">
+                    <div class="stat-grid">
+                        <article class="stat-card"><p>Total documents</p><strong id="totalDocuments">--</strong><small>Across connected collections</small></article>
+                        <article class="stat-card"><p>Collections</p><strong id="collectionCount">--</strong><small>Available to inspect</small></article>
+                        <article class="stat-card"><p>Data source</p><strong id="dataSource">--</strong><small id="dataSourceDetail">Checking connection</small></article>
+                        <article class="stat-card"><p>Admin access</p><strong>Active</strong><small>Protected workspace</small></article>
+                    </div>
+                    <div class="dashboard-grid"><article class="panel"><div class="panel-heading"><div><p class="eyebrow">Data overview</p><h2>Collections</h2></div><button class="text-button" data-go="collections">View all →</button></div><div id="collectionList" class="collection-list"><div class="loading-row">Loading collections</div></div></article><article class="panel"><div class="panel-heading"><div><p class="eyebrow">Shortcuts</p><h2>Quick actions</h2></div></div><div class="quick-actions"><a href="/upload" class="quick-action"><span>＋</span><strong>Upload texture pack</strong><small>Add a new pack to the library</small></a><a href="/packs" class="quick-action"><span>▤</span><strong>Review pack library</strong><small>Browse every published pack</small></a><a href="/search" class="quick-action"><span>⌕</span><strong>Search the site</strong><small>Find packs and content quickly</small></a></div></article></div>
+                    <div class="bottom-grid"><article class="panel chart-panel"><div class="panel-heading"><div><p class="eyebrow">At a glance</p><h2>Workspace activity</h2></div><span>Last 7 days</span></div><div class="bar-chart"><i style="--size:38%"></i><i style="--size:54%"></i><i style="--size:47%"></i><i style="--size:72%"></i><i style="--size:61%"></i><i style="--size:89%"></i><i style="--size:76%"></i></div><div class="chart-labels"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div><p class="chart-note">Visual placeholder until event analytics are connected.</p></article><article class="panel status-panel"><div class="panel-heading"><div><p class="eyebrow">Health check</p><h2>Services</h2></div><span class="healthy-pill" id="healthPill">Checking</span></div><div class="service-row"><span class="service-bullet"></span><span><strong>Application server</strong><small>Express runtime</small></span><b>Online</b></div><div class="service-row"><span class="service-bullet" id="databaseBullet"></span><span><strong>Database</strong><small id="databaseKind">Connection pending</small></span><b id="databaseStatus">Checking</b></div><div class="service-row"><span class="service-bullet"></span><span><strong>File uploads</strong><small>MCPE and image storage</small></span><b>Ready</b></div></article></div>
+                </section>
+                <section class="view-panel" data-panel="collections"><div class="section-toolbar"><div><p class="eyebrow">Data explorer</p><h2>Collections</h2><p class="subheading">Inspect the records available to the application.</p></div><div class="toolbar-actions"><select id="documentLimit" aria-label="Documents per page"><option value="10">10 records</option><option value="25" selected>25 records</option><option value="50">50 records</option></select><button class="button button-secondary" id="reloadCollections">↻ Reload</button></div></div><div class="explorer-layout"><div class="panel collection-browser"><div class="browser-heading"><strong>All collections</strong><span id="browserCount">0</span></div><div id="collectionBrowser" class="browser-list"><div class="loading-row">Loading</div></div></div><div class="panel document-viewer"><div class="browser-heading"><strong id="documentTitle">Select a collection</strong><span id="documentCount">--</span></div><div id="documentTable" class="empty-state"><span class="empty-icon">▦</span><strong>Choose a collection</strong><p>Records will appear here when you select one.</p></div></div></div></section>
+                <section class="view-panel" data-panel="activity"><div class="section-toolbar"><div><p class="eyebrow">Audit trail</p><h2>Activity log</h2><p class="subheading">A concise record of the actions available in this workspace.</p></div><span class="healthy-pill">Read-only view</span></div><div class="panel activity-list"><div class="activity-item"><span class="activity-icon">✓</span><div><strong>Admin panel initialized</strong><p>Control room loaded and ready to inspect site data.</p></div><time>Now</time></div><div class="activity-item"><span class="activity-icon">↗</span><div><strong>Public routes available</strong><p>Upload, packs, discover, search, and dashboard links are connected.</p></div><time>Now</time></div><div class="activity-item"><span class="activity-icon">◷</span><div><strong>Analytics pending</strong><p>Event history will appear when an analytics source is configured.</p></div><time>Pending</time></div></div></section>
+            </div>
+            <footer class="footer"><span>© 2026 Sakura</span><span>Admin workspace · <a href="/PRIVACYPOLICY.md">Privacy</a></span></footer>
+        </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="/admin-assets/adminPanel.js" defer></script>
+</body>
+</html>

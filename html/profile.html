@@ -49,6 +49,11 @@
 		.switch input:checked + .slider { background:var(--accent); }
 		.switch input:checked + .slider:before { transform:translateX(19px); }
 		.danger { color:var(--danger); }
+		.admin-access { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:19px 24px; border:1px solid #d8d2ff; background:var(--accent-soft); border-radius:16px; margin-bottom:18px; }
+		.admin-access[hidden] { display:none; }
+		.admin-access h3 { margin:0 0 3px; font-size:15px; }
+		.admin-access p { margin:0; color:var(--muted); font-size:13px; }
+		.admin-access .button { white-space:nowrap; background:#fff; }
 		@media (max-width:700px) { .shell { padding-top:26px; } .layout { grid-template-columns:1fr; } nav { display:flex; overflow:auto; gap:3px; } nav a { white-space:nowrap; } .grid { grid-template-columns:1fr; } .full { grid-column:auto; } }
 	</style>
 </head>
@@ -57,6 +62,10 @@
 		<header>
 			<div><h1>Profile</h1><p class="subtitle">Manage how you appear to the community.</p></div>
 		</header>
+		<div class="admin-access" id="adminAccess" hidden>
+			<div><h3>Administrator access</h3><p>Your account is tagged as an administrator.</p></div>
+			<button class="button" id="adminAccessButton" type="button">Open admin panel</button>
+		</div>
 		<div class="layout">
 			<nav aria-label="Settings navigation">
 				<a class="active" href="#profile">Profile</a><a href="#account">Account</a><a href="#notifications">Notifications</a><a href="#appearance">Appearance</a>
@@ -83,5 +92,6 @@
 			</section>
 		</div>
 	</main>
+	<script src="/profile-assets/profile.js" defer></script>
 </body>
 </html>

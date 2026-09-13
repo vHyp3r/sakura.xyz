@@ -11,6 +11,8 @@
 		const displayName = form.querySelectorAll('input[type="text"]')[1];
 		const saveButton = form.querySelector('.primary');
 		const storageKey = 'sakura-profile';
+		const adminAccess = document.querySelector('#adminAccess');
+		const adminAccessButton = document.querySelector('#adminAccessButton');
 
 		const fields = {
 			username,
@@ -25,6 +27,22 @@
 			const name = (fields.displayName.value.trim() || fields.username.value.trim() || 'SK')
 				.split(/\s+/).map(part => part[0]).join('').slice(0, 2).toUpperCase();
 			avatar.textContent = name || 'SK';
+		};
+
+		const updateAdminAccess = async () => {
+			if (!adminAccess || !adminAccessButton) return;
+			try {
+				const accessResponse = await fetch(`/api/admin/access?username=${encodeURIComponent(fields.username.value.trim())}`);
+				const access = await accessResponse.json();
+				adminAccess.hidden = !access.isAdmin;
+				if (access.isAdmin) {
+					const sessionResponse = await fetch('/api/admin/session');
+					const session = await sessionResponse.json();
+					adminAccessButton.textContent = session.authenticated ? 'Open admin panel' : 'Admin sign in';
+				}
+			} catch (_) {
+				adminAccess.hidden = true;
+			}
 		};
 
 		const setStatus = message => {
@@ -46,6 +64,7 @@
 			});
 		} catch (_) { /* Storage may be unavailable. */ }
 		updateAvatar();
+		updateAdminAccess();
 
 		form.addEventListener('submit', event => {
 			event.preventDefault();
@@ -53,12 +72,22 @@
 			const data = Object.fromEntries(Object.entries(fields).map(([key, field]) => [key, field.value.trim()]));
 			try { localStorage.setItem(storageKey, JSON.stringify(data)); } catch (_) { /* Ignore storage errors. */ }
 			updateAvatar();
+			updateAdminAccess();
 			setStatus('Changes saved');
 		});
 
 		form.addEventListener('reset', () => window.setTimeout(updateAvatar, 0));
 		displayName.addEventListener('input', updateAvatar);
 		username.addEventListener('input', updateAvatar);
+		username.addEventListener('input', updateAdminAccess);
+
+		adminAccessButton?.addEventListener('click', async () => {
+			const sessionResponse = await fetch('/api/admin/session');
+			const session = await sessionResponse.json();
+			window.location.href = session.authenticated
+				? '/admin'
+				: `/admin/login?username=${encodeURIComponent(fields.username.value.trim())}&returnTo=/admin`;
+		});
 
 		photoButton.addEventListener('click', () => {
 			const input = document.createElement('input');
