@@ -2,6 +2,7 @@ const express = require('express');
 const {
   getDashboardSummary: getMongoDashboardSummary,
   getDataStoreStatus,
+  getMongoDocuments,
   isMongoConfigured,
 } = require('../src/services/dataStore');
 const {
@@ -59,11 +60,13 @@ router.get('/admin/summary', requireAdmin, async (req, res, next) => {
 
 router.get('/admin/collections/:collectionName', requireAdmin, async (req, res, next) => {
   try {
-    const data = await getDocuments(req.params.collectionName, {
-      limit: req.query.limit,
-      orderBy: req.query.orderBy,
-      orderDirection: req.query.orderDirection,
-    });
+    const data = isMongoConfigured()
+      ? await getMongoDocuments(req.params.collectionName, { limit: req.query.limit })
+      : await getDocuments(req.params.collectionName, {
+          limit: req.query.limit,
+          orderBy: req.query.orderBy,
+          orderDirection: req.query.orderDirection,
+        });
     res.json(data);
   } catch (error) {
     next(error);
@@ -107,11 +110,13 @@ router.get('/firebase/collections', async (req, res, next) => {
 
 router.get('/firebase/collections/:collectionName', async (req, res, next) => {
   try {
-    const data = await getDocuments(req.params.collectionName, {
-      limit: req.query.limit,
-      orderBy: req.query.orderBy,
-      orderDirection: req.query.orderDirection,
-    });
+    const data = isMongoConfigured()
+      ? await getMongoDocuments(req.params.collectionName, { limit: req.query.limit })
+      : await getDocuments(req.params.collectionName, {
+          limit: req.query.limit,
+          orderBy: req.query.orderBy,
+          orderDirection: req.query.orderDirection,
+        });
 
     res.json(data);
   } catch (error) {
