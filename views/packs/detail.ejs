@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
     <link rel="stylesheet" href="/css/tailwind.css">
+    <link rel="stylesheet" href="/css/legacy-pages.css">
     <style>
       @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
@@ -13,27 +14,23 @@
       .animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 antialiased">
-    <nav class="bg-white border-b border-gray-200 shadow-sm">
+<body class="sakura-page antialiased">
+    <nav class="sakura-nav">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
             <div class="flex-shrink-0">
-                <h1 class="text-xl font-bold text-gray-800">TexturePack.xyz</h1>
+                <a href="/" class="sakura-brand">Sakura<span>.xyz</span></a>
             </div>
             <div class="hidden md:flex md:items-center md:space-x-8">
-                <a href="/" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Home</a>
-                <a href="/search" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Search</a>
-                <a href="/discover" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Discover</a>
-                <a href="/upload" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Upload</a>
-                <a href="/random" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Random</a>
+                <a href="/" class="sakura-nav-link">Home</a><a href="/search" class="sakura-nav-link">Search</a><a href="/discover" class="sakura-nav-link">Discover</a><a href="/upload" class="sakura-nav-link">Upload</a><a href="/random" class="sakura-nav-link">Random</a><a href="/shop" class="sakura-nav-link">Shop</a><a href="/profile" class="sakura-nav-link">Profile</a>
             </div>
         </div>
     </nav>
 
-    <main class="py-12">
+    <main class="sakura-main">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
-            <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="sakura-detail-card">
                 <div class="mb-6">
-                    <h1 class="text-3xl font-bold text-gray-900"><%= pack.name %></h1>
+                    <h1 class="pack-title"><%= pack.name %></h1>
                     <div class="flex flex-wrap gap-3 mb-4">
                         <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full"><%= pack.resolution %></span>
                         <% if (pack.isPort) { %>
@@ -54,15 +51,15 @@
 
                 <div class="space-y-4 text-gray-600">
                     <p><strong class="text-gray-800">Description:</strong></p>
-                    <p class="text-gray-600">
-                        Texture pack description would go here. In a full implementation, this would be stored in the database and displayed.
+                    <p class="detail-copy">
+                        <%= pack.description || 'No description provided for this texture pack.' %>
                     </p>
                 </div>
 
                 <div class="grid gap-6 sm:grid-cols-2">
                     <div>
                         <h3 class="text-sm font-medium text-gray-500 mb-1">Downloads</h3>
-                        <p class="text-2xl font-semibold text-gray-900"><%= pack.downloads.toLocaleString() %></p>
+                        <p class="detail-value"><%= (pack.downloads || 0).toLocaleString() %></p>
                     </div>
                     <div>
                         <h3 class="text-sm font-medium text-gray-500 mb-1">Uploaded by</h3>
@@ -81,15 +78,13 @@
             </div>
 
             <div class="mt-6">
-                <a href="/packs/<%= pack._id %>/download"
-                    class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105 flex justify-center items-center">
+                <a href="/packs/<%= pack._id %>/download" class="sakura-button sakura-download">
                     Download Pack
                 </a>
             </div>
 
             <div class="mt-6">
-                <a href="/packs"
-                    class="inline-block bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-transform transform hover:scale-105">
+                <a href="/packs" class="sakura-quiet-button">
                     Back to All Packs
                 </a>
             </div>

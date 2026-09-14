@@ -1,0 +1,57 @@
+:root {
+  --sakura-bg: #0b0b12;
+  --sakura-surface: #15131d;
+  --sakura-surface-2: #1c1826;
+  --sakura-line: rgba(255, 255, 255, .1);
+  --sakura-text: #f7f3fa;
+  --sakura-muted: #a59bad;
+  --sakura-pink: #e83291;
+  --sakura-pink-soft: rgba(232, 50, 145, .14);
+}
+.sakura-page { min-height:100vh; background:var(--sakura-bg); color:var(--sakura-text); }
+.sakura-nav { height:64px; background:rgba(15, 12, 20, .94); border-bottom:1px solid var(--sakura-line); }
+.sakura-nav > div { height:100%; display:flex; align-items:center; justify-content:space-between; max-width:1280px; margin:0 auto; padding:0 24px; }
+.sakura-brand { color:var(--sakura-text); font:700 20px 'Space Grotesk', sans-serif; text-decoration:none; }
+.sakura-brand span { color:#f278b5; }
+.sakura-nav-link { color:var(--sakura-muted); font-size:12px; text-decoration:none; margin-left:20px; transition:color .2s; }
+.sakura-nav-link:hover { color:#fff; }
+.sakura-main { min-height:calc(100vh - 64px); padding:64px 24px 88px; }
+.sakura-main > div { max-width:1280px; margin:0 auto; }
+.sakura-heading h1 { margin:.55rem 0 0; color:var(--sakura-text); font:700 36px 'Space Grotesk', sans-serif; }
+.sakura-kicker { color:#f278b5; text-transform:uppercase; letter-spacing:.14em; font-size:10px; font-weight:700; }
+.sakura-heading > div { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-top:22px; }
+.sakura-input { border:1px solid var(--sakura-line); border-radius:7px; background:var(--sakura-surface); color:var(--sakura-text); padding:11px 13px; outline:0; }
+.sakura-input::placeholder { color:#776d82; }
+.sakura-input:focus { border-color:#ee5ba6; box-shadow:0 0 0 3px var(--sakura-pink-soft); }
+.sakura-button { display:inline-flex; align-items:center; justify-content:center; border:0; border-radius:7px; background:var(--sakura-pink); color:#fff; padding:11px 16px; font-weight:700; text-decoration:none; cursor:pointer; }
+.sakura-button:hover { background:#f04da0; }
+.sakura-pack-card, .sakura-detail-card { overflow:hidden; background:var(--sakura-surface); border:1px solid var(--sakura-line); border-radius:10px; box-shadow:0 14px 35px rgba(0,0,0,.18); }
+.sakura-pack-card { transition:transform .2s, border-color .2s; }
+.sakura-pack-card:hover { transform:translateY(-3px); border-color:rgba(232,50,145,.45); }
+.sakura-pack-card .p-5 { padding:20px; }
+.sakura-pack-card .text-gray-500, .sakura-pack-card .text-gray-400 { color:var(--sakura-muted) !important; }
+.sakura-pack-card .text-gray-900, .sakura-pack-card .text-gray-800 { color:var(--sakura-text) !important; }
+.sakura-pack-card .bg-gray-100 { background:var(--sakura-surface-2); color:#d7cedd; }
+.sakura-pack-card a { color:inherit; }
+.pack-title { color:var(--sakura-text); font:700 26px 'Space Grotesk', sans-serif; }
+.sakura-detail-card { max-width:940px; margin:0 auto; padding:28px; }
+.sakura-detail-card .text-gray-500 { color:var(--sakura-muted) !important; }
+.sakura-detail-card .text-gray-800, .sakura-detail-card .text-gray-900 { color:var(--sakura-text) !important; }
+.sakura-detail-card .bg-gray-100 { background:var(--sakura-surface-2); color:#d7cedd; }
+.sakura-detail-card .bg-indigo-100 { background:var(--sakura-pink-soft); color:#ff9bc8; }
+.detail-copy { color:var(--sakura-muted); line-height:1.7; }
+.detail-value { color:var(--sakura-text); font:700 25px 'Space Grotesk', sans-serif; }
+.sakura-download { width:100%; margin:22px auto 0; max-width:940px; }
+.sakura-quiet-button { display:inline-block; margin-top:20px; padding:10px 14px; border-radius:7px; background:var(--sakura-surface-2); color:var(--sakura-text); text-decoration:none; }
+.sakura-page footer { background:#101019 !important; border-top:1px solid var(--sakura-line); color:var(--sakura-muted) !important; }
+.sakura-page .bg-white { background:var(--sakura-surface); }
+.sakura-page .text-gray-50, .sakura-page .text-gray-900 { color:var(--sakura-text); }
+@media (max-width:760px) {
+  .sakura-nav > div { padding:0 16px; }
+  .sakura-nav-link { margin-left:10px; font-size:11px; }
+  .sakura-main { padding:42px 16px 64px; }
+  .sakura-heading > div { display:block; }
+  .sakura-heading form { margin-top:16px; }
+  .sakura-heading form input { width:100%; }
+  .sakura-heading form button { margin-top:8px; }
+}

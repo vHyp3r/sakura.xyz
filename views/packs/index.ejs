@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
     <link rel="stylesheet" href="/css/tailwind.css">
+    <link rel="stylesheet" href="/css/legacy-pages.css">
     <style>
       @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
@@ -13,33 +14,29 @@
       .animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 antialiased">
-    <nav class="bg-white border-b border-gray-200 shadow-sm">
+<body class="sakura-page antialiased">
+    <nav class="sakura-nav">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
             <div class="flex-shrink-0">
-                <h1 class="text-xl font-bold text-gray-800">TexturePack.xyz</h1>
+                <a href="/" class="sakura-brand">Sakura<span>.xyz</span></a>
             </div>
             <div class="hidden md:flex md:items-center md:space-x-8">
-                <a href="/" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Home</a>
-                <a href="/search" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Search</a>
-                <a href="/discover" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Discover</a>
-                <a href="/upload" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Upload</a>
-                <a href="/random" class="text-gray-500 hover:text-gray-700 font-medium transition-colors">Random</a>
+                <a href="/" class="sakura-nav-link">Home</a><a href="/search" class="sakura-nav-link">Search</a><a href="/discover" class="sakura-nav-link">Discover</a><a href="/upload" class="sakura-nav-link">Upload</a><a href="/random" class="sakura-nav-link">Random</a><a href="/shop" class="sakura-nav-link">Shop</a><a href="/profile" class="sakura-nav-link">Profile</a>
             </div>
         </div>
     </nav>
 
-    <main class="py-12">
+    <main class="sakura-main">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
-            <div class="mb-8">
-                <h1 class="text-2xl font-bold text-gray-900">All Texture Packs</h1>
+            <div class="sakura-heading">
+                <span class="sakura-kicker">Community library</span><h1>All Texture Packs</h1>
                 <div class="mt-4 flex justify-between items-center">
-                    <a href="/upload" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105">Upload New Pack</a>
+                    <a href="/upload" class="sakura-button">Upload New Pack</a>
                     <form action="/search" method="GET" class="flex items-center space-x-3">
                         <input type="text" name="q" placeholder="Search packs..."
-                            class="px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-64 sm:w-80">
+                            class="sakura-input w-64 sm:w-80">
                         <button type="submit"
-                            class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            class="sakura-button">
                             Search
                         </button>
                     </form>
@@ -57,13 +54,13 @@
             <% } else { %>
                 <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     <% packs.forEach(function(pack) { %>
-                        <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow transform hover:-translate-y-1 group">
+                        <div class="sakura-pack-card">
                             <a href="/packs/<%= pack._id %>" class="block">
                                 <img src="<%= pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="<%= pack.name %> Thumbnail"
                                     class="w-full h-48 object-cover">
                             </a>
                             <div class="p-5">
-                                <h3 class="font-semibold text-gray-900 mb-2">
+                                    <h3 class="pack-title">
                                     <a href="/packs/<%= pack._id %>" class="hover:text-indigo-600 transition-colors"><%= pack.name %></a>
                                 </h3>
                                 <div class="flex flex-wrap gap-3 mb-3">
@@ -77,7 +74,7 @@
                                         <img src="/images/default-avatar.svg" alt="Uploader Avatar" class="w-8 h-8 rounded-full mr-2">
                                         <%= pack.uploader %>
                                     </span>
-                                    <span><%= pack.downloads.toLocaleString() %> downloads</span>
+                                    <span><%= (pack.downloads || 0).toLocaleString() %> downloads</span>
                                 </div>
                             </div>
                         </div>

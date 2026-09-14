@@ -36,7 +36,7 @@
                                             <img src="/images/default-avatar.svg" alt="" class="h-8 w-8 shrink-0 rounded-full border border-white/10">
                                             <span class="truncate"><%= pack.uploader %></span>
                                         </span>
-                                        <span class="shrink-0 text-gray-500"><%= pack.downloads.toLocaleString() %> downloads</span>
+                                        <span class="shrink-0 text-gray-500"><%= (pack.downloads || 0).toLocaleString() %> downloads</span>
                                     </div>
                                 </div>
                             </article>
