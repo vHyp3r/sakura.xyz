@@ -10,6 +10,9 @@
 		body { margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font:15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; }
 		.shell { width:min(1040px, calc(100% - 32px)); margin:0 auto; padding:42px 0 64px; }
 		header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+		.section-nav { display:flex; gap:5px; margin-bottom:24px; padding:6px; background:#fff; border:1px solid var(--line); border-radius:11px; }
+		.section-nav a { color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:7px; font-size:13px; font-weight:650; }
+		.section-nav a:hover, .section-nav a.active { color:var(--accent); background:var(--accent-soft); }
 		h1 { margin:0 0 5px; font-size:28px; letter-spacing:-.03em; }
 		.subtitle { color:var(--muted); margin:0; }
 		.layout { display:grid; grid-template-columns:220px 1fr; gap:24px; align-items:start; }
@@ -54,11 +57,22 @@
 		.admin-access h3 { margin:0 0 3px; font-size:15px; }
 		.admin-access p { margin:0; color:var(--muted); font-size:13px; }
 		.admin-access .button { white-space:nowrap; background:#fff; }
+		.cosmetic-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; padding:24px; }
+		.cosmetic-field { padding:15px; border:1px solid var(--line); border-radius:11px; background:#fbfbfe; }
+		.cosmetic-field label { font-size:12px; }
+		.cosmetic-field select { margin-top:9px; }
+		.cosmetic-empty { grid-column:1/-1; color:var(--muted); font-size:13px; }
+		.cosmetic-status { padding:0 24px 20px; color:var(--muted); font-size:12px; }
+		#account { padding:24px; }
+		#account p { margin:0; color:var(--muted); font-size:13px; }
+		#account strong { display:block; margin-bottom:4px; }
+		@media (max-width:700px) { .cosmetic-grid { grid-template-columns:1fr; } }
 		@media (max-width:700px) { .shell { padding-top:26px; } .layout { grid-template-columns:1fr; } nav { display:flex; overflow:auto; gap:3px; } nav a { white-space:nowrap; } .grid { grid-template-columns:1fr; } .full { grid-column:auto; } }
 	</style>
 </head>
 <body>
 	<main class="shell">
+		<nav class="section-nav" aria-label="Sakura sections"><a href="/">Sakura</a><a class="active" href="/profile">Profile</a><a href="/shop">Shop</a><a href="/admin">Admin</a></nav>
 		<header>
 			<div><h1>Profile</h1><p class="subtitle">Manage how you appear to the community.</p></div>
 		</header>
@@ -86,8 +100,10 @@
 						<div class="actions"><button class="button" type="reset">Cancel</button><button class="primary" type="submit">Save changes</button></div>
 					</form>
 				</div>
-				<div class="card" id="notifications"><div class="privacy"><div><h3>Show email address</h3><p>Let other members contact you by email.</p></div><label class="switch"><input type="checkbox"><span class="slider"></span></label></div></div>
-				<div class="card"><div class="privacy"><div><h3>Profile discoverability</h3><p>Allow your profile to appear in search results.</p></div><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div></div>
+				<div class="card" id="account"><strong>Account preferences</strong><p>Your profile settings and cosmetic collection are saved in this browser.</p></div>
+				<div class="card" id="notifications"><div class="privacy"><div><h3>Show email address</h3><p>Let other members contact you by email.</p></div><label class="switch"><input id="showEmail" data-setting="showEmail" type="checkbox"><span class="slider"></span></label></div></div>
+				<div class="card"><div class="privacy"><div><h3>Profile discoverability</h3><p>Allow your profile to appear in search results.</p></div><label class="switch"><input id="discoverable" data-setting="discoverable" type="checkbox" checked><span class="slider"></span></label></div></div>
+				<div class="card" id="appearance"><div class="card-head"><h2>Cosmetics</h2><p>Equip items you own from the Sakura Shop.</p></div><div class="cosmetic-grid"><div class="cosmetic-field"><label for="avatarCosmetic">Avatar cosmetic<select id="avatarCosmetic"><option value="">Default initials</option></select></label></div><div class="cosmetic-field"><label for="profileBackground">Profile background<select id="profileBackground"><option value="">Default background</option></select></label></div><div class="cosmetic-field"><label for="profileTheme">Profile theme<select id="profileTheme"><option value="">Default theme</option></select></label></div></div><div class="cosmetic-status" id="cosmeticStatus">Visit the Shop to unlock cosmetics.</div></div>
 				<button class="button danger" type="button">Delete profile</button>
 			</section>
 		</div>

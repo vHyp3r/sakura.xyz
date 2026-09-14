@@ -4,9 +4,16 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Sakura Shop</title>
+	<style>
+		.section-nav { width:min(980px, calc(100% - 32px)); margin:24px auto 0; display:flex; align-items:center; justify-content:space-between; gap:16px; font:600 13px system-ui,sans-serif; }
+		.section-nav a { color:#76556b; text-decoration:none; padding:8px 11px; border-radius:8px; }
+		.section-nav a:hover, .section-nav a.active { color:#b34c78; background:#f4e6f0; }
+		.section-nav .links { display:flex; gap:4px; flex-wrap:wrap; }
+	</style>
 </head>
 <body>
+	<nav class="section-nav" aria-label="Sakura sections"><a href="/" aria-label="Sakura home">Sakura</a><div class="links"><a href="/profile">Profile</a><a class="active" href="/shop">Shop</a><a href="/admin">Admin</a></div></nav>
 	<main id="shop" aria-label="Sakura Shop"></main>
-	<script src="../shop.js"></script>
+	<script src="/shop-assets/shop.js"></script>
 </body>
 </html>

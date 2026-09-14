@@ -15,9 +15,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/admin-assets', express.static(path.join(__dirname, 'css')));
 app.use('/admin-assets', express.static(path.join(__dirname, 'js')));
 app.use('/profile-assets', express.static(path.join(__dirname, 'js')));
+app.get('/shop-assets/shop.js', (req, res) => res.sendFile(path.join(__dirname, 'shop.js')));
 app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, 'html', 'adminLogin.html')));
-app.get('/admin', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, 'html', 'adminPanel.html')));
+app.get(['/admin', '/admin/overview', '/admin/collections', '/admin/activity'], requireAdmin, (req, res) => res.sendFile(path.join(__dirname, 'html', 'adminPanel.html')));
 app.get('/profile', (req, res) => res.sendFile(path.join(__dirname, 'html', 'profile.html')));
+app.get('/shop', (req, res) => res.sendFile(path.join(__dirname, 'html', 'shop.html')));
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));

@@ -87,11 +87,18 @@ async function selectCollection(name) {
 	}
 }
 
-function switchView(view) {
+function switchView(view, updateUrl = true) {
 	$$('.nav-item[data-view]').forEach((item) => item.classList.toggle('is-active', item.dataset.view === view));
 	$$('.view-panel').forEach((panel) => panel.classList.toggle('is-visible', panel.dataset.panel === view));
 	$('#viewCrumb').textContent = view[0].toUpperCase() + view.slice(1);
 	$('#pageTitle').textContent = view === 'overview' ? 'Good morning, admin.' : view[0].toUpperCase() + view.slice(1);
+	if (updateUrl && window.location.pathname !== `/admin/${view}`) window.history.pushState({}, '', `/admin/${view}`);
+}
+
+function setInitialView() {
+	const routeView = window.location.pathname.split('/').filter(Boolean).pop();
+	if (['collections', 'activity'].includes(routeView)) switchView(routeView, false);
+	else switchView('overview', false);
 }
 
 function setupInteractions() {
@@ -109,4 +116,6 @@ function setupInteractions() {
 }
 
 setupInteractions();
+setInitialView();
+window.addEventListener('popstate', setInitialView);
 loadSummary();
