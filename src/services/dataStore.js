@@ -93,7 +93,10 @@ async function listMongoCollections() {
     return [];
   }
 
-  const collections = await mongoose.connection.db.listCollections().toArray();
+  const collectionCursor = mongoose.connection.db.listCollections();
+  const collections = Array.isArray(collectionCursor)
+    ? collectionCursor
+    : await collectionCursor.toArray();
 
   return Promise.all(
     collections.map(async (collection) => ({

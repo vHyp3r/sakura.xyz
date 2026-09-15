@@ -16,3 +16,9 @@ services:
         value: sakura-auth-66415
       - key: FIREBASE_SERVICE_ACCOUNT_JSON
         sync: false
+      - key: ADMIN_USERNAMES
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_SESSION_SECRET
+        sync: false
