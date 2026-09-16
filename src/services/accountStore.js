@@ -22,7 +22,7 @@ async function getAccountConnection() {
 
   if (!accountConnection) {
     accountConnection = mongoose.createConnection(uri, {
-      dbName: process.env.ACCOUNTINFO_DB_NAME || 'accountinfo',
+      dbName: process.env.ACCOUNTINFO_DB_NAME || 'accountInfo',
       serverSelectionTimeoutMS: 5000,
     });
   }

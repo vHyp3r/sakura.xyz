@@ -124,10 +124,11 @@
 	}
 	async function loadServerBalance() {
 		try {
-			const profile = JSON.parse(readStorage("sakura-profile", "{}"));
-			const username = String(profile.username || "").trim();
-			if (!username) return;
-			const response = await fetch(`/api/coins?username=${encodeURIComponent(username)}`);
+			const accountResponse = await fetch("/api/account/me", { cache: "no-store" });
+			if (!accountResponse.ok) return;
+			const accountResult = await accountResponse.json();
+			if (!accountResult.authenticated || !accountResult.account?.username) return;
+			const response = await fetch("/api/coins", { cache: "no-store" });
 			if (!response.ok) return;
 			const result = await response.json();
 			if (Number.isInteger(result.balance) && result.balance >= 0) {

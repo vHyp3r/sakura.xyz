@@ -75,7 +75,8 @@ router.patch('/account/profile', async (req, res, next) => {
 
 router.get('/coins', async (req, res, next) => {
   try {
-    const username = String(req.query.username || '').trim();
+    const session = getAccountSession(req);
+    const username = String(session?.username || req.query.username || '').trim();
     const balance = await getBalance(username);
     res.json({ username, balance: balance?.balance ?? null, source: balance ? 'server' : 'local' });
   } catch (error) {

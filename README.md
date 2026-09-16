@@ -122,7 +122,7 @@ npm run dev
 
 ## Account database
 
-The account database is `accountinfo`, a separate database inside the existing MongoDB cluster. The app reuses `MONGODB_URI` and selects `accountinfo` automatically. Set `ACCOUNTINFO_DB_NAME` only if the database has a different name. Account data is stored in an `accounts` collection.
+The account database is `accountInfo`, a separate database inside the existing MongoDB cluster. The app reuses `MONGODB_URI` and selects `accountInfo` automatically. Set `ACCOUNTINFO_DB_NAME` only if the database has a different name. Account data is stored in an `accounts` collection.
 
 ## File Uploads
 
