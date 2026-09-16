@@ -122,5 +122,21 @@
 		saveStorage("sakura-coins", state.balance); saveStorage("sakura-owned", JSON.stringify(state.owned));
 		message.textContent = `${item.name} added to your collection!`; render();
 	}
-	render();
+	async function loadServerBalance() {
+		try {
+			const profile = JSON.parse(readStorage("sakura-profile", "{}"));
+			const username = String(profile.username || "").trim();
+			if (!username) return;
+			const response = await fetch(`/api/coins?username=${encodeURIComponent(username)}`);
+			if (!response.ok) return;
+			const result = await response.json();
+			if (Number.isInteger(result.balance) && result.balance >= 0) {
+				state.balance = result.balance;
+				saveStorage("sakura-coins", result.balance);
+			}
+		} catch (_) {
+			// The local balance remains available when the server balance is unavailable.
+		}
+	}
+	loadServerBalance().finally(render);
 })();

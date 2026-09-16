@@ -18,8 +18,43 @@ const {
   requireAdmin,
   setAdminSession,
 } = require('../src/services/adminAuth');
+const { getBalance, listBalances, setBalance } = require('../src/services/coinService');
 
 const router = express.Router();
+
+router.get('/coins', async (req, res, next) => {
+  try {
+    const username = String(req.query.username || '').trim();
+    const balance = await getBalance(username);
+    res.json({ username, balance: balance?.balance ?? null, source: balance ? 'server' : 'local' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/admin/balances', requireAdmin, async (req, res, next) => {
+  try {
+    res.json({ balances: await listBalances(req.query.limit) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/admin/balances', requireAdmin, async (req, res, next) => {
+  try {
+    const session = getAdminSession(req);
+    const result = await setBalance(req.body.username, req.body.balance, session.username);
+    res.json(result);
+  } catch (error) {
+    if (error.code === 'COOLDOWN') {
+      return res.status(429).json({ error: error.message, retryAfterSeconds: error.retryAfterSeconds });
+    }
+    if (/required|whole number|between/.test(error.message)) {
+      return res.status(400).json({ error: error.message });
+    }
+    return next(error);
+  }
+});
 
 router.get('/admin/access', (req, res) => {
   res.json({ isAdmin: isAdminUsername(req.query.username) });

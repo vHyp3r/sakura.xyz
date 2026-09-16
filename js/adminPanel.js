@@ -93,12 +93,26 @@ function switchView(view, updateUrl = true) {
 	$('#viewCrumb').textContent = view[0].toUpperCase() + view.slice(1);
 	$('#pageTitle').textContent = view === 'overview' ? 'Good morning, admin.' : view[0].toUpperCase() + view.slice(1);
 	if (updateUrl && window.location.pathname !== `/admin/${view}`) window.history.pushState({}, '', `/admin/${view}`);
+	if (view === 'balances') loadBalances();
 }
 
 function setInitialView() {
 	const routeView = window.location.pathname.split('/').filter(Boolean).pop();
-	if (['collections', 'activity'].includes(routeView)) switchView(routeView, false);
+	if (['collections', 'activity', 'balances'].includes(routeView)) switchView(routeView, false);
 	else switchView('overview', false);
+}
+
+async function loadBalances() {
+	const rows = $('#balanceRows');
+	if (!rows) return;
+	try {
+		const response = await fetch('/api/admin/balances');
+		if (!response.ok) throw new Error('Could not load balances.');
+		const result = await response.json();
+		rows.innerHTML = result.balances.length ? result.balances.map((record) => `<tr><td>${escapeHtml(record.username)}</td><td>${Number(record.balance || 0).toLocaleString()}</td><td>${record.updatedAt ? new Date(record.updatedAt).toLocaleString() : '—'}</td></tr>`).join('') : '<tr><td colspan="3">No server balances have been set.</td></tr>';
+	} catch (error) {
+		rows.innerHTML = `<tr><td colspan="3">${escapeHtml(error.message)}</td></tr>`;
+	}
 }
 
 function setupInteractions() {
@@ -108,6 +122,28 @@ function setupInteractions() {
 	$('#refreshCta').addEventListener('click', () => { loadSummary(); showToast('Dashboard refreshed'); });
 	$('#reloadCollections').addEventListener('click', () => { loadSummary(); showToast('Collections reloaded'); });
 	$('#documentLimit').addEventListener('change', () => { if (state.activeCollection) selectCollection(state.activeCollection); });
+	$('#balanceForm')?.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		const status = $('#balanceStatus');
+		const submit = event.currentTarget.querySelector('button');
+		const formData = new FormData(event.currentTarget);
+		submit.disabled = true;
+		status.textContent = 'Saving balance...';
+		status.className = 'balance-status';
+		try {
+			const response = await fetch('/api/admin/balances', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(formData)) });
+			const result = await response.json();
+			if (!response.ok) throw new Error(result.retryAfterSeconds ? `${result.error} Try again in ${result.retryAfterSeconds}s.` : result.error || 'Could not save balance.');
+			status.textContent = `${result.username} now has ${Number(result.balance).toLocaleString()} Sakura coins.`;
+			status.className = 'balance-status is-success';
+			loadBalances();
+		} catch (error) {
+			status.textContent = error.message;
+			status.className = 'balance-status is-error';
+		} finally {
+			submit.disabled = false;
+		}
+	});
 	$('#globalSearch').addEventListener('input', (event) => {
 		const query = event.target.value.toLowerCase();
 		$$('.browser-item').forEach((item) => { item.hidden = !item.dataset.collection.toLowerCase().includes(query); });
