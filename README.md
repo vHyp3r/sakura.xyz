@@ -122,7 +122,7 @@ npm run dev
 
 ## Account database
 
-Set `ACCOUNTINFO_MONGODB_URI` in `.env` to the connection string for the separate account cluster. The account database stores password hashes and profile data in an `accounts` collection. Do not use the content database URI for this setting.
+The account database is `accountinfo`, a separate database inside the existing MongoDB cluster. The app reuses `MONGODB_URI` and selects `accountinfo` automatically. Set `ACCOUNTINFO_DB_NAME` only if the database has a different name. Account data is stored in an `accounts` collection.
 
 ## File Uploads
 

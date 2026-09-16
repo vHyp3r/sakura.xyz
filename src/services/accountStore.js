@@ -7,7 +7,8 @@ function getAccountMongoUri() {
   return (
     process.env.ACCOUNTINFO_MONGODB_URI ||
     process.env.MONGODB_ACCOUNTINFO_URI ||
-    process.env.ACCOUNTINFO_URI
+    process.env.ACCOUNTINFO_URI ||
+    process.env.MONGODB_URI
   )?.trim() || null;
 }
 
@@ -17,9 +18,14 @@ function isAccountStoreConfigured() {
 
 async function getAccountConnection() {
   const uri = getAccountMongoUri();
-  if (!uri) throw new Error('Account database is not configured. Set ACCOUNTINFO_MONGODB_URI.');
+  if (!uri) throw new Error('Account database is not configured. Set MONGODB_URI.');
 
-  if (!accountConnection) accountConnection = mongoose.createConnection(uri, { serverSelectionTimeoutMS: 5000 });
+  if (!accountConnection) {
+    accountConnection = mongoose.createConnection(uri, {
+      dbName: process.env.ACCOUNTINFO_DB_NAME || 'accountinfo',
+      serverSelectionTimeoutMS: 5000,
+    });
+  }
   if (accountConnection.readyState !== 1) await accountConnection.asPromise();
   return accountConnection;
 }
