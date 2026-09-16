@@ -17,7 +17,7 @@ A Minecraft Bedrock texture pack gallery website inspired by [texturepack.be](ht
 - **Backend**: Node.js with Express.js
 - **Frontend**: HTML/CSS/JavaScript with EJS templating
 - **File Uploads**: Multer middleware
-- **Database**: Mongoose/MongoDB (planned for future implementation)
+- **Database**: MongoDB for site data and a separate MongoDB cluster for accounts
 - **Styling**: Custom CSS with responsive design
 
 ## Project Structure
@@ -96,7 +96,7 @@ npm run dev
 - [x] Discover/popular packs page
 - [x] Random pack redirect
 - [ ] Actual database integration (MongoDB)
-- [ ] User authentication/accounts
+- [x] User authentication/accounts
 - [ ] Pack rating and commenting system
 - [ ] Discord bot integration for Java-to-Bedrock conversion
 - [ ] Advanced search filters
@@ -104,6 +104,11 @@ npm run dev
 - [ ] Pack categorization and tagging system
 
 ## API Endpoints
+
+- `POST /api/account/register` - Create an account
+- `POST /api/account/login` - Sign in
+- `GET /api/account/me` - Read the signed-in account
+- `POST /api/account/logout` - Sign out
 
 - `GET /` - Home page
 - `GET /packs` - List all texture packs
@@ -114,6 +119,10 @@ npm run dev
 - `GET /search` - Search texture packs
 - `GET /discover` - Discover popular packs
 - `GET /random` - Redirect to random pack
+
+## Account database
+
+Set `ACCOUNTINFO_MONGODB_URI` in `.env` to the connection string for the separate account cluster. The account database stores password hashes and profile data in an `accounts` collection. Do not use the content database URI for this setting.
 
 ## File Uploads
 

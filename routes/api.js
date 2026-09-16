@@ -19,8 +19,59 @@ const {
   setAdminSession,
 } = require('../src/services/adminAuth');
 const { getBalance, listBalances, setBalance } = require('../src/services/coinService');
+const { clearAccountSession, getAccountSession, setAccountSession } = require('../src/services/accountAuth');
+const { authenticateAccount, getAccountById, registerAccount, updateAccount } = require('../src/services/accountService');
 
 const router = express.Router();
+
+router.post('/account/register', async (req, res, next) => {
+  try {
+    const account = await registerAccount(req.body);
+    setAccountSession(res, req, account);
+    res.status(201).json({ authenticated: true, account });
+  } catch (error) {
+    if (/Username|email|Password|already/.test(error.message)) return res.status(400).json({ error: error.message });
+    next(error);
+  }
+});
+
+router.post('/account/login', async (req, res, next) => {
+  try {
+    const account = await authenticateAccount(req.body.username, req.body.password);
+    if (!account) return res.status(401).json({ error: 'Invalid username or password.' });
+    setAccountSession(res, req, account);
+    res.json({ authenticated: true, account });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/account/me', async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    const account = session ? await getAccountById(session.accountId) : null;
+    res.json({ authenticated: Boolean(account), account });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/account/logout', (req, res) => {
+  clearAccountSession(res);
+  res.json({ authenticated: false });
+});
+
+router.patch('/account/profile', async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    if (!session) return res.status(401).json({ error: 'Account authentication required.' });
+    const account = await updateAccount(session.accountId, req.body);
+    if (!account) return res.status(404).json({ error: 'Account not found.' });
+    res.json({ account });
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get('/coins', async (req, res, next) => {
   try {

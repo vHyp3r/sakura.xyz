@@ -90,9 +90,9 @@
 					<form>
 						<div class="avatar-row"><div class="avatar" aria-label="Avatar preview">SK</div><div><strong>Profile picture</strong><small>JPG, PNG or GIF · max 5 MB</small><button class="button" type="button">Change photo</button></div></div>
 						<div class="grid">
-							<label>Username<input type="text" value="sakura" aria-describedby="username-hint"><span class="hint" id="username-hint">sakura.xyz/@sakura</span></label>
-							<label>Display name<input type="text" value="Sakura Kim"></label>
-							<label class="full">Bio<textarea maxlength="160">Building thoughtful things for the web.</textarea><span class="hint">160 characters maximum</span></label>
+							<label>Username<input type="text" aria-describedby="username-hint" readonly><span class="hint" id="username-hint">Your unique Sakura username</span></label>
+							<label>Display name<input type="text"></label>
+							<label class="full">Bio<textarea maxlength="160"></textarea><span class="hint">160 characters maximum</span></label>
 							<label>Pronouns<select><option>Prefer not to say</option><option>she / her</option><option>he / him</option><option>they / them</option></select></label>
 							<label>Location<input type="text" value="Tokyo, Japan"></label>
 							<label class="full">Website<input type="url" value="https://sakura.xyz"></label>
@@ -100,7 +100,7 @@
 						<div class="actions"><button class="button" type="reset">Cancel</button><button class="primary" type="submit">Save changes</button></div>
 					</form>
 				</div>
-				<div class="card" id="account"><strong>Account preferences</strong><p>Your profile settings and cosmetic collection are saved in this browser.</p></div>
+				<div class="card" id="account"><strong>Account preferences</strong><p id="accountIdentity">Your profile settings are saved to your account.</p><button class="button" id="logoutButton" type="button">Sign out</button></div>
 				<div class="card" id="notifications"><div class="privacy"><div><h3>Show email address</h3><p>Let other members contact you by email.</p></div><label class="switch"><input id="showEmail" data-setting="showEmail" type="checkbox"><span class="slider"></span></label></div></div>
 				<div class="card"><div class="privacy"><div><h3>Profile discoverability</h3><p>Allow your profile to appear in search results.</p></div><label class="switch"><input id="discoverable" data-setting="discoverable" type="checkbox" checked><span class="slider"></span></label></div></div>
 				<div class="card" id="appearance"><div class="card-head"><h2>Cosmetics</h2><p>Equip items you own from the Sakura Shop.</p></div><div class="cosmetic-grid"><div class="cosmetic-field"><label for="avatarCosmetic">Avatar cosmetic<select id="avatarCosmetic"><option value="">Default initials</option></select></label></div><div class="cosmetic-field"><label for="profileBackground">Profile background<select id="profileBackground"><option value="">Default background</option></select></label></div><div class="cosmetic-field"><label for="profileTheme">Profile theme<select id="profileTheme"><option value="">Default theme</option></select></label></div></div><div class="cosmetic-status" id="cosmeticStatus">Visit the Shop to unlock cosmetics.</div></div>

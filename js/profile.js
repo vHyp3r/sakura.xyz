@@ -16,6 +16,8 @@
 		const appearanceKey = 'sakura-appearance';
 		const adminAccess = document.querySelector('#adminAccess');
 		const adminAccessButton = document.querySelector('#adminAccessButton');
+		const accountIdentity = document.querySelector('#accountIdentity');
+		const logoutButton = document.querySelector('#logoutButton');
 		const cosmeticCatalog = {
 			'rose-crown': { group: 'avatarCosmetic', label: 'Rose Crown', icon: '🌹' },
 			'moon-glasses': { group: 'avatarCosmetic', label: 'Moon Glasses', icon: '🌙' },
@@ -139,23 +141,32 @@
 			setStatus.timer = window.setTimeout(() => { status.textContent = ''; }, 3000);
 		};
 
-		try {
-			const saved = JSON.parse(localStorage.getItem(storageKey));
-			if (saved) Object.entries(fields).forEach(([key, field]) => {
-				if (field && saved[key] !== undefined) field.value = saved[key];
-			});
-		} catch (_) { /* Storage may be unavailable. */ }
+		const loadAccount = async () => {
+			const response = await fetch('/api/account/me');
+			const result = await response.json();
+			if (!response.ok || !result.authenticated) {
+				window.location.href = `/login?returnTo=${encodeURIComponent('/profile')}`;
+				return false;
+			}
+			const account = result.account;
+			Object.entries(fields).forEach(([key, field]) => { if (field && account[key] !== undefined) field.value = account[key]; });
+			if (accountIdentity) accountIdentity.textContent = `Signed in as ${account.email}`;
+			return true;
+		};
+
+		loadAccount().then((authenticated) => { if (!authenticated) return; updateAvatar(); updateAdminAccess(); });
 		updateAvatar();
 		applyAppearance();
 		renderCosmetics();
 		restoreSettings();
 		updateAdminAccess();
 
-		form.addEventListener('submit', event => {
+		form.addEventListener('submit', async event => {
 			event.preventDefault();
 			if (!form.reportValidity()) return;
 			const data = Object.fromEntries(Object.entries(fields).map(([key, field]) => [key, field.value.trim()]));
-			try { localStorage.setItem(storageKey, JSON.stringify(data)); } catch (_) { /* Ignore storage errors. */ }
+			const response = await fetch('/api/account/profile', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+			if (!response.ok) return setStatus('Unable to save changes');
 			updateAvatar();
 			updateAdminAccess();
 			setStatus('Changes saved');
@@ -183,6 +194,11 @@
 			window.location.href = session.authenticated
 				? '/admin'
 				: `/admin/login?username=${encodeURIComponent(fields.username.value.trim())}&returnTo=/admin`;
+		});
+
+		logoutButton?.addEventListener('click', async () => {
+			await fetch('/api/account/logout', { method: 'POST' });
+			window.location.href = '/login';
 		});
 
 		photoButton.addEventListener('click', () => {

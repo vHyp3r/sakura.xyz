@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Sign in | Sakura</title>
+  <style>
+    :root { --bg:#101717; --card:#18211f; --line:#30403b; --text:#f3f7f2; --muted:#a5b3ad; --accent:#9ee2bd; --error:#ff9687; }
+    * { box-sizing:border-box } body { margin:0; min-height:100vh; display:grid; place-items:center; padding:24px; background:radial-gradient(circle at 20% 10%,#204337,transparent 40%),var(--bg); color:var(--text); font:15px/1.5 ui-sans-serif,system-ui,sans-serif }
+    main { width:min(420px,100%); padding:32px; background:var(--card); border:1px solid var(--line); border-radius:12px; box-shadow:0 24px 80px #0008 } h1 { margin:0 0 6px; font-size:28px } p { margin:0 0 25px; color:var(--muted) } label { display:block; margin-top:15px; color:var(--muted); font-size:13px; font-weight:700 } input { width:100%; margin-top:6px; padding:12px; border:1px solid var(--line); border-radius:7px; background:#111a18; color:var(--text); font:inherit } button { width:100%; margin-top:24px; padding:12px; border:0; border-radius:7px; background:var(--accent); color:#101717; font-weight:700; cursor:pointer } .switch { margin-top:20px; text-align:center; font-size:13px } a { color:var(--accent); cursor:pointer } .error { min-height:21px; margin:13px 0 0; color:var(--error); font-size:13px }
+  </style>
+</head>
+<body><main><h1 id="title">Welcome back</h1><p id="subtitle">Sign in to your own Sakura account.</p><form id="accountForm"><label id="usernameLabel">Username<input name="username" autocomplete="username" required></label><label id="emailLabel" hidden>Email<input name="email" type="email" autocomplete="email"></label><label>Password<input name="password" type="password" autocomplete="current-password" minlength="8" required></label><button id="submit" type="submit">Sign in</button><div class="error" id="error" role="alert"></div></form><div class="switch"><span id="switchText">New here?</span> <a id="switchMode">Create an account</a></div></main>
+<script>
+  const form = document.querySelector('#accountForm'); const error = document.querySelector('#error'); const params = new URLSearchParams(location.search); let register = false;
+  const render = () => { document.querySelector('#title').textContent = register ? 'Create your account' : 'Welcome back'; document.querySelector('#subtitle').textContent = register ? 'Your profile will be saved to your account.' : 'Sign in to your own Sakura account.'; document.querySelector('#emailLabel').hidden = !register; document.querySelector('#emailLabel input').required = register; document.querySelector('#submit').textContent = register ? 'Create account' : 'Sign in'; document.querySelector('#switchText').textContent = register ? 'Already have an account?' : 'New here?'; document.querySelector('#switchMode').textContent = register ? 'Sign in' : 'Create an account'; };
+  document.querySelector('#switchMode').onclick = () => { register = !register; render(); };
+  form.onsubmit = async (event) => { event.preventDefault(); error.textContent = ''; const response = await fetch(register ? '/api/account/register' : '/api/account/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(Object.fromEntries(new FormData(form))) }); const result = await response.json(); if (!response.ok) { error.textContent = result.error || 'Unable to continue.'; return; } location.href = params.get('returnTo')?.startsWith('/') ? params.get('returnTo') : '/profile'; };
+  render();
+</script></body></html>
