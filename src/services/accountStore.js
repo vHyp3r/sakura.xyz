@@ -36,6 +36,7 @@ async function getAccountCollection() {
   indexesReady ||= Promise.all([
     collection.createIndex({ username: 1 }, { unique: true }),
     collection.createIndex({ email: 1 }, { unique: true }),
+    collection.createIndex({ discoverable: 1, username: 1 }),
   ]);
   await indexesReady;
   return collection;

@@ -1,3 +1,10 @@
+		.account-search { padding:24px; }
+		.account-search input { max-width:420px; }
+		.account-search-results { display:grid; gap:10px; margin-top:16px; }
+		.account-result { padding:14px; border:1px solid var(--line); border-radius:10px; background:#fbfbfe; }
+		.account-result strong { display:inline; }
+		.account-result span { color:var(--muted); font-size:12px; margin-left:6px; }
+		.account-result p { margin:6px 0 0; color:var(--muted); font-size:13px; }
 <!doctype html>
 <html lang="en">
 <head>
@@ -101,6 +108,7 @@
 					</form>
 				</div>
 				<div class="card" id="account"><strong>Account preferences</strong><p id="accountIdentity">Your profile settings are saved to your account.</p><button class="button" id="logoutButton" type="button">Sign out</button></div>
+								<div class="card" id="find-people"><div class="card-head"><h2>Find people</h2><p>Search discoverable Sakura profiles by username or display name.</p></div><div class="account-search"><label for="accountSearch">Search profiles<input id="accountSearch" type="search" minlength="2" placeholder="Try a username"></label><div id="accountSearchResults" class="account-search-results" aria-live="polite"></div></div></div>
 				<div class="card" id="notifications"><div class="privacy"><div><h3>Show email address</h3><p>Let other members contact you by email.</p></div><label class="switch"><input id="showEmail" data-setting="showEmail" type="checkbox"><span class="slider"></span></label></div></div>
 				<div class="card"><div class="privacy"><div><h3>Profile discoverability</h3><p>Allow your profile to appear in search results.</p></div><label class="switch"><input id="discoverable" data-setting="discoverable" type="checkbox" checked><span class="slider"></span></label></div></div>
 				<div class="card" id="appearance"><div class="card-head"><h2>Cosmetics</h2><p>Equip items you own from the Sakura Shop.</p></div><div class="cosmetic-grid"><div class="cosmetic-field"><label for="avatarCosmetic">Avatar cosmetic<select id="avatarCosmetic"><option value="">Default initials</option></select></label></div><div class="cosmetic-field"><label for="profileBackground">Profile background<select id="profileBackground"><option value="">Default background</option></select></label></div><div class="cosmetic-field"><label for="profileTheme">Profile theme<select id="profileTheme"><option value="">Default theme</option></select></label></div></div><div class="cosmetic-status" id="cosmeticStatus">Visit the Shop to unlock cosmetics.</div></div>

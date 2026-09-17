@@ -18,6 +18,8 @@
 		const adminAccessButton = document.querySelector('#adminAccessButton');
 		const accountIdentity = document.querySelector('#accountIdentity');
 		const logoutButton = document.querySelector('#logoutButton');
+		const accountSearch = document.querySelector('#accountSearch');
+		const accountSearchResults = document.querySelector('#accountSearchResults');
 		const cosmeticCatalog = {
 			'rose-crown': { group: 'avatarCosmetic', label: 'Rose Crown', icon: '🌹' },
 			'moon-glasses': { group: 'avatarCosmetic', label: 'Moon Glasses', icon: '🌙' },
@@ -79,6 +81,10 @@
 			updateAvatar();
 		};
 
+		const saveEquippedCosmetic = async (equippedCosmetic) => {
+			await fetch('/api/account/profile', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ equippedCosmetic }) });
+		};
+
 		const renderCosmetics = () => {
 			const owned = (() => {
 				try {
@@ -99,6 +105,7 @@
 					if (select.value) next[group] = select.value;
 					else delete next[group];
 					saveJson(appearanceKey, next);
+					if (group === 'avatarCosmetic') saveEquippedCosmetic(select.value || null);
 					applyAppearance();
 					const status = document.querySelector('#cosmeticStatus');
 					if (status) status.textContent = select.value ? `${cosmeticCatalog[select.value].label} equipped.` : 'Cosmetic removed.';
@@ -107,6 +114,33 @@
 			const status = document.querySelector('#cosmeticStatus');
 			if (status && owned.some(id => cosmeticCatalog[id])) status.textContent = 'Your owned cosmetics are ready to equip.';
 		};
+
+		const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+		const renderAccountResults = (accounts) => {
+			if (!accountSearchResults) return;
+			accountSearchResults.replaceChildren();
+			if (!accounts.length) {
+				accountSearchResults.textContent = 'No discoverable profiles found.';
+				return;
+			}
+			accounts.forEach((account) => {
+				const result = document.createElement('article');
+				result.className = 'account-result';
+				const emoji = account.cosmetic?.emoji ? `${account.cosmetic.emoji} ` : '';
+				result.innerHTML = `<strong>${emoji}${escapeHtml(account.displayName)}</strong><span>@${escapeHtml(account.username)}</span><p>${escapeHtml(account.bio || 'No bio yet.')}</p>`;
+				accountSearchResults.appendChild(result);
+			});
+		};
+		let searchTimer;
+		accountSearch?.addEventListener('input', () => {
+			window.clearTimeout(searchTimer);
+			const query = accountSearch.value.trim();
+			if (query.length < 2) return renderAccountResults([]);
+			searchTimer = window.setTimeout(async () => {
+				const response = await fetch(`/api/account/search?q=${encodeURIComponent(query)}`, { cache: 'no-store' });
+				if (response.ok) renderAccountResults((await response.json()).accounts || []);
+			}, 250);
+		});
 
 		const restoreSettings = () => {
 			const settings = readJson(settingsKey, { discoverable: true });
@@ -149,6 +183,11 @@
 				return false;
 			}
 			const account = result.account;
+			if (account.equippedCosmetic) {
+				const appearance = readJson(appearanceKey, {});
+				appearance.avatarCosmetic = account.equippedCosmetic;
+				saveJson(appearanceKey, appearance);
+			}
 			Object.entries(fields).forEach(([key, field]) => { if (field && account[key] !== undefined) field.value = account[key]; });
 			if (accountIdentity) accountIdentity.textContent = `Signed in as ${account.email}`;
 			return true;
@@ -186,6 +225,9 @@
 			const settings = readJson(settingsKey, {});
 			settings[input.dataset.setting] = input.checked;
 			saveJson(settingsKey, settings);
+			if (input.dataset.setting === 'discoverable') {
+				fetch('/api/account/profile', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ discoverable: input.checked }) });
+			}
 		}));
 
 		adminAccessButton?.addEventListener('click', async () => {

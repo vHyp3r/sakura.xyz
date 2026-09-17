@@ -20,7 +20,7 @@ const {
 } = require('../src/services/adminAuth');
 const { getBalance, listBalances, setBalance } = require('../src/services/coinService');
 const { clearAccountSession, getAccountSession, setAccountSession } = require('../src/services/accountAuth');
-const { authenticateAccount, getAccountById, registerAccount, updateAccount } = require('../src/services/accountService');
+const { authenticateAccount, getAccountById, registerAccount, searchAccounts, updateAccount } = require('../src/services/accountService');
 
 const router = express.Router();
 
@@ -55,10 +55,19 @@ router.get('/account/me', async (req, res, next) => {
     next(error);
   }
 });
-
 router.post('/account/logout', (req, res) => {
   clearAccountSession(res);
   res.json({ authenticated: false });
+});
+
+router.get('/account/search', async (req, res, next) => {
+  try {
+    const query = String(req.query.q || '').trim();
+    if (query.length < 2) return res.json({ accounts: [] });
+    res.json({ accounts: await searchAccounts(query, req.query.limit) });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.patch('/account/profile', async (req, res, next) => {

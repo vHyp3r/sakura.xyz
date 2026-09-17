@@ -1,6 +1,11 @@
 const crypto = require('crypto');
 const { getAccountCollection } = require('./accountStore');
 
+const AVATAR_COSMETICS = {
+  'rose-crown': { label: 'Rose Crown', emoji: '🌹' },
+  'moon-glasses': { label: 'Moon Glasses', emoji: '🌙' },
+};
+
 function normalizeUsername(username) {
   return String(username || '').trim().toLowerCase();
 }
@@ -25,6 +30,16 @@ function publicAccount(account) {
   return safeAccount;
 }
 
+function publicSearchAccount(account) {
+  return {
+    username: account.username,
+    displayName: account.displayName || account.username,
+    bio: account.bio || '',
+    equippedCosmetic: account.equippedCosmetic || null,
+    cosmetic: AVATAR_COSMETICS[account.equippedCosmetic] || null,
+  };
+}
+
 async function registerAccount({ username, email, password }) {
   const normalizedUsername = normalizeUsername(username);
   const normalizedEmail = String(email || '').trim().toLowerCase();
@@ -46,6 +61,7 @@ async function registerAccount({ username, email, password }) {
     pronouns: '',
     location: '',
     website: '',
+    equippedCosmetic: null,
     discoverable: true,
     createdAt: now,
     updatedAt: now,
@@ -70,11 +86,30 @@ async function getAccountById(id) {
 async function updateAccount(id, updates) {
   const { ObjectId } = require('mongodb');
   if (!ObjectId.isValid(id)) return null;
-  const allowed = ['displayName', 'bio', 'pronouns', 'location', 'website', 'discoverable'];
+  const allowed = ['displayName', 'bio', 'pronouns', 'location', 'website', 'discoverable', 'equippedCosmetic'];
   const changes = Object.fromEntries(allowed.filter((key) => updates[key] !== undefined).map((key) => [key, updates[key]]));
+  if (changes.equippedCosmetic && !AVATAR_COSMETICS[changes.equippedCosmetic]) throw new Error('That avatar cosmetic is not available.');
   changes.updatedAt = new Date();
   await (await getAccountCollection()).updateOne({ _id: new ObjectId(id) }, { $set: changes });
   return getAccountById(id);
 }
 
-module.exports = { authenticateAccount, getAccountById, registerAccount, updateAccount };
+async function searchAccounts(query, limit = 20) {
+  const normalizedQuery = String(query || '').trim().toLowerCase();
+  if (normalizedQuery.length < 2) return [];
+
+  const escapedQuery = normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const records = await (await getAccountCollection()).find({
+    discoverable: { $ne: false },
+    $or: [
+      { username: { $regex: escapedQuery, $options: 'i' } },
+      { displayName: { $regex: escapedQuery, $options: 'i' } },
+    ],
+  }, {
+    projection: { _id: 0, username: 1, displayName: 1, bio: 1, equippedCosmetic: 1 },
+  }).sort({ username: 1 }).limit(Math.min(Number(limit) || 20, 50)).toArray();
+
+  return records.map(publicSearchAccount);
+}
+
+module.exports = { AVATAR_COSMETICS, authenticateAccount, getAccountById, registerAccount, searchAccounts, updateAccount };
