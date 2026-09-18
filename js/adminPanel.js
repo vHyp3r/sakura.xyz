@@ -146,9 +146,10 @@ function setupInteractions() {
 	});
 	$('#passwordResetForm')?.addEventListener('submit', async (event) => {
 		event.preventDefault();
+		const form = event.currentTarget;
 		const status = $('#passwordResetStatus');
-		const submit = event.currentTarget.querySelector('button');
-		const formData = new FormData(event.currentTarget);
+		const submit = form.querySelector('button');
+		const formData = new FormData(form);
 		submit.disabled = true;
 		status.textContent = 'Resetting password...';
 		status.className = 'balance-status';
@@ -158,7 +159,7 @@ function setupInteractions() {
 			if (!response.ok) throw new Error(result.error || 'Could not reset password.');
 			status.textContent = `Password reset for ${result.account.username}.`;
 			status.className = 'balance-status is-success';
-			event.currentTarget.reset();
+			form.reset();
 		} catch (error) {
 			status.textContent = error.message;
 			status.className = 'balance-status is-error';
