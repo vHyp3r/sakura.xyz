@@ -1,14 +1,15 @@
 const mongoose = require('mongoose');
+const { validateMongoUri } = require('./mongoUri');
 
 let accountConnection;
 let indexesReady;
 
 function getAccountMongoUri() {
   return (
+    process.env.MONGODB_URI ||
     process.env.ACCOUNTINFO_MONGODB_URI ||
     process.env.MONGODB_ACCOUNTINFO_URI ||
-    process.env.ACCOUNTINFO_URI ||
-    process.env.MONGODB_URI
+    process.env.ACCOUNTINFO_URI
   )?.trim() || null;
 }
 
@@ -19,6 +20,9 @@ function isAccountStoreConfigured() {
 async function getAccountConnection() {
   const uri = getAccountMongoUri();
   if (!uri) throw new Error('Account database is not configured. Set MONGODB_URI.');
+
+  const uriError = validateMongoUri(uri);
+  if (uriError) throw new Error(uriError);
 
   if (!accountConnection) {
     accountConnection = mongoose.createConnection(uri, {

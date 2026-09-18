@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { validateMongoUri } = require('./mongoUri');
 
 function getMongoUri() {
   const configuredUri =
@@ -20,6 +21,11 @@ async function connectMongo() {
   }
 
   try {
+    const uriError = validateMongoUri(getMongoUri());
+    if (uriError) {
+      return { connected: false, message: uriError };
+    }
+
     if (mongoose.connection.readyState === 1) {
       return { connected: true, message: 'Connected to MongoDB.' };
     }

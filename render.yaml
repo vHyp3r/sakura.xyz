@@ -8,7 +8,10 @@ services:
     autoDeploy: true
     envVars:
       - key: MONGODB_URI
-        value: ${MONGODB_URI}
+        sync: false
+      - key: ACCOUNTINFO_DB_NAME
+        value: accountInfo
+      - key: ACCOUNT_SESSION_SECRET
         sync: false
       - key: NODE_ENV
         value: production
