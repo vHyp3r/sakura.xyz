@@ -130,7 +130,11 @@ router.post('/admin/login', (req, res) => {
   const username = String(req.body.username || '').trim();
   const password = String(req.body.password || '');
 
-  if (!isAdminUsername(username) || !process.env.ADMIN_PASSWORD || password !== process.env.ADMIN_PASSWORD) {
+  if (!process.env.ADMIN_PASSWORD) {
+    return res.status(503).json({ error: 'Admin login is not configured on this server. Set ADMIN_PASSWORD in Render.' });
+  }
+
+  if (!isAdminUsername(username) || password !== process.env.ADMIN_PASSWORD) {
     return res.status(401).json({ error: 'Invalid admin credentials.' });
   }
 

@@ -72,7 +72,11 @@ async function registerAccount({ username, email, password }) {
 }
 
 async function authenticateAccount(username, password) {
-  const account = await (await getAccountCollection()).findOne({ username: normalizeUsername(username) });
+  const login = String(username || '').trim();
+  const normalizedLogin = login.toLowerCase();
+  const account = await (await getAccountCollection()).findOne({
+    $or: [{ username: normalizedLogin }, { email: normalizedLogin }],
+  });
   if (!account || !verifyPassword(password, account.passwordHash)) return null;
   return publicAccount(account);
 }
