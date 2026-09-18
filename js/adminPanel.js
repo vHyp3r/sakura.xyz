@@ -144,6 +144,28 @@ function setupInteractions() {
 			submit.disabled = false;
 		}
 	});
+	$('#passwordResetForm')?.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		const status = $('#passwordResetStatus');
+		const submit = event.currentTarget.querySelector('button');
+		const formData = new FormData(event.currentTarget);
+		submit.disabled = true;
+		status.textContent = 'Resetting password...';
+		status.className = 'balance-status';
+		try {
+			const response = await fetch('/api/admin/accounts/reset-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(formData)) });
+			const result = await response.json();
+			if (!response.ok) throw new Error(result.error || 'Could not reset password.');
+			status.textContent = `Password reset for ${result.account.username}.`;
+			status.className = 'balance-status is-success';
+			event.currentTarget.reset();
+		} catch (error) {
+			status.textContent = error.message;
+			status.className = 'balance-status is-error';
+		} finally {
+			submit.disabled = false;
+		}
+	});
 	$('#globalSearch').addEventListener('input', (event) => {
 		const query = event.target.value.toLowerCase();
 		$$('.browser-item').forEach((item) => { item.hidden = !item.dataset.collection.toLowerCase().includes(query); });

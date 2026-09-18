@@ -81,6 +81,26 @@ async function authenticateAccount(username, password) {
   return publicAccount(account);
 }
 
+async function resetAccountPassword(identifier, password) {
+  const login = String(identifier || '').trim().toLowerCase();
+  if (!login) throw new Error('Username or email is required.');
+  if (String(password || '').length < 8) throw new Error('Password must be at least 8 characters.');
+
+  const collection = await getAccountCollection();
+  const account = await collection.findOne({
+    $or: [{ username: login }, { email: login }],
+  });
+
+  if (!account) return null;
+
+  await collection.updateOne(
+    { _id: account._id },
+    { $set: { passwordHash: hashPassword(password), updatedAt: new Date() } }
+  );
+
+  return { username: account.username, email: account.email };
+}
+
 async function getAccountById(id) {
   const { ObjectId } = require('mongodb');
   if (!ObjectId.isValid(id)) return null;
@@ -116,4 +136,4 @@ async function searchAccounts(query, limit = 20) {
   return records.map(publicSearchAccount);
 }
 
-module.exports = { AVATAR_COSMETICS, authenticateAccount, getAccountById, registerAccount, searchAccounts, updateAccount };
+module.exports = { AVATAR_COSMETICS, authenticateAccount, getAccountById, registerAccount, resetAccountPassword, searchAccounts, updateAccount };

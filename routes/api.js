@@ -20,7 +20,7 @@ const {
 } = require('../src/services/adminAuth');
 const { getBalance, listBalances, setBalance } = require('../src/services/coinService');
 const { clearAccountSession, getAccountSession, setAccountSession } = require('../src/services/accountAuth');
-const { authenticateAccount, getAccountById, registerAccount, searchAccounts, updateAccount } = require('../src/services/accountService');
+const { authenticateAccount, getAccountById, registerAccount, resetAccountPassword, searchAccounts, updateAccount } = require('../src/services/accountService');
 
 const router = express.Router();
 
@@ -114,6 +114,19 @@ router.post('/admin/balances', requireAdmin, async (req, res, next) => {
       return res.status(400).json({ error: error.message });
     }
     return next(error);
+  }
+});
+
+router.post('/admin/accounts/reset-password', requireAdmin, async (req, res, next) => {
+  try {
+    const account = await resetAccountPassword(req.body.identifier, req.body.password);
+    if (!account) return res.status(404).json({ error: 'Account not found.' });
+    res.json({ reset: true, account });
+  } catch (error) {
+    if (/required|at least/.test(error.message)) {
+      return res.status(400).json({ error: error.message });
+    }
+    next(error);
   }
 });
 
