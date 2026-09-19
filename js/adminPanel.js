@@ -115,6 +115,22 @@ async function loadBalances() {
 	}
 }
 
+async function loadRankOptions() {
+	const rankSelect = $('#rankSelect');
+	const badgeSelect = $('#badgeSelect');
+	if (!rankSelect || !badgeSelect) return;
+	try {
+		const response = await fetch('/api/admin/ranks');
+		if (!response.ok) throw new Error('Could not load ranks.');
+		const result = await response.json();
+		rankSelect.innerHTML = Object.entries(result.ranks).map(([id, rank]) => `<option value="${escapeHtml(id)}">${escapeHtml(rank.label)}</option>`).join('');
+		badgeSelect.innerHTML = Object.entries(result.badges).map(([id, badge]) => `<option value="${escapeHtml(id)}">${escapeHtml(badge.label)}</option>`).join('');
+	} catch (error) {
+		$('#rankStatus').textContent = error.message;
+		$('#rankStatus').className = 'balance-status is-error';
+	}
+}
+
 function setupInteractions() {
 	$$('.nav-item[data-view]').forEach((item) => item.addEventListener('click', () => switchView(item.dataset.view)));
 	$$('[data-go="collections"]').forEach((item) => item.addEventListener('click', () => switchView('collections')));
@@ -167,6 +183,31 @@ function setupInteractions() {
 			submit.disabled = false;
 		}
 	});
+	$('#rankForm')?.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		const form = event.currentTarget;
+		const status = $('#rankStatus');
+		const badges = [...$('#badgeSelect').selectedOptions].map((option) => option.value);
+		const submit = form.querySelector('button');
+		submit.disabled = true;
+		status.textContent = 'Saving rank...';
+		status.className = 'balance-status';
+		try {
+			const values = Object.fromEntries(new FormData(form));
+			const response = await fetch('/api/admin/accounts/rank', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...values, badges }) });
+			const result = await response.json();
+			if (!response.ok) throw new Error(result.error || 'Could not save rank.');
+			status.textContent = `${result.account.username} is now ${result.account.rank.label}.`;
+			status.className = 'balance-status is-success';
+			form.reset();
+			$('#badgeSelect').selectedIndex = -1;
+		} catch (error) {
+			status.textContent = error.message;
+			status.className = 'balance-status is-error';
+		} finally {
+			submit.disabled = false;
+		}
+	});
 	$('#globalSearch').addEventListener('input', (event) => {
 		const query = event.target.value.toLowerCase();
 		$$('.browser-item').forEach((item) => { item.hidden = !item.dataset.collection.toLowerCase().includes(query); });
@@ -177,4 +218,5 @@ function setupInteractions() {
 setupInteractions();
 setInitialView();
 window.addEventListener('popstate', setInitialView);
+loadRankOptions();
 loadSummary();

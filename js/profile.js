@@ -17,6 +17,8 @@
 		const adminAccess = document.querySelector('#adminAccess');
 		const adminAccessButton = document.querySelector('#adminAccessButton');
 		const accountIdentity = document.querySelector('#accountIdentity');
+		const accountRank = document.querySelector('#accountRank');
+		const accountBadges = document.querySelector('#accountBadges');
 		const logoutButton = document.querySelector('#logoutButton');
 		const accountSearch = document.querySelector('#accountSearch');
 		const accountSearchResults = document.querySelector('#accountSearchResults');
@@ -183,6 +185,11 @@
 				return false;
 			}
 			const account = result.account;
+			if (accountRank && account.rank) {
+				accountRank.textContent = account.rank.label;
+				accountRank.style.backgroundColor = account.rank.color;
+			}
+			if (accountBadges) accountBadges.innerHTML = (account.badges || []).map((badge) => `<span class="profile-badge">${badge}</span>`).join('');
 			if (account.equippedCosmetic) {
 				const appearance = readJson(appearanceKey, {});
 				appearance.avatarCosmetic = account.equippedCosmetic;

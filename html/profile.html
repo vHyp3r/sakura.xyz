@@ -28,6 +28,9 @@
 		.avatar-row { display:flex; align-items:center; gap:15px; margin-bottom:24px; }
 		.avatar { width:72px; height:72px; display:grid; place-items:center; border-radius:50%; color:#fff; font-size:24px; font-weight:750; background:linear-gradient(135deg,#a789ff,#6845d7); }
 		.avatar-row strong { display:block; margin-bottom:3px; }
+		.rank-badge { display:inline-block; padding:4px 9px; border-radius:999px; color:#fff; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+		.profile-badges { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+		.profile-badge { color:var(--muted); font-size:12px; }
 		.avatar-row small { display:block; color:var(--muted); margin-bottom:9px; }
 		button { border:0; cursor:pointer; font:inherit; font-weight:650; }
 		.button { padding:8px 13px; border:1px solid var(--line); border-radius:8px; color:var(--ink); background:#fff; }
@@ -95,7 +98,7 @@
 				<div class="card" id="profile">
 					<div class="card-head"><h2>Public profile</h2><p>Your name and bio are visible on your profile.</p></div>
 					<form>
-						<div class="avatar-row"><div class="avatar" aria-label="Avatar preview">SK</div><div><strong>Profile picture</strong><small>JPG, PNG or GIF · max 5 MB</small><button class="button" type="button">Change photo</button></div></div>
+						<div class="avatar-row"><div class="avatar" aria-label="Avatar preview">SK</div><div><strong>Profile picture</strong><small>JPG, PNG or GIF · max 5 MB</small><span id="accountRank" class="rank-badge">Member</span><div id="accountBadges" class="profile-badges"></div><button class="button" type="button">Change photo</button></div></div>
 						<div class="grid">
 							<label>Username<input type="text" aria-describedby="username-hint" readonly><span class="hint" id="username-hint">Your unique Sakura username</span></label>
 							<label>Display name<input type="text"></label>

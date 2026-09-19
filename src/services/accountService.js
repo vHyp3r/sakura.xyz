@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { getAccountCollection } = require('./accountStore');
+const { getRank, normalizeBadges, normalizeRank } = require('./ranks');
 
 const AVATAR_COSMETICS = {
   'rose-crown': { label: 'Rose Crown', emoji: '🌹' },
@@ -27,16 +28,19 @@ function verifyPassword(password, storedHash) {
 function publicAccount(account) {
   if (!account) return null;
   const { passwordHash, ...safeAccount } = account;
-  return safeAccount;
+  return { ...safeAccount, rank: getRank(safeAccount.rank), badges: normalizeBadges(safeAccount.badges) };
 }
 
 function publicSearchAccount(account) {
+  const rank = getRank(account.rank);
   return {
     username: account.username,
     displayName: account.displayName || account.username,
     bio: account.bio || '',
     equippedCosmetic: account.equippedCosmetic || null,
     cosmetic: AVATAR_COSMETICS[account.equippedCosmetic] || null,
+    rank,
+    badges: normalizeBadges(account.badges),
   };
 }
 
@@ -62,6 +66,8 @@ async function registerAccount({ username, email, password }) {
     location: '',
     website: '',
     equippedCosmetic: null,
+    rank: 'member',
+    badges: [],
     discoverable: true,
     createdAt: now,
     updatedAt: now,
@@ -101,6 +107,19 @@ async function resetAccountPassword(identifier, password) {
   return { username: account.username, email: account.email };
 }
 
+async function updateAccountRank(identifier, rank, badges) {
+  const login = String(identifier || '').trim().toLowerCase();
+  const account = await (await getAccountCollection()).findOne({
+    $or: [{ username: login }, { email: login }],
+  });
+  if (!account) return null;
+
+  const changes = { rank: normalizeRank(rank), updatedAt: new Date() };
+  if (badges !== undefined) changes.badges = normalizeBadges(badges);
+  await (await getAccountCollection()).updateOne({ _id: account._id }, { $set: changes });
+  return { username: account.username, rank: getRank(changes.rank), badges: changes.badges || normalizeBadges(account.badges) };
+}
+
 async function getAccountById(id) {
   const { ObjectId } = require('mongodb');
   if (!ObjectId.isValid(id)) return null;
@@ -136,4 +155,4 @@ async function searchAccounts(query, limit = 20) {
   return records.map(publicSearchAccount);
 }
 
-module.exports = { AVATAR_COSMETICS, authenticateAccount, getAccountById, registerAccount, resetAccountPassword, searchAccounts, updateAccount };
+module.exports = { AVATAR_COSMETICS, authenticateAccount, getAccountById, registerAccount, resetAccountPassword, searchAccounts, updateAccount, updateAccountRank };

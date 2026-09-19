@@ -20,7 +20,8 @@ const {
 } = require('../src/services/adminAuth');
 const { getBalance, listBalances, setBalance } = require('../src/services/coinService');
 const { clearAccountSession, getAccountSession, setAccountSession } = require('../src/services/accountAuth');
-const { authenticateAccount, getAccountById, registerAccount, resetAccountPassword, searchAccounts, updateAccount } = require('../src/services/accountService');
+const { authenticateAccount, getAccountById, registerAccount, resetAccountPassword, searchAccounts, updateAccount, updateAccountRank } = require('../src/services/accountService');
+const { BADGES, RANKS } = require('../src/services/ranks');
 
 const router = express.Router();
 
@@ -126,6 +127,20 @@ router.post('/admin/accounts/reset-password', requireAdmin, async (req, res, nex
     if (/required|at least/.test(error.message)) {
       return res.status(400).json({ error: error.message });
     }
+    next(error);
+  }
+});
+
+router.get('/admin/ranks', requireAdmin, (req, res) => {
+  res.json({ ranks: RANKS, badges: BADGES });
+});
+
+router.post('/admin/accounts/rank', requireAdmin, async (req, res, next) => {
+  try {
+    const account = await updateAccountRank(req.body.identifier, req.body.rank, req.body.badges);
+    if (!account) return res.status(404).json({ error: 'Account not found.' });
+    res.json({ updated: true, account });
+  } catch (error) {
     next(error);
   }
 });
