@@ -189,7 +189,11 @@
 				accountRank.textContent = account.rank.label;
 				accountRank.style.backgroundColor = account.rank.color;
 			}
-			if (accountBadges) accountBadges.innerHTML = (account.badges || []).map((badge) => `<span class="profile-badge">${badge}</span>`).join('');
+			if (accountBadges) accountBadges.innerHTML = (account.badges || []).map((badge) => {
+				const label = typeof badge === 'string' ? badge : badge.label;
+				const icon = typeof badge === 'string' ? '' : `${badge.icon} `;
+				return `<span class="profile-badge">${icon}${label}</span>`;
+			}).join('');
 			if (account.equippedCosmetic) {
 				const appearance = readJson(appearanceKey, {});
 				appearance.avatarCosmetic = account.equippedCosmetic;

@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const { getAccountCollection } = require('./accountStore');
-const { getRank, normalizeBadges, normalizeRank } = require('./ranks');
+const { getBadges, getRank, normalizeBadges, normalizeRank } = require('./ranks');
 
 const AVATAR_COSMETICS = {
   'rose-crown': { label: 'Rose Crown', emoji: '🌹' },
@@ -28,7 +28,7 @@ function verifyPassword(password, storedHash) {
 function publicAccount(account) {
   if (!account) return null;
   const { passwordHash, ...safeAccount } = account;
-  return { ...safeAccount, rank: getRank(safeAccount.rank), badges: normalizeBadges(safeAccount.badges) };
+  return { ...safeAccount, rank: getRank(safeAccount.rank), badges: getBadges(safeAccount.badges) };
 }
 
 function publicSearchAccount(account) {
@@ -40,7 +40,7 @@ function publicSearchAccount(account) {
     equippedCosmetic: account.equippedCosmetic || null,
     cosmetic: AVATAR_COSMETICS[account.equippedCosmetic] || null,
     rank,
-    badges: normalizeBadges(account.badges),
+    badges: getBadges(account.badges),
   };
 }
 

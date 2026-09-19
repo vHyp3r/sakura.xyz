@@ -40,4 +40,8 @@ function normalizeBadges(badges) {
   return Array.isArray(badges) ? badges.filter((badge) => BADGES[badge]) : [];
 }
 
-module.exports = { BADGES, RANKS, getRank, normalizeBadges, normalizeRank };
+function getBadges(badges) {
+  return normalizeBadges(badges).map((id) => ({ id, ...BADGES[id] }));
+}
+
+module.exports = { BADGES, RANKS, getBadges, getRank, normalizeBadges, normalizeRank };
