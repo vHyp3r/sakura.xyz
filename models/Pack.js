@@ -8,6 +8,7 @@ const packSchema = new mongoose.Schema(
     category: { type: String, default: '' },
     tags: { type: [String], default: [] },
     uploader: { type: String, default: 'Anonymous' },
+    uploaderId: { type: String, default: '' },
     thumbnail: { type: String, default: '/images/default-thumbnail.svg' },
     file: { type: String, required: true },
     originalFileName: { type: String, default: '' },

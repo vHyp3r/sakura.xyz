@@ -45,12 +45,11 @@
                     </div>
                 </div>
 
-                <% if (pack.thumbnail && pack.thumbnail !== '/images/default-thumbnail.svg') { %>
-                    <div class="mb-6">
-                        <img src="<%= pack.thumbnail %>" alt="<%= pack.name %> Thumbnail"
-                            class="w-full h-64 object-cover rounded-lg shadow-sm">
-                    </div>
-                <% } %>
+                <div class="mb-6">
+                    <img src="<%= pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="<%= pack.name %> thumbnail"
+                        class="w-full h-64 object-cover rounded-lg shadow-sm"
+                        onerror="this.onerror=null;this.src='/images/default-thumbnail.svg';">
+                </div>
 
                 <div class="space-y-4 text-gray-600">
                     <p><strong class="text-gray-800">Description:</strong></p>
@@ -71,10 +70,10 @@
                             <span class="font-semibold"><%= pack.uploader %></span>
                         </p>
                     </div>
-                    <% if (pack.uploadDate) { %>
+                    <% if (pack.createdAt) { %>
                         <div>
                             <h3 class="text-sm font-medium text-gray-500 mb-1">Upload Date</h3>
-                            <p class="text-gray-600"><%= new Date(pack.uploadDate).toLocaleDateString() %></p>
+                            <p class="text-gray-600"><%= new Date(pack.createdAt).toLocaleDateString() %></p>
                         </div>
                     <% } %>
                 </div>

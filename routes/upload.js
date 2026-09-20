@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { createPack } = require('../src/services/packService');
+const { getAccountSession } = require('../src/services/accountAuth');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -56,6 +57,7 @@ router.post('/', upload.fields([
 
         const packFile = req.files.packFile[0];
         const thumbnailFile = req.files.thumbnail ? req.files.thumbnail[0] : null;
+        const accountSession = getAccountSession(req);
 
         const pack = await createPack({
             name: req.body.packName,
@@ -63,7 +65,8 @@ router.post('/', upload.fields([
             category: req.body.category,
             tags: req.body.tags,
             resolution: req.body.resolution,
-            uploader: req.body.uploader || 'Anonymous',
+            uploader: accountSession?.username || 'Anonymous',
+            uploaderId: accountSession?.accountId || '',
             file: `/uploads/${packFile.filename}`,
             originalFileName: packFile.originalname,
             thumbnail: thumbnailFile
