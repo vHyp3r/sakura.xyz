@@ -15,7 +15,7 @@ router.get('/', async (req, res, next) => {
         if (query.trim()) {
             const searchTerm = new RegExp(escapeRegex(query.trim()), 'i');
             const packs = await getPacks();
-            results = packs.filter((pack) => [pack.name, pack.category, pack.resolution, pack.uploader, pack.description]
+            results = packs.filter((pack) => [pack.name, pack.category, pack.resolution, pack.uploader, pack.description, ...(pack.tags || [])]
                 .some((field) => searchTerm.test(String(field || ''))));
         }
 

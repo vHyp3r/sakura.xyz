@@ -61,6 +61,7 @@ router.post('/', upload.fields([
             name: req.body.packName,
             description: req.body.description,
             category: req.body.category,
+            tags: req.body.tags,
             resolution: req.body.resolution,
             uploader: req.body.uploader || 'Anonymous',
             file: `/uploads/${packFile.filename}`,

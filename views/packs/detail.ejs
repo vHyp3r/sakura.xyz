@@ -39,6 +39,9 @@
                         <% if (pack.category) { %>
                             <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full"><%= pack.category %></span>
                         <% } %>
+                        <% (pack.tags || []).forEach(function(tag) { %>
+                            <span class="bg-pink-100 text-pink-800 text-xs font-medium px-2.5 py-0.5 rounded-full"><%= tag %></span>
+                        <% }); %>
                     </div>
                 </div>
 
