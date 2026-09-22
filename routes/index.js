@@ -3,7 +3,7 @@ const router = express.Router();
 
 // Home page
 router.get('/', (req, res) => {
-  res.render('index', { title: 'Sakura.xyz — Fast & Secure Minecraft Utilities' });
+  res.render('index', { title: 'Sakura.xyz — Minecraft Texture Pack Gallery' });
 });
 
 module.exports = router;

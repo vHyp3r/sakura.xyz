@@ -2,6 +2,19 @@
 
 A Minecraft Bedrock texture pack gallery website inspired by [texturepack.be](https://texturepack.be/).
 
+## Current project update
+
+The current release focuses on the working Bedrock pack gallery rather than an unfinished Java-to-Bedrock porter. The shipped flows are:
+
+- Browse all packs, popular packs, or a random pack
+- Search pack names, descriptions, categories, resolutions, uploaders, and tags
+- Upload a `.mcpack` file with optional thumbnail and metadata
+- Open pack details and download the original file
+- Register, sign in, and manage an account profile
+- Review MongoDB data through the authenticated admin dashboard
+
+The Java-to-Bedrock converter and Discord bot are planned features, not part of the current release. They are not presented as working features in the homepage UI.
+
 ## Features
 
 - Browse and search texture packs
@@ -85,7 +98,7 @@ For development with auto-restart:
 npm run dev
 ```
 
-## Features to Implement
+## Feature status
 
 - [x] Basic website structure
 - [x] Home page with navigation
@@ -95,10 +108,11 @@ npm run dev
 - [x] Search functionality
 - [x] Discover/popular packs page
 - [x] Random pack redirect
-- [ ] Actual database integration (MongoDB)
+- [x] MongoDB integration for packs, accounts, and the admin dashboard
 - [x] User authentication/accounts
 - [ ] Pack rating and commenting system
-- [ ] Discord bot integration for Java-to-Bedrock conversion
+- [ ] Java-to-Bedrock conversion
+- [ ] Discord bot integration
 - [ ] Advanced search filters
 - [ ] Pagination for large result sets
 - [ ] Pack categorization and tagging system

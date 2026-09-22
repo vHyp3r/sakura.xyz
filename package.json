@@ -8,7 +8,7 @@
     "dev": "nodemon server.js",
     "build-css": "tailwindcss -i ./src/css/input.css -o ./public/css/tailwind.css",
     "watch-css": "tailwindcss -i ./src/css/input.css -o ./public/css/tailwind.css --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --check server.js && node --check routes/index.js && node --check routes/packs.js && node --check routes/search.js && node --check routes/discover.js && node --check routes/random.js && node --check routes/upload.js && node --check src/services/packService.js"
   },
   "repository": {
     "type": "git",
