@@ -6,64 +6,144 @@
 <body>
   <%- include('partials/nav') %>
 
-  <!-- Hero -->
-  <section class="relative overflow-hidden pt-32 pb-20 sm:pt-40 sm:pb-28">
-    <div class="absolute inset-0 grid-bg opacity-40"></div>
-    <div class="absolute top-1/4 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full hero-glow blur-3xl animate-pulse-glow"></div>
+  <section class="home-hero relative flex min-h-[calc(100vh-1rem)] items-center overflow-hidden pt-24 pb-40 sm:pt-28 sm:pb-44">
+    <div class="home-backdrop absolute inset-0"></div>
+    <div class="absolute inset-0 bg-black/55"></div>
 
     <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-4xl text-center">
+      <div class="relative mx-auto max-w-4xl text-center">
         <div class="animate-fade-up">
           <span class="section-label">
             <span class="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-            Fast &amp; Secure Minecraft Utilities
+            Sakura texture library
           </span>
         </div>
 
         <h1 class="mt-8 text-4xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl animate-fade-up-delay-1">
-          Power your Minecraft world with
-          <span class="gradient-text"> lightning-fast tools</span>
+          FREE MINECRAFT<br>
+          <span class="home-accent">TEXTURE PACKS</span><br>
+          <span class="text-2xl sm:text-4xl lg:text-5xl">FOR BEDROCK PLAYERS</span>
         </h1>
 
         <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-400 sm:text-xl animate-fade-up-delay-2">
-          Sakura.xyz gives Minecraft creators a simple place to publish, discover, and download Bedrock texture packs.
+          Browse community uploads, search by tag or resolution, and share your own packs.
         </p>
 
-        <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row animate-fade-up-delay-3">
-          <a href="/packs" class="btn-primary w-full sm:w-auto">
-            Browse texture packs
+        <form action="/search" method="GET" class="mx-auto mt-8 flex w-full max-w-2xl flex-col gap-3 rounded-xl border border-white/20 bg-black/35 p-2 shadow-2xl backdrop-blur-sm sm:flex-row">
+          <label for="home-search" class="sr-only">Search texture packs</label>
+          <input id="home-search" name="q" type="search" placeholder="Search packs, tags, or creators..." class="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-gray-500 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/20">
+          <button type="submit" class="home-green-button shrink-0">Search</button>
+        </form>
+
+        <div class="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-gray-400">
+          <span class="px-1">Popular</span>
+          <a href="/search?q=pvp" class="home-chip">PvP</a>
+          <a href="/search?q=bedwars" class="home-chip">Bedwars</a>
+          <a href="/search?q=faithful" class="home-chip">Faithful</a>
+          <a href="/search?q=1.21" class="home-chip">1.21</a>
+        </div>
+
+        <div class="mt-5 flex flex-col items-center justify-center gap-4 sm:flex-row animate-fade-up-delay-3">
+          <a href="/packs" class="home-green-button w-full sm:w-auto">
+            Explore packs <span aria-hidden="true">›</span>
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </a>
-          <a href="/upload" class="btn-secondary w-full sm:w-auto">Upload a pack</a>
+          <a href="/upload" class="home-outline-button w-full sm:w-auto">Create your own <span aria-hidden="true">›</span></a>
         </div>
 
-        <!-- Trust badges -->
-        <div class="mt-16 grid grid-cols-2 gap-6 sm:grid-cols-4 animate-fade-up-delay-4">
-          <div class="glass-card px-4 py-5 text-center">
-            <p class="stat-value text-pink-400">.mcpack</p>
-            <p class="stat-label">Bedrock pack format</p>
-          </div>
-          <div class="glass-card px-4 py-5 text-center">
-            <p class="stat-value text-emerald-400">50 MB</p>
-            <p class="stat-label">Upload limit</p>
-          </div>
-          <div class="glass-card px-4 py-5 text-center">
-            <p class="stat-value">10</p>
-            <p class="stat-label">Tags per pack</p>
-          </div>
-          <div class="glass-card px-4 py-5 text-center">
-            <p class="stat-value">1 click</p>
-            <p class="stat-label">To download a pack</p>
-          </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="home-promo fixed bottom-4 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2 items-center justify-between gap-3 rounded-2xl border border-emerald-400/40 bg-[#111914]/95 px-4 py-3 text-sm shadow-2xl backdrop-blur-xl sm:px-5">
+    <span class="hidden text-lg sm:inline" aria-hidden="true">🌱</span>
+    <p class="min-w-0 truncate text-gray-300"><strong class="text-emerald-300">New here?</strong> Start with a community pack.</p>
+    <a href="/packs" class="home-green-button shrink-0 px-4 py-2 text-xs">Browse <span aria-hidden="true">›</span></a>
+  </div>
+
+  <section class="pb-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex items-end justify-between gap-4 border-b border-white/10 pb-4">
+        <div>
+          <p class="text-sm font-medium text-pink-300">From the community</p>
+          <h2 class="mt-2 text-2xl font-bold text-white sm:text-3xl">Recently uploaded</h2>
+        </div>
+        <a href="/packs" class="text-sm font-medium text-gray-400 transition-colors hover:text-white">View all packs</a>
+      </div>
+
+      <% if (packs.length) { %>
+        <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <% packs.forEach(function(pack) { %>
+            <article class="glass-card-hover overflow-hidden">
+              <a href="/packs/<%= pack._id %>" class="block">
+                <img src="<%= pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="<%= pack.name %> thumbnail" class="h-44 w-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='/images/default-thumbnail.svg';">
+              </a>
+              <div class="p-5">
+                <div class="flex items-start justify-between gap-3">
+                  <h3 class="truncate text-lg font-semibold text-white"><a href="/packs/<%= pack._id %>" class="hover:text-pink-300"><%= pack.name %></a></h3>
+                  <% if (pack.resolution) { %><span class="shrink-0 text-xs text-gray-500"><%= pack.resolution %></span><% } %>
+                </div>
+                <p class="mt-2 truncate text-sm text-gray-400"><%= pack.description || 'No description provided.' %></p>
+                <div class="mt-4 flex items-center justify-between text-xs text-gray-500">
+                  <span>by <%= pack.uploader || 'Anonymous' %></span>
+                  <span><%= (pack.downloads || 0).toLocaleString() %> downloads</span>
+                </div>
+              </div>
+            </article>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div class="mt-8 border border-dashed border-white/15 px-6 py-12 text-center">
+          <p class="text-gray-400">No packs have been uploaded yet.</p>
+          <a href="/upload" class="btn-secondary mt-5">Upload the first pack</a>
+        </div>
+      <% } %>
+    </div>
+  </section>
+
+  <section class="border-t border-white/10 py-24">
+    <div class="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
+      <div>
+        <p class="home-kicker">Creator communities</p>
+        <h2 class="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">Share your work. <span class="home-accent">Find your people.</span></h2>
+        <p class="mt-5 max-w-lg leading-7 text-gray-400">Upload a pack, add the details that help people find it, and make your profile part of the library.</p>
+        <ul class="mt-7 space-y-3 text-sm text-gray-300">
+          <li><span class="mr-2 text-emerald-400">+</span>Publish a thumbnail and pack description</li>
+          <li><span class="mr-2 text-emerald-400">+</span>Search by category, resolution, or tag</li>
+          <li><span class="mr-2 text-emerald-400">+</span>Keep your uploads tied to your account</li>
+        </ul>
+        <a href="/upload" class="home-green-button mt-8">Upload a pack <span aria-hidden="true">›</span></a>
+      </div>
+      <div class="home-community-preview">
+        <div class="flex items-center justify-between border-b border-white/10 pb-4">
+          <div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-xl text-black">🌸</span><div><strong class="block text-sm text-white">Sakura Library</strong><span class="text-xs text-gray-500">Community texture packs</span></div></div>
+          <a href="/discover" class="home-chip">Discover</a>
+        </div>
+        <div class="mt-5 grid grid-cols-3 gap-3">
+          <% packs.slice(0, 3).forEach(function(pack) { %>
+            <a href="/packs/<%= pack._id %>" class="overflow-hidden rounded-lg border border-white/10"><img src="<%= pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="" class="aspect-square w-full object-cover"></a>
+          <% }); %>
         </div>
       </div>
     </div>
   </section>
 
+  <section class="border-t border-white/10 py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <p class="home-kicker">Pack tools</p>
+      <h2 class="mt-4 max-w-xl text-4xl font-bold tracking-tight text-white sm:text-5xl">Everything around the <span class="home-accent">pack.</span></h2>
+      <div class="mt-10 grid gap-5 lg:grid-cols-3">
+        <a href="/discover" class="home-tool-card"><span class="home-tool-icon">♧</span><span><strong>Creator communities</strong><small>Find new uploads and discover the people behind them.</small></span><span class="text-emerald-400">›</span></a>
+        <a href="/validate" class="home-tool-card"><span class="home-tool-icon">↔</span><span><strong>Pack validator</strong><small>Check pack data before you share it with the community.</small></span><span class="text-emerald-400">›</span></a>
+        <a href="/shop" class="home-tool-card home-tool-card-warm"><span class="home-tool-icon">♛</span><span><strong>Sakura Shop</strong><small>Browse profile cosmetics and community extras.</small></span><span class="text-amber-300">›</span></a>
+      </div>
+    </div>
+  </section>
+
   <!-- Features -->
-  <section id="features" class="py-24">
+  <section id="features" class="hidden py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-2xl text-center" data-reveal>
         <span class="section-label">Why Sakura</span>
@@ -152,7 +232,7 @@
   </section>
 
   <!-- Services -->
-  <section id="services" class="py-24">
+  <section id="services" class="hidden py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="grid items-center gap-16 lg:grid-cols-2">
         <div data-reveal>
@@ -259,7 +339,7 @@
   </section>
 
   <!-- Security -->
-  <section id="security" class="py-24">
+  <section id="security" class="hidden py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="glass-card overflow-hidden">
         <div class="grid lg:grid-cols-2">

@@ -1,20 +1,30 @@
-<nav class="site-nav fixed top-0 z-50 w-full border-b border-subtle bg-nav backdrop-blur-xl">
-  <div class="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-    <a href="/" class="group flex items-center gap-2">
-      <span class="brand-mark flex h-9 w-9 items-center justify-center rounded-xl text-lg shadow-sakura">🌸</span>
-      <span class="brand-wordmark text-lg font-bold tracking-tight text-white">sakura<span class="text-pink-400">.xyz</span></span>
+<nav class="site-nav fixed top-2 z-50 w-[calc(100%-1rem)] max-w-7xl left-1/2 -translate-x-1/2 rounded-xl border border-white/10 bg-nav/95 backdrop-blur-xl">
+  <div class="mx-auto flex h-14 items-center justify-between gap-3 px-3 sm:px-5">
+    <a href="/" class="group flex shrink-0 items-center gap-2">
+      <span class="brand-mark flex h-8 w-8 items-center justify-center rounded-lg text-base shadow-sakura">🌸</span>
+      <span class="brand-wordmark hidden text-sm font-bold tracking-tight text-white sm:block">sakura<span class="text-pink-400">.xyz</span></span>
     </a>
 
-    <div class="hidden items-center gap-7 md:flex">
-      <a href="/" class="nav-link" aria-current="page">Home</a>
-      <a href="/packs" class="nav-link">Texture packs</a>
-      <a href="/dashboard" class="nav-link">Dashboard</a>
-      <a href="/discover" class="nav-link">Discover</a>
-      <a href="/upload" class="nav-link">Upload</a>
-      <a href="/shop" class="nav-link">Shop</a>
-      <a href="/profile" class="nav-link">Profile</a>
-      <a href="/admin" class="nav-link">Admin</a>
-      <a href="/dashboard" class="btn-primary py-2 px-5 text-xs">Open dashboard</a>
+    <div class="hidden min-w-0 items-center gap-1 rounded-xl border border-white/10 bg-white/[0.03] p-1 lg:flex">
+      <a href="/packs" class="nav-tab"><span aria-hidden="true">▣</span>Library</a>
+      <a href="/discover" class="nav-tab"><span aria-hidden="true">♧</span>Communities</a>
+      <a href="/validate" class="nav-tab"><span aria-hidden="true">↔</span>Converter</a>
+      <a href="/search" class="nav-tab"><span aria-hidden="true">⌕</span>Tools</a>
+      <details class="relative">
+        <summary class="nav-tab list-none cursor-pointer"><span aria-hidden="true">•••</span>More⌄</summary>
+        <div class="absolute right-0 top-11 z-10 min-w-40 rounded-lg border border-white/10 bg-[#14161b] p-1 shadow-2xl">
+          <a href="/shop" class="nav-menu-link">Shop</a>
+          <a href="/profile" class="nav-menu-link">Profile</a>
+          <a href="/privacy" class="nav-menu-link">Privacy</a>
+        </div>
+      </details>
+    </div>
+
+    <div class="hidden items-center gap-2 md:flex">
+      <a href="/search" class="nav-search-link"><span aria-hidden="true">⌕</span><span class="hidden xl:inline">Search...</span><kbd>⌘K</kbd></a>
+      <a href="/shop" class="nav-utility-link">♛ <span class="hidden xl:inline">Packs+</span></a>
+      <a href="/upload" class="nav-upload-link">↥ Upload</a>
+      <a href="/login" class="nav-signin-link">⇥ <span class="hidden xl:inline">Sign in</span></a>
     </div>
 
     <button
@@ -32,14 +42,12 @@
 
   <div id="mobile-menu" class="hidden border-t border-subtle bg-nav-solid backdrop-blur-xl md:hidden">
     <div class="flex flex-col gap-1 px-4 py-4">
-      <a href="/" class="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover-bg-glass-light">Home</a>
-      <a href="/packs" class="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover-bg-glass-light">Texture packs</a>
-      <a href="/dashboard" class="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover-bg-glass-light">Dashboard</a>
-      <a href="/discover" class="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover-bg-glass-light">Discover</a>
-      <a href="/upload" class="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover-bg-glass-light">Upload</a>
-      <a href="/shop" class="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover-bg-glass-light">Shop</a>
-      <a href="/profile" class="rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover-bg-glass-light">Profile</a>
-      <a href="/admin" class="btn-primary mt-2 justify-center">Admin</a>
+      <a href="/packs" class="nav-menu-link">Library</a>
+      <a href="/discover" class="nav-menu-link">Communities</a>
+      <a href="/validate" class="nav-menu-link">Converter</a>
+      <a href="/search" class="nav-menu-link">Tools and search</a>
+      <a href="/upload" class="nav-upload-link mt-2 justify-center">Upload</a>
+      <a href="/login" class="nav-menu-link text-center">Sign in</a>
     </div>
   </div>
 </nav>

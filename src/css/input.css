@@ -253,6 +253,262 @@
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
     background-color: rgba(9, 9, 13, 0.5);
   }
+
+  .nav-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    color: #9ca3af;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    transition: color 150ms, background-color 150ms;
+  }
+
+  .nav-tab:hover,
+  .nav-tab:focus-visible {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    outline: none;
+  }
+
+  .nav-menu-link {
+    display: block;
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    color: #d1d5db;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    transition: color 150ms, background-color 150ms;
+  }
+
+  .nav-menu-link:hover,
+  .nav-menu-link:focus-visible {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    outline: none;
+  }
+
+  .nav-search-link, .nav-utility-link, .nav-signin-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
+    padding: 0.5rem 0.75rem;
+    color: #9ca3af;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    transition: color 150ms, border-color 150ms;
+  }
+
+  .nav-search-link:hover, .nav-utility-link:hover, .nav-signin-link:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+
+  .nav-search-link kbd {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.25rem;
+    padding: 0 0.25rem;
+    color: #6b7280;
+    font-size: 10px;
+  }
+
+  .nav-upload-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border-radius: 9999px;
+    background-color: #10b981;
+    padding: 0.5rem 1rem;
+    color: #000;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1rem;
+    transition: background-color 150ms;
+  }
+
+  .nav-upload-link:hover {
+    background-color: #34d399;
+  }
+
+  .home-backdrop {
+    background-color: #0a0d0e;
+    background-image:
+      radial-gradient(circle at 50% 20%, rgba(17, 118, 67, 0.18), transparent 34%),
+      linear-gradient(135deg, rgba(24, 56, 48, 0.2), transparent 48%),
+      linear-gradient(180deg, #0b1013 0%, #090b0f 100%);
+    background-repeat: no-repeat;
+  }
+
+  .home-accent {
+    color: #16d64f;
+  }
+
+  .home-green-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    background-color: #10b981;
+    padding: 0.75rem 1.5rem;
+    color: #000;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    transition: background-color 150ms;
+  }
+
+  .home-green-button:hover {
+    background-color: #34d399;
+  }
+
+  .home-outline-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 0.75rem 1.5rem;
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    transition: color 150ms, border-color 150ms, background-color 150ms;
+  }
+
+  .home-outline-button:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .home-chip {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 0.375rem 0.75rem;
+    color: #d1d5db;
+    transition: color 150ms, border-color 150ms;
+  }
+
+  .home-chip:hover {
+    border-color: rgba(52, 211, 153, 0.6);
+    color: #6ee7b7;
+  }
+
+  .home-kicker {
+    color: #34d399;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    line-height: 1rem;
+    text-transform: uppercase;
+  }
+
+  .home-community-preview {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    background-color: rgba(255, 255, 255, 0.04);
+    padding: 1.25rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  .home-tool-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    background-color: rgba(255, 255, 255, 0.035);
+    padding: 1.5rem;
+    color: #d1d5db;
+    transition: color 150ms, border-color 150ms, background-color 150ms;
+  }
+
+  .home-tool-card:hover {
+    border-color: rgba(52, 211, 153, 0.5);
+    background-color: rgba(255, 255, 255, 0.07);
+  }
+
+  .home-tool-card > span:nth-child(2) {
+    @apply min-w-0 flex-1;
+  }
+
+  .home-tool-card strong, .home-tool-card small {
+    display: block;
+  }
+
+  .home-tool-card strong {
+    @apply text-sm text-white;
+  }
+
+  .home-tool-card small {
+    @apply mt-1 text-xs leading-5 text-gray-500;
+  }
+
+  .home-tool-card-warm {
+    border-color: rgba(245, 158, 11, 0.35);
+    background-color: rgba(120, 53, 15, 0.18);
+  }
+
+  .home-tool-icon {
+    display: flex;
+    height: 2.5rem;
+    width: 2.5rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(52, 211, 153, 0.3);
+    border-radius: 0.75rem;
+    background-color: rgba(52, 211, 153, 0.1);
+    color: #34d399;
+    font-size: 1.125rem;
+  }
+
+  .home-promo {
+    animation: promo-in 0.7s ease-out both;
+  }
+
+  .site-nav {
+    left: 50%;
+    width: calc(100% - 2rem);
+    max-width: 1200px;
+    transform: translateX(-50%);
+  }
+
+  .home-hero input {
+    background-color: rgba(12, 15, 18, 0.82) !important;
+    color: #fff !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .home-hero input::placeholder {
+    color: rgba(209, 213, 219, 0.65) !important;
+  }
+
+  @media (max-width: 1100px) {
+    .site-nav .nav-search-link {
+      display: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .site-nav {
+      width: calc(100% - 1rem);
+    }
+
+    .site-nav .nav-utility-link,
+    .site-nav .nav-signin-link {
+      padding-left: 0.6rem;
+      padding-right: 0.6rem;
+    }
+  }
 }
 
 @layer utilities {
@@ -320,4 +576,9 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes promo-in {
+  from { opacity: 0; transform: translate(-50%, 1rem); }
+  to { opacity: 1; transform: translate(-50%, 0); }
 }
