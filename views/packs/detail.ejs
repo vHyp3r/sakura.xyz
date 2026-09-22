@@ -80,9 +80,15 @@
             </div>
 
             <div class="mt-6">
+                <% if (fileAvailable) { %>
                 <a href="/packs/<%= pack._id %>/download" class="sakura-button sakura-download">
                     Download Pack
                 </a>
+                <% } else { %>
+                <p class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                    This pack's download file is unavailable.
+                </p>
+                <% } %>
             </div>
 
             <div class="mt-6">

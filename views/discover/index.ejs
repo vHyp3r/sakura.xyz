@@ -11,19 +11,19 @@
             <div class="mx-auto max-w-3xl text-center">
                 <span class="section-label">Discover</span>
                 <h1 class="mt-6 text-3xl font-bold tracking-tight text-white sm:text-5xl">Popular texture packs</h1>
-                <p class="mx-auto mt-4 max-w-2xl text-gray-400">Explore the most downloaded and highly-rated texture packs in the community.</p>
+                <p class="mx-auto mt-4 max-w-2xl text-gray-400">Explore the most downloaded texture packs in the community.</p>
 
                 <% if (packs.length > 0) { %>
                     <div class="mt-12 grid gap-6 text-left sm:grid-cols-2 lg:grid-cols-3">
                         <% packs.forEach(function(pack) { %>
                             <article class="group glass-card-hover overflow-hidden">
-                                <a href="/packs/<%= pack.id %>" class="block overflow-hidden">
+                                <a href="/packs/<%= pack._id %>" class="block overflow-hidden">
                                     <img src="<%= pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="<%= pack.name %> thumbnail"
                                         class="h-52 w-full object-cover transition-transform duration-300 group-hover:scale-105">
                                 </a>
                                 <div class="p-5">
                                     <h2 class="truncate text-lg font-semibold text-white">
-                                        <a href="/packs/<%= pack.id %>" class="transition-colors hover:text-pink-300"><%= pack.name %></a>
+                                        <a href="/packs/<%= pack._id %>" class="transition-colors hover:text-pink-300"><%= pack.name %></a>
                                     </h2>
                                     <div class="mt-3 flex flex-wrap gap-2">
                                         <span class="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium text-gray-300"><%= pack.resolution %></span>

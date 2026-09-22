@@ -19,6 +19,8 @@ app.use('/profile-assets', express.static(path.join(__dirname, 'js')));
 app.get('/shop-assets/shop.js', (req, res) => res.sendFile(path.join(__dirname, 'shop.js')));
 app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, 'html', 'adminLogin.html')));
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'html', 'accountLogin.html')));
+app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'html', 'privacypolicy.html')));
+app.get('/validate', (req, res) => res.sendFile(path.join(__dirname, 'html', 'validate.html')));
 app.get(['/admin', '/admin/overview', '/admin/collections', '/admin/activity', '/admin/balances'], requireAdmin, (req, res) => res.sendFile(path.join(__dirname, 'html', 'adminPanel.html')));
 app.get('/profile', requireAccount, (req, res) => res.sendFile(path.join(__dirname, 'html', 'profile.html')));
 app.get('/shop', (req, res) => res.sendFile(path.join(__dirname, 'html', 'shop.html')));

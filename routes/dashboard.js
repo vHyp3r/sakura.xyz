@@ -11,10 +11,11 @@ const {
   getCollectionMeta,
 } = require('../src/services/firestore');
 const { isFirebaseConfigured } = require('../src/config/firebase');
+const { requireAdmin } = require('../src/services/adminAuth');
 
 const router = express.Router();
 
-router.get('/', async (req, res, next) => {
+router.get('/', requireAdmin, async (req, res, next) => {
   try {
     const mongoConfigured = isMongoConfigured();
     const firebaseConfigured = isFirebaseConfigured();
@@ -45,7 +46,7 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-router.get('/collections/:collectionName', async (req, res, next) => {
+router.get('/collections/:collectionName', requireAdmin, async (req, res, next) => {
   try {
     const collectionName = req.params.collectionName;
     const [meta, data] = isMongoConfigured()

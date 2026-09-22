@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const path = require('path');
+const fs = require('fs');
 const Pack = require('../../models/Pack');
 
 function normalizeTags(tags) {
@@ -10,7 +12,8 @@ function normalizeTags(tags) {
 }
 
 async function getPacks() {
-  return Pack.find().sort({ createdAt: -1 }).lean();
+  const packs = await Pack.find().sort({ createdAt: -1 }).lean();
+  return packs.filter(hasAvailableFile);
 }
 
 async function getPackById(id) {
@@ -26,7 +29,14 @@ async function createPack(packData) {
 }
 
 async function getPopularPacks() {
-  return Pack.find().sort({ downloads: -1, createdAt: -1 }).lean();
+  const packs = await Pack.find().sort({ downloads: -1, createdAt: -1 }).lean();
+  return packs.filter(hasAvailableFile);
+}
+
+function hasAvailableFile(pack) {
+  if (!pack.file) return false;
+  const filePath = path.join(__dirname, '..', '..', 'public', pack.file.replace(/^\//, ''));
+  return fs.existsSync(filePath);
 }
 
 async function incrementDownloads(id) {
