@@ -1,4 +1,4 @@
-# TexturePack.xyz (sakura.xyz)
+https://raw.githubusercontent.com/vHyp3r/sakura.xyz/refs/heads/main/public/images/Group%201.png
 
 A Minecraft Bedrock texture pack gallery website inspired by [texturepack.be](https://texturepack.be/).
 
