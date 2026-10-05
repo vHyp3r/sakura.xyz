@@ -20,6 +20,11 @@
 		const accountRank = document.querySelector('#accountRank');
 		const accountBadges = document.querySelector('#accountBadges');
 		const logoutButton = document.querySelector('#logoutButton');
+		const heroLogoutButton = document.querySelector('#heroLogoutButton');
+		const profileHeroName = document.querySelector('#profileHeroName');
+		const profileHeroHandle = document.querySelector('#profileHeroHandle');
+		const profileHeroAvatar = document.querySelector('#profileHeroAvatar');
+		const consoleName = document.querySelector('#consoleName');
 		const accountSearch = document.querySelector('#accountSearch');
 		const accountSearchResults = document.querySelector('#accountSearchResults');
 		const cosmeticCatalog = {
@@ -50,6 +55,10 @@
 			avatar.style.background = photo ? `url("${photo}") center/cover` : '';
 			avatar.textContent = photo ? '' : cosmetic ? `${cosmetic.icon} ${name || 'SK'}` : name || 'SK';
 			avatar.title = cosmetic ? `${cosmetic.label} equipped` : 'Avatar preview';
+			if (profileHeroAvatar) {
+				profileHeroAvatar.textContent = photo ? '' : (cosmetic ? `${cosmetic.icon} ${name || 'SK'}` : name || 'SK');
+				profileHeroAvatar.style.background = photo ? `url("${photo}") center/cover` : '';
+			}
 		};
 
 		const readStorage = (key, fallback = '') => {
@@ -185,6 +194,10 @@
 				return false;
 			}
 			const account = result.account;
+			const accountName = account.displayName || account.username;
+			if (profileHeroName) profileHeroName.textContent = accountName;
+			if (profileHeroHandle) profileHeroHandle.textContent = `@${account.username}`;
+			if (consoleName) consoleName.textContent = accountName;
 			if (accountRank && account.rank) {
 				accountRank.textContent = account.rank.label;
 				accountRank.style.backgroundColor = account.rank.color;
@@ -250,6 +263,11 @@
 		});
 
 		logoutButton?.addEventListener('click', async () => {
+			await fetch('/api/account/logout', { method: 'POST' });
+			window.location.href = '/login';
+		});
+
+		heroLogoutButton?.addEventListener('click', async () => {
 			await fetch('/api/account/logout', { method: 'POST' });
 			window.location.href = '/login';
 		});

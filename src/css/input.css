@@ -322,7 +322,7 @@
     justify-content: center;
     gap: 0.375rem;
     border-radius: 9999px;
-    background-color: #10b981;
+    background-color: #ec4899;
     padding: 0.5rem 1rem;
     color: #000;
     font-size: 0.75rem;
@@ -332,20 +332,28 @@
   }
 
   .nav-upload-link:hover {
-    background-color: #34d399;
+    background-color: #f472b6;
   }
 
   .home-backdrop {
-    background-color: #0a0d0e;
+    background-color: #07100e;
     background-image:
-      radial-gradient(circle at 50% 20%, rgba(17, 118, 67, 0.18), transparent 34%),
-      linear-gradient(135deg, rgba(24, 56, 48, 0.2), transparent 48%),
-      linear-gradient(180deg, #0b1013 0%, #090b0f 100%);
-    background-repeat: no-repeat;
+      radial-gradient(ellipse at 50% 35%, rgba(219, 39, 119, 0.34), transparent 42%),
+      linear-gradient(125deg, rgba(0, 0, 0, 0.05) 0 38%, rgba(123, 24, 79, 0.28) 38% 47%, rgba(0, 0, 0, 0.12) 47% 100%),
+      repeating-linear-gradient(0deg, rgba(255, 168, 214, 0.06) 0 1px, transparent 1px 34px),
+      repeating-linear-gradient(90deg, rgba(255, 168, 214, 0.05) 0 1px, transparent 1px 34px),
+      linear-gradient(180deg, #281421 0%, #100910 100%);
+    background-size: auto, auto, 34px 34px, 34px 34px, auto;
+    background-position: center;
+    transform: scale(1.08);
+  }
+
+  .home-hero-shade {
+    background: linear-gradient(180deg, rgba(4, 8, 10, 0.42), rgba(4, 8, 10, 0.62));
   }
 
   .home-accent {
-    color: #16d64f;
+    color: #ec4899;
   }
 
   .home-green-button {
@@ -354,7 +362,7 @@
     justify-content: center;
     gap: 0.5rem;
     border-radius: 0.5rem;
-    background-color: #10b981;
+    background-color: #ec4899;
     padding: 0.75rem 1.5rem;
     color: #000;
     font-size: 0.875rem;
@@ -364,7 +372,7 @@
   }
 
   .home-green-button:hover {
-    background-color: #34d399;
+    background-color: #f472b6;
   }
 
   .home-outline-button {
@@ -398,12 +406,12 @@
   }
 
   .home-chip:hover {
-    border-color: rgba(52, 211, 153, 0.6);
-    color: #6ee7b7;
+    border-color: rgba(244, 114, 182, 0.7);
+    color: #f9a8d4;
   }
 
   .home-kicker {
-    color: #34d399;
+    color: #f472b6;
     font-size: 0.75rem;
     font-weight: 500;
     letter-spacing: 0.18em;
@@ -432,7 +440,7 @@
   }
 
   .home-tool-card:hover {
-    border-color: rgba(52, 211, 153, 0.5);
+    border-color: rgba(244, 114, 182, 0.5);
     background-color: rgba(255, 255, 255, 0.07);
   }
 
@@ -464,22 +472,24 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(52, 211, 153, 0.3);
+    border: 1px solid rgba(244, 114, 182, 0.3);
     border-radius: 0.75rem;
-    background-color: rgba(52, 211, 153, 0.1);
-    color: #34d399;
+    background-color: rgba(244, 114, 182, 0.1);
+    color: #f472b6;
     font-size: 1.125rem;
   }
 
   .home-promo {
-    animation: promo-in 0.7s ease-out both;
+    animation: none;
   }
 
   .site-nav {
-    left: 50%;
+    left: auto;
     width: calc(100% - 2rem);
     max-width: 1200px;
-    transform: translateX(-50%);
+    margin-left: auto;
+    margin-right: auto;
+    transform: none;
   }
 
   .home-hero input {

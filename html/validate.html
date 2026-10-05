@@ -1,20 +1,46 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pack Validator</title>
-    <link rel="stylesheet" href="../css/validate.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Converter | Sakura.xyz</title>
+    <link rel="stylesheet" href="/admin-assets/validate.css">
 </head>
 <body>
-    <h1>Pack Validator</h1>
-    <form id="packForm">
-        <label for="packInput">Enter Pack Data:</label><br>
-        <input type="text" id="packInput" name="packInput" required><br><br>
-        <input type="submit" value="Validate">
-    </form>
-    <div id="result"></div>
+    <header class="converter-nav">
+        <a href="/" class="wordmark"><span>🌸</span> sakura<span>.xyz</span></a>
+        <nav aria-label="Primary navigation">
+            <a href="/packs">Library</a><a href="/discover">Communities</a><a class="active" href="/validate">Converter</a><a href="/search">Tools</a>
+        </nav>
+        <div class="nav-actions"><a href="/upload">Upload</a><a href="/login">Sign in</a></div>
+    </header>
 
-    <script src="../js/validate.js"></script>
+    <main class="converter-shell">
+        <section class="converter-workspace" aria-labelledby="converterTitle">
+            <div class="workspace-top"><div class="tool-title"><span class="tool-icon">↻</span><strong>Convert a pack</strong></div><span class="limit">MAX 300MB</span></div>
+            <form id="packForm">
+                <div class="step-heading"><span>1</span><strong>Source pack</strong><small>drop or browse</small></div>
+                <label class="dropzone" for="packInput"><span class="upload-icon">↥</span><strong>Drop your texture pack here</strong><small>.zip Java / .mcpack Bedrock</small><input type="file" id="packInput" name="packInput" accept=".zip,.mcpack" required></label>
+
+                <div class="step-heading"><span>2</span><strong>Target version</strong><small>where it's going</small></div>
+                <div class="version-pills" aria-label="Popular target versions"><button type="button" data-version="1.21.11">1.21.11</button><button type="button" data-version="1.20.6">1.20.6</button><button type="button" data-version="1.19.4">1.19.4</button><button type="button" data-version="1.16.5">1.16.5</button><button type="button" data-version="1.8.9">1.8.9</button><button type="button" data-version="bedrock">Bedrock</button></div>
+                <label class="select-wrap" for="targetVersion"><span class="sr-only">Target version</span><select id="targetVersion" name="targetVersion" required><option value="">All versions...</option><option>1.21.11</option><option>1.20.6</option><option>1.19.4</option><option>1.16.5</option><option>1.8.9</option><option>Bedrock</option></select></label>
+
+                <div class="step-heading"><span>3</span><strong>Convert</strong><small>check the pack locally</small></div>
+                <button class="convert-button" type="submit">↯ &nbsp; CONVERT PACK</button>
+                <p class="form-note">Choose a .zip or .mcpack and a target version to validate the conversion setup.</p>
+            </form>
+            <div id="result" aria-live="polite"></div>
+        </section>
+
+        <section class="converter-copy" aria-labelledby="converterTitle">
+            <p class="eyebrow">Free converter</p>
+            <h1 id="converterTitle">MINECRAFT <span>TEXTURE<br>PACK CONVERTER</span><br>&amp; UPDATER</h1>
+            <p class="intro">Prepare a resource pack for another Minecraft version or Bedrock export. Nothing is uploaded by this page.</p>
+            <ul class="benefits"><li><b>↕</b><span><strong>Upgrade or downgrade</strong><small>Choose the version your pack is targeting.</small></span></li><li><b>▣</b><span><strong>Bedrock-ready input</strong><small>.mcpack files are accepted for local checking.</small></span></li><li><b>✧</b><span><strong>Check in seconds</strong><small>Get immediate feedback before publishing.</small></span></li></ul>
+            <div class="trust-line"><strong>Local-first</strong><span>•</span><span>No account needed</span></div>
+        </section>
+    </main>
+    <script src="/admin-assets/validate.js"></script>
 </body>
 </html>
