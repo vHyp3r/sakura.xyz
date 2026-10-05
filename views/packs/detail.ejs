@@ -1,110 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
-    <link rel="stylesheet" href="/css/tailwind.css">
-    <link rel="stylesheet" href="/css/legacy-pages.css">
-    <style>
-      @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
-      .animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
-    </style>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/tailwind.css"><link rel="stylesheet" href="/css/legacy-pages.css">
 </head>
-<body class="sakura-page antialiased">
-    <nav class="sakura-nav">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-            <div class="flex-shrink-0">
-                <a href="/" class="sakura-brand">Sakura<span>.xyz</span></a>
-            </div>
-            <div class="hidden md:flex md:items-center md:space-x-8">
-                <a href="/" class="sakura-nav-link">Home</a><a href="/search" class="sakura-nav-link">Search</a><a href="/discover" class="sakura-nav-link">Discover</a><a href="/upload" class="sakura-nav-link">Upload</a><a href="/random" class="sakura-nav-link">Random</a><a href="/shop" class="sakura-nav-link">Shop</a><a href="/profile" class="sakura-nav-link">Profile</a>
-            </div>
-        </div>
-    </nav>
-
-    <main class="sakura-main">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
-            <div class="sakura-detail-card">
-                <div class="mb-6">
-                    <h1 class="pack-title"><%= pack.name %></h1>
-                    <div class="flex flex-wrap gap-3 mb-4">
-                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full"><%= pack.resolution %></span>
-                        <% if (pack.isPort) { %>
-                            <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Port</span>
-                        <% } %>
-                        <% if (pack.category) { %>
-                            <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full"><%= pack.category %></span>
-                        <% } %>
-                        <% (pack.tags || []).forEach(function(tag) { %>
-                            <span class="bg-pink-100 text-pink-800 text-xs font-medium px-2.5 py-0.5 rounded-full"><%= tag %></span>
-                        <% }); %>
-                    </div>
-                </div>
-
-                <div class="mb-6">
-                    <img src="<%= pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="<%= pack.name %> thumbnail"
-                        class="w-full h-64 object-cover rounded-lg shadow-sm"
-                        onerror="this.onerror=null;this.src='/images/default-thumbnail.svg';">
-                </div>
-
-                <div class="space-y-4 text-gray-600">
-                    <p><strong class="text-gray-800">Description:</strong></p>
-                    <p class="detail-copy">
-                        <%= pack.description || 'No description provided for this texture pack.' %>
-                    </p>
-                </div>
-
-                <div class="grid gap-6 sm:grid-cols-2">
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-500 mb-1">Downloads</h3>
-                        <p class="detail-value"><%= (pack.downloads || 0).toLocaleString() %></p>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-500 mb-1">Uploaded by</h3>
-                        <p class="flex items-center">
-                            <img src="/images/default-avatar.svg" alt="Uploader Avatar" class="w-10 h-10 rounded-full mr-2">
-                            <span class="font-semibold"><%= pack.uploader %></span>
-                        </p>
-                    </div>
-                    <% if (pack.createdAt) { %>
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-500 mb-1">Upload Date</h3>
-                            <p class="text-gray-600"><%= new Date(pack.createdAt).toLocaleDateString() %></p>
-                        </div>
-                    <% } %>
-                </div>
-            </div>
-
-            <div class="mt-6">
-                <% if (fileAvailable) { %>
-                <a href="/packs/<%= pack._id %>/download" class="sakura-button sakura-download">
-                    Download Pack
-                </a>
-                <% } else { %>
-                <p class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    This pack's download file is unavailable.
-                </p>
-                <% } %>
-            </div>
-
-            <div class="mt-6">
-                <a href="/packs" class="sakura-quiet-button">
-                    Back to All Packs
-                </a>
-            </div>
-        </div>
-    </main>
-
-    <footer class="bg-gray-800 text-gray-300 py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p class="text-center text-sm">&copy; 2026 TexturePack.xyz. All rights reserved.</p>
-        </div>
-    </footer>
-
-    <script src="/js/main.js"></script>
+<body class="library-page">
+  <%- include('../partials/nav') %>
+  <main class="detail-main">
+    <p class="detail-breadcrumb"><a href="/packs">‹ Library</a> / <%= pack.category || 'Texture pack' %> / <span><%= pack.name %></span></p>
+    <div class="detail-layout">
+      <section class="detail-media"><div class="media-tabs"><span class="active">▧ Screenshot</span><span>◉ Clip</span></div><div class="detail-image-wrap"><img src="<%= pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="<%= pack.name %> screenshot" onerror="this.onerror=null;this.src='/images/default-thumbnail.svg';"><span class="media-label">● SCREENSHOT 1 / 1</span><span class="media-resolution"><%= pack.resolution || 'PACK' %></span></div><p class="detail-description"><%= pack.description || 'No description provided for this texture pack.' %></p></section>
+      <aside class="detail-panel"><div class="detail-title"><h1><%= pack.name %></h1><p><span class="online-dot"></span> Community pack <span>·</span> <%= pack.resolution || 'Bedrock' %></p></div><div class="detail-creator"><img src="/images/default-avatar.svg" alt=""><div><span>CREATED BY</span><strong><%= pack.uploader || 'Anonymous' %></strong></div><a href="/search?q=<%= encodeURIComponent(pack.uploader || '') %>">＋ FOLLOW</a></div><div class="detail-stats"><div><strong><%= (pack.downloads || 0).toLocaleString() %></strong><span>DOWNLOADS</span></div><div><strong><%= pack.category || 'OTHER' %></strong><span>CATEGORY</span></div><div><strong><%= (pack.tags || []).length %></strong><span>TAGS</span></div></div><div class="edition-switch"><span class="active">◈ Bedrock</span><span>Java Edition</span></div><div class="version-select">✓ Minecraft Bedrock <span>⌄</span></div><% if (fileAvailable) { %><a class="detail-download" href="/packs/<%= pack._id %>/download">⇩ &nbsp; DOWNLOAD</a><% } else { %><div class="detail-unavailable">Download file unavailable</div><% } %><a class="detail-secondary" href="/packs">＋ ADD TO LIBRARY</a><div class="detail-actions"><button type="button">♡</button><button type="button">⌁</button><button type="button">◌</button><button type="button">⌯</button></div></aside>
+    </div>
+  </main>
+  <script src="/js/main.js"></script>
 </body>
 </html>

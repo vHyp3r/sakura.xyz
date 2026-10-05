@@ -12,6 +12,7 @@
 		const saveButton = form.querySelector('.primary');
 		const storageKey = 'sakura-profile';
 		const avatarPhotoKey = 'sakura-avatar-photo';
+		const bannerPhotoKey = 'sakura-profile-banner';
 		const settingsKey = 'sakura-profile-settings';
 		const appearanceKey = 'sakura-appearance';
 		const adminAccess = document.querySelector('#adminAccess');
@@ -24,6 +25,8 @@
 		const profileHeroName = document.querySelector('#profileHeroName');
 		const profileHeroHandle = document.querySelector('#profileHeroHandle');
 		const profileHeroAvatar = document.querySelector('#profileHeroAvatar');
+		const profileHeroCover = document.querySelector('#profileHeroCover');
+		const bannerInput = document.querySelector('#bannerInput');
 		const consoleName = document.querySelector('#consoleName');
 		const accountSearch = document.querySelector('#accountSearch');
 		const accountSearchResults = document.querySelector('#accountSearchResults');
@@ -86,9 +89,16 @@
 			const equipped = readJson(appearanceKey, {});
 			const background = cosmeticCatalog[equipped.profileBackground];
 			const theme = cosmeticCatalog[equipped.profileTheme];
-			document.body.style.background = background?.color || '';
 			document.documentElement.style.setProperty('--accent', theme?.accent || '#7857e8');
 			document.documentElement.style.setProperty('--accent-soft', theme?.soft || '#f0edff');
+			if (profileHeroCover) {
+				const banner = readStorage(bannerPhotoKey, '');
+				const defaultBanner = 'linear-gradient(120deg,rgba(236,72,153,.7),rgba(86,25,78,.6) 45%,rgba(8,12,14,.95)), repeating-linear-gradient(135deg,rgba(255,255,255,.06) 0 1px,transparent 1px 28px)';
+				profileHeroCover.style.backgroundColor = background?.color || '';
+				profileHeroCover.style.backgroundImage = banner
+					? `linear-gradient(120deg, rgba(8,12,14,.34), rgba(8,12,14,.55)), url("${banner}")`
+					: defaultBanner;
+			}
 			updateAvatar();
 		};
 
@@ -194,6 +204,7 @@
 				return false;
 			}
 			const account = result.account;
+			saveJson(storageKey, account);
 			const accountName = account.displayName || account.username;
 			if (profileHeroName) profileHeroName.textContent = accountName;
 			if (profileHeroHandle) profileHeroHandle.textContent = `@${account.username}`;
@@ -230,6 +241,8 @@
 			const data = Object.fromEntries(Object.entries(fields).map(([key, field]) => [key, field.value.trim()]));
 			const response = await fetch('/api/account/profile', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
 			if (!response.ok) return setStatus('Unable to save changes');
+			saveJson(storageKey, data);
+			Object.entries(data).forEach(([key, value]) => { if (fields[key]) fields[key].value = value; });
 			updateAvatar();
 			updateAdminAccess();
 			setStatus('Changes saved');
@@ -272,21 +285,40 @@
 			window.location.href = '/login';
 		});
 
-		photoButton.addEventListener('click', () => {
+		const chooseImage = (accept, maxSize, onLoad, message) => {
 			const input = document.createElement('input');
 			input.type = 'file';
-			input.accept = 'image/jpeg,image/png,image/gif';
+			input.accept = accept;
 			input.addEventListener('change', () => {
 				const file = input.files[0];
-				if (!file || file.size > 5 * 1024 * 1024) return setStatus('Choose an image under 5 MB');
+				if (!file) return;
+				if (!file.type.startsWith('image/')) return setStatus('Choose a JPG, PNG, or GIF image');
+				if (file.size > maxSize) return setStatus(message);
 				const reader = new FileReader();
-				reader.onload = () => {
-					saveStorage(avatarPhotoKey, reader.result);
-					updateAvatar();
-				};
+				reader.onload = () => onLoad(reader.result);
 				reader.readAsDataURL(file);
 			});
 			input.click();
+		};
+
+		photoButton.addEventListener('click', () => chooseImage('image/jpeg,image/png,image/gif', 5 * 1024 * 1024, (image) => {
+			saveStorage(avatarPhotoKey, image);
+			updateAvatar();
+			setStatus('Profile picture updated');
+		}, 'Choose an image under 5 MB'));
+
+		bannerInput?.addEventListener('change', () => {
+			const file = bannerInput.files[0];
+			if (!file) return;
+			if (!file.type.startsWith('image/')) return setStatus('Choose a JPG, PNG, or GIF image');
+			if (file.size > 8 * 1024 * 1024) return setStatus('Choose a banner image under 8 MB');
+			const reader = new FileReader();
+			reader.onload = () => {
+				saveStorage(bannerPhotoKey, reader.result);
+				applyAppearance();
+				setStatus('Profile banner updated');
+			};
+			reader.readAsDataURL(file);
 		});
 
 		document.querySelector('.danger')?.addEventListener('click', () => {
@@ -295,6 +327,7 @@
 				localStorage.removeItem(settingsKey);
 				localStorage.removeItem(appearanceKey);
 				localStorage.removeItem(avatarPhotoKey);
+				localStorage.removeItem(bannerPhotoKey);
 				applyAppearance();
 				setStatus('Profile data cleared');
 			}
