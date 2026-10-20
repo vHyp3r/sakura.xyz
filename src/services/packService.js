@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const path = require('path');
-const fs = require('fs');
 const Pack = require('../../models/Pack');
 
 function normalizeTags(tags) {
@@ -12,8 +10,7 @@ function normalizeTags(tags) {
 }
 
 async function getPacks() {
-  const packs = await Pack.find().sort({ createdAt: -1 }).lean();
-  return packs.filter(hasAvailableFile);
+  return Pack.find().sort({ createdAt: -1 }).lean();
 }
 
 async function getPackById(id) {
@@ -28,8 +25,7 @@ async function getPacksByIds(ids) {
   const validIds = (Array.isArray(ids) ? ids : [])
     .filter((id) => mongoose.isValidObjectId(id));
   if (!validIds.length) return [];
-  const packs = await Pack.find({ _id: { $in: validIds } }).sort({ createdAt: -1 }).lean();
-  return packs.filter(hasAvailableFile);
+  return Pack.find({ _id: { $in: validIds } }).sort({ createdAt: -1 }).lean();
 }
 
 async function createPack(packData) {
@@ -37,14 +33,7 @@ async function createPack(packData) {
 }
 
 async function getPopularPacks() {
-  const packs = await Pack.find().sort({ downloads: -1, createdAt: -1 }).lean();
-  return packs.filter(hasAvailableFile);
-}
-
-function hasAvailableFile(pack) {
-  if (!pack.file) return false;
-  const filePath = path.join(__dirname, '..', '..', 'public', pack.file.replace(/^\//, ''));
-  return fs.existsSync(filePath);
+  return Pack.find().sort({ downloads: -1, createdAt: -1 }).lean();
 }
 
 async function incrementDownloads(id) {
