@@ -17,7 +17,7 @@
       <div class="pack-grid">
         <% packs.forEach(function(pack, index) { %>
           <article class="pack-card">
-            <a href="/packs/<%= pack._id %>" class="pack-image-link"><img src="<%= pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="<%= pack.name %> preview" class="pack-image" loading="lazy" onerror="this.onerror=null;this.src='/images/default-thumbnail.svg';"><span class="pack-resolution"><%= pack.resolution || 'PACK' %></span><span class="pack-rank">#<%= index + 1 %></span></a>
+            <a href="/packs/<%= pack._id %>" class="pack-image-link"><img src="<%= pack.thumbnailData || pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="<%= pack.name %> preview" class="pack-image" loading="lazy" onerror="this.onerror=null;this.src='/images/default-thumbnail.svg';"><span class="pack-resolution"><%= pack.resolution || 'PACK' %></span><span class="pack-rank">#<%= index + 1 %></span></a>
             <div class="pack-card-body"><h2><a href="/packs/<%= pack._id %>"><%= pack.name %></a></h2><p class="pack-author">◉ by <%= pack.uploader || 'Anonymous' %></p><div class="pack-tags"><% if (pack.category) { %><span><%= pack.category %></span><% } %><% (pack.tags || []).slice(0, 3).forEach(function(tag) { %><span><%= tag %></span><% }); %><% if ((pack.tags || []).length > 3) { %><span>+<%= pack.tags.length - 3 %></span><% } %></div><div class="pack-card-meta"><span>◉ <%= (pack.downloads || 0).toLocaleString() %></span><span>↧ <%= pack.originalFileName || 'mcpack' %></span></div></div>
           </article>
         <% }); %>

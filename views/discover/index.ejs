@@ -18,7 +18,7 @@
                         <% packs.forEach(function(pack) { %>
                             <article class="group glass-card-hover overflow-hidden">
                                 <a href="/packs/<%= pack._id %>" class="block overflow-hidden">
-                                    <img src="<%= pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="<%= pack.name %> thumbnail"
+                                    <img src="<%= pack.thumbnailData || pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="<%= pack.name %> thumbnail"
                                         class="h-52 w-full object-cover transition-transform duration-300 group-hover:scale-105">
                                 </a>
                                 <div class="p-5">

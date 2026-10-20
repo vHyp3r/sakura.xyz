@@ -10,6 +10,7 @@ const packSchema = new mongoose.Schema(
     uploader: { type: String, default: 'Anonymous' },
     uploaderId: { type: String, default: '' },
     thumbnail: { type: String, default: '/images/default-thumbnail.svg' },
+    thumbnailData: { type: String, default: '' },
     file: { type: String, required: true },
     originalFileName: { type: String, default: '' },
     downloads: { type: Number, default: 0 },

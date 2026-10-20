@@ -167,7 +167,7 @@
 				const link = document.createElement('a');
 				link.className = 'saved-pack';
 				link.href = `/packs/${encodeURIComponent(pack._id)}`;
-				link.innerHTML = `<img src="${escapeHtml(pack.thumbnail || '/images/default-thumbnail.svg')}" alt=""><strong>${escapeHtml(pack.name)}</strong><span>${escapeHtml(pack.uploader || 'Anonymous')}</span>`;
+				link.innerHTML = `<img src="${escapeHtml(pack.thumbnailData || pack.thumbnail || '/images/default-thumbnail.svg')}" alt=""><strong>${escapeHtml(pack.name)}</strong><span>${escapeHtml(pack.uploader || 'Anonymous')}</span>`;
 				savedPacks.appendChild(link);
 			});
 		};

@@ -78,7 +78,7 @@
           <% packs.forEach(function(pack) { %>
             <article class="glass-card-hover overflow-hidden">
               <a href="/packs/<%= pack._id %>" class="block">
-                <img src="<%= pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="<%= pack.name %> thumbnail" class="h-44 w-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='/images/default-thumbnail.svg';">
+                <img src="<%= pack.thumbnailData || pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="<%= pack.name %> thumbnail" class="h-44 w-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='/images/default-thumbnail.svg';">
               </a>
               <div class="p-5">
                 <div class="flex items-start justify-between gap-3">
@@ -123,7 +123,7 @@
         </div>
         <div class="mt-5 grid grid-cols-3 gap-3">
           <% packs.slice(0, 3).forEach(function(pack) { %>
-            <a href="/packs/<%= pack._id %>" class="overflow-hidden rounded-lg border border-white/10"><img src="<%= pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="" class="aspect-square w-full object-cover"></a>
+            <a href="/packs/<%= pack._id %>" class="overflow-hidden rounded-lg border border-white/10"><img src="<%= pack.thumbnailData || pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="" class="aspect-square w-full object-cover"></a>
           <% }); %>
         </div>
       </div>

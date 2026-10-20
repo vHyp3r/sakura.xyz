@@ -58,6 +58,9 @@ router.post('/', upload.fields([
         const packFile = req.files.packFile[0];
         const thumbnailFile = req.files.thumbnail ? req.files.thumbnail[0] : null;
         const accountSession = getAccountSession(req);
+        const thumbnailData = thumbnailFile
+            ? `data:${thumbnailFile.mimetype};base64,${fs.readFileSync(thumbnailFile.path).toString('base64')}`
+            : '';
 
         const pack = await createPack({
             name: req.body.packName,
@@ -72,6 +75,7 @@ router.post('/', upload.fields([
             thumbnail: thumbnailFile
                 ? `/uploads/${thumbnailFile.filename}`
                 : '/images/default-thumbnail.svg',
+            thumbnailData,
         });
 
         res.render('upload-success', {
