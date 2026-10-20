@@ -12,6 +12,7 @@ const packSchema = new mongoose.Schema(
     thumbnail: { type: String, default: '/images/default-thumbnail.svg' },
     thumbnailData: { type: String, default: '' },
     file: { type: String, required: true },
+    fileStorageId: { type: mongoose.Schema.Types.ObjectId, default: null },
     originalFileName: { type: String, default: '' },
     downloads: { type: Number, default: 0 },
     views: { type: Number, default: 0 },

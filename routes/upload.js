@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { createPack } = require('../src/services/packService');
+const { createPack, storePackFile } = require('../src/services/packService');
 const { getAccountSession } = require('../src/services/accountAuth');
 
 // Configure multer for file uploads
@@ -61,6 +61,7 @@ router.post('/', upload.fields([
         const thumbnailData = thumbnailFile
             ? `data:${thumbnailFile.mimetype};base64,${fs.readFileSync(thumbnailFile.path).toString('base64')}`
             : '';
+        const fileStorageId = await storePackFile(packFile.path, packFile.originalname, packFile.mimetype);
 
         const pack = await createPack({
             name: req.body.packName,
@@ -71,6 +72,7 @@ router.post('/', upload.fields([
             uploader: accountSession?.username || 'Anonymous',
             uploaderId: accountSession?.accountId || '',
             file: `/uploads/${packFile.filename}`,
+            fileStorageId,
             originalFileName: packFile.originalname,
             thumbnail: thumbnailFile
                 ? `/uploads/${thumbnailFile.filename}`

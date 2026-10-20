@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const fs = require('fs');
 const Pack = require('../../models/Pack');
 
 function normalizeTags(tags) {
@@ -30,6 +31,28 @@ async function getPacksByIds(ids) {
 
 async function createPack(packData) {
   return Pack.create({ ...packData, tags: normalizeTags(packData.tags) });
+}
+
+async function storePackFile(filePath, filename, contentType = 'application/octet-stream') {
+  if (mongoose.connection.readyState !== 1) throw new Error('MongoDB must be connected to store pack files.');
+  const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'packFiles' });
+  return new Promise((resolve, reject) => {
+    const upload = bucket.openUploadStream(filename, { contentType });
+    fs.createReadStream(filePath)
+      .on('error', reject)
+      .pipe(upload)
+      .on('error', reject)
+      .on('finish', () => resolve(upload.id));
+  });
+}
+
+async function getPackFileStream(fileStorageId) {
+  if (!fileStorageId || mongoose.connection.readyState !== 1) return null;
+  if (!mongoose.isValidObjectId(fileStorageId)) return null;
+  const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'packFiles' });
+  const id = new mongoose.Types.ObjectId(String(fileStorageId));
+  const files = await bucket.find({ _id: id }).toArray();
+  return files[0] ? { bucket, file: files[0] } : null;
 }
 
 async function getPopularPacks() {
@@ -75,6 +98,8 @@ module.exports = {
   getPopularPacks,
   getPackById,
   getPacksByIds,
+  storePackFile,
+  getPackFileStream,
   createPack,
   incrementDownloads,
   incrementViews,

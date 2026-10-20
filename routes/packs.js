@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const { getPacks, getPackById, incrementDownloads } = require('../src/services/packService');
+const { getPacks, getPackById, getPackFileStream, incrementDownloads } = require('../src/services/packService');
 const { getAccountSession } = require('../src/services/accountAuth');
 const { getAccountById } = require('../src/services/accountService');
 const router = express.Router();
@@ -43,7 +43,7 @@ router.get('/:id', async (req, res, next) => {
                 pack,
         owner,
         isOwner,
-        fileAvailable: Boolean(filePath && fs.existsSync(filePath)),
+        fileAvailable: Boolean((filePath && fs.existsSync(filePath)) || pack.fileStorageId),
     });
     } catch (error) {
         next(error);
@@ -58,7 +58,15 @@ router.get('/:id/download', async (req, res, next) => {
     }
 
         const filePath = path.join(__dirname, '..', 'public', pack.file.replace(/^\//, ''));
-        if (!fs.existsSync(filePath)) {
+        if (fs.existsSync(filePath)) {
+            await incrementDownloads(pack._id);
+            return res.download(filePath, path.basename(filePath), (error) => {
+                if (error && !res.headersSent) next(error);
+            });
+        }
+
+        const storedFile = await getPackFileStream(pack.fileStorageId);
+        if (!storedFile) {
             return res.status(404).render('error', {
                 title: 'Pack File Unavailable',
                 message: 'This pack is listed in the gallery, but its download file is no longer available.',
@@ -66,11 +74,9 @@ router.get('/:id/download', async (req, res, next) => {
         }
 
         await incrementDownloads(pack._id);
-        res.download(filePath, path.basename(filePath), (error) => {
-            if (error && !res.headersSent) {
-                next(error);
-            }
-        });
+        res.setHeader('Content-Type', storedFile.file.contentType || 'application/octet-stream');
+        res.setHeader('Content-Disposition', `attachment; filename="${path.basename(pack.originalFileName || storedFile.file.filename)}"`);
+        storedFile.bucket.openDownloadStream(storedFile.file._id).on('error', next).pipe(res);
     } catch (error) {
         next(error);
     }
