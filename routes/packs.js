@@ -2,6 +2,8 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const { getPacks, getPackById, incrementDownloads } = require('../src/services/packService');
+const { getAccountSession } = require('../src/services/accountAuth');
+const { getAccountById } = require('../src/services/accountService');
 const router = express.Router();
 
 router.get('/', async (req, res, next) => {
@@ -29,10 +31,18 @@ router.get('/:id', async (req, res, next) => {
     const filePath = pack.file
         ? path.join(__dirname, '..', 'public', pack.file.replace(/^\//, ''))
         : null;
+    const owner = pack.uploaderId ? await getAccountById(pack.uploaderId) : null;
+    const session = getAccountSession(req);
+    const isOwner = Boolean(session && (
+        (pack.uploaderId && session.accountId === String(pack.uploaderId))
+        || (!pack.uploaderId && session.username?.toLowerCase() === pack.uploader?.toLowerCase())
+    ));
 
     res.render('packs/detail', {
         title: pack.name,
                 pack,
+        owner,
+        isOwner,
         fileAvailable: Boolean(filePath && fs.existsSync(filePath)),
     });
     } catch (error) {

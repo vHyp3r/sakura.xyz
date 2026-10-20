@@ -13,6 +13,18 @@ const packSchema = new mongoose.Schema(
     file: { type: String, required: true },
     originalFileName: { type: String, default: '' },
     downloads: { type: Number, default: 0 },
+    views: { type: Number, default: 0 },
+    likedBy: { type: [String], default: [] },
+    superReactedBy: { type: [String], default: [] },
+    comments: {
+      type: [{
+        accountId: String,
+        username: String,
+        body: String,
+        createdAt: { type: Date, default: Date.now },
+      }],
+      default: [],
+    },
     isPort: { type: Boolean, default: false },
     isRecolor: { type: Boolean, default: false },
   },

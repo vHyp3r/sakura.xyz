@@ -23,6 +23,7 @@
 		const logoutButton = document.querySelector('#logoutButton');
 		const heroLogoutButton = document.querySelector('#heroLogoutButton');
 		const profileHeroName = document.querySelector('#profileHeroName');
+		const profileHeroCosmetic = document.querySelector('#profileHeroCosmetic');
 		const profileHeroHandle = document.querySelector('#profileHeroHandle');
 		const profileHeroAvatar = document.querySelector('#profileHeroAvatar');
 		const profileHeroCover = document.querySelector('#profileHeroCover');
@@ -30,6 +31,7 @@
 		const consoleName = document.querySelector('#consoleName');
 		const accountSearch = document.querySelector('#accountSearch');
 		const accountSearchResults = document.querySelector('#accountSearchResults');
+		const savedPacks = document.querySelector('#savedPacks');
 		const cosmeticCatalog = {
 			'rose-crown': { group: 'avatarCosmetic', label: 'Rose Crown', icon: '🌹' },
 			'moon-glasses': { group: 'avatarCosmetic', label: 'Moon Glasses', icon: '🌙' },
@@ -89,12 +91,14 @@
 			const equipped = readJson(appearanceKey, {});
 			const background = cosmeticCatalog[equipped.profileBackground];
 			const theme = cosmeticCatalog[equipped.profileTheme];
+			document.body.style.setProperty('background-color', '#0b0d0f', 'important');
+			document.body.style.setProperty('background-image', 'none', 'important');
 			document.documentElement.style.setProperty('--accent', theme?.accent || '#7857e8');
 			document.documentElement.style.setProperty('--accent-soft', theme?.soft || '#f0edff');
 			if (profileHeroCover) {
 				const banner = readStorage(bannerPhotoKey, '');
 				const defaultBanner = 'linear-gradient(120deg,rgba(236,72,153,.7),rgba(86,25,78,.6) 45%,rgba(8,12,14,.95)), repeating-linear-gradient(135deg,rgba(255,255,255,.06) 0 1px,transparent 1px 28px)';
-				profileHeroCover.style.backgroundColor = background?.color || '';
+				profileHeroCover.style.backgroundColor = background?.color || '#15191c';
 				profileHeroCover.style.backgroundImage = banner
 					? `linear-gradient(120deg, rgba(8,12,14,.34), rgba(8,12,14,.55)), url("${banner}")`
 					: defaultBanner;
@@ -152,6 +156,27 @@
 				accountSearchResults.appendChild(result);
 			});
 		};
+		const renderSavedPacks = (packs) => {
+			if (!savedPacks) return;
+			savedPacks.replaceChildren();
+			if (!packs.length) {
+				savedPacks.innerHTML = '<p class="cosmetic-empty">No saved packs yet. Add packs from their detail pages.</p>';
+				return;
+			}
+			packs.forEach((pack) => {
+				const link = document.createElement('a');
+				link.className = 'saved-pack';
+				link.href = `/packs/${encodeURIComponent(pack._id)}`;
+				link.innerHTML = `<img src="${escapeHtml(pack.thumbnail || '/images/default-thumbnail.svg')}" alt=""><strong>${escapeHtml(pack.name)}</strong><span>${escapeHtml(pack.uploader || 'Anonymous')}</span>`;
+				savedPacks.appendChild(link);
+			});
+		};
+		const loadSavedPacks = async () => {
+			if (!savedPacks) return;
+			const response = await fetch('/api/account/library', { cache: 'no-store' });
+			if (!response.ok) throw new Error('Unable to load saved packs.');
+			renderSavedPacks((await response.json()).packs || []);
+		};
 		let searchTimer;
 		accountSearch?.addEventListener('input', () => {
 			window.clearTimeout(searchTimer);
@@ -204,9 +229,25 @@
 				return false;
 			}
 			const account = result.account;
+			const localPhoto = readStorage(avatarPhotoKey, '');
+			if (account.profilePicture) {
+				saveStorage(avatarPhotoKey, account.profilePicture);
+			} else if (localPhoto) {
+				fetch('/api/account/profile', {
+					method: 'PATCH',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ profilePicture: localPhoto })
+				}).catch(() => {});
+			}
 			saveJson(storageKey, account);
 			const accountName = account.displayName || account.username;
 			if (profileHeroName) profileHeroName.textContent = accountName;
+			if (profileHeroCosmetic) {
+				const cosmetic = cosmeticCatalog[account.equippedCosmetic];
+				profileHeroCosmetic.textContent = cosmetic?.icon || '';
+				profileHeroCosmetic.title = cosmetic ? `${cosmetic.label} equipped` : '';
+				profileHeroCosmetic.classList.toggle('is-equipped', Boolean(cosmetic));
+			}
 			if (profileHeroHandle) profileHeroHandle.textContent = `@${account.username}`;
 			if (consoleName) consoleName.textContent = accountName;
 			if (accountRank && account.rank) {
@@ -228,7 +269,12 @@
 			return true;
 		};
 
-		loadAccount().then((authenticated) => { if (!authenticated) return; updateAvatar(); updateAdminAccess(); });
+		loadAccount().then(async (authenticated) => {
+			if (!authenticated) return;
+			updateAvatar();
+			updateAdminAccess();
+			try { await loadSavedPacks(); } catch (_) { renderSavedPacks([]); }
+		});
 		updateAvatar();
 		applyAppearance();
 		renderCosmetics();
@@ -304,6 +350,11 @@
 		photoButton.addEventListener('click', () => chooseImage('image/jpeg,image/png,image/gif', 5 * 1024 * 1024, (image) => {
 			saveStorage(avatarPhotoKey, image);
 			updateAvatar();
+			fetch('/api/account/profile', {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ profilePicture: image })
+			}).catch(() => setStatus('Profile picture saved locally, but could not be synced.'));
 			setStatus('Profile picture updated');
 		}, 'Choose an image under 5 MB'));
 

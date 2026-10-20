@@ -20,7 +20,8 @@ const {
 } = require('../src/services/adminAuth');
 const { getBalance, listBalances, setBalance } = require('../src/services/coinService');
 const { clearAccountSession, getAccountSession, setAccountSession } = require('../src/services/accountAuth');
-const { authenticateAccount, getAccountById, registerAccount, resetAccountPassword, searchAccounts, updateAccount, updateAccountRank } = require('../src/services/accountService');
+const { authenticateAccount, getAccountById, registerAccount, resetAccountPassword, searchAccounts, toggleAccountPack, updateAccount, updateAccountRank } = require('../src/services/accountService');
+const { addPackComment, getPackById, getPacksByIds, incrementViews, togglePackList } = require('../src/services/packService');
 const { BADGES, RANKS } = require('../src/services/ranks');
 
 const router = express.Router();
@@ -75,10 +76,103 @@ router.patch('/account/profile', async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Account authentication required.' });
-    const account = await updateAccount(session.accountId, req.body);
+    const updates = { ...req.body };
+    if (updates.profilePicture !== undefined) {
+      const picture = String(updates.profilePicture || '');
+      if (picture && !/^data:image\/(?:jpeg|png|gif);base64,[a-z0-9+/]+=*$/i.test(picture)) {
+        return res.status(400).json({ error: 'Profile picture must be a valid image.' });
+      }
+      if (picture.length > 7 * 1024 * 1024) {
+        return res.status(400).json({ error: 'Profile picture is too large.' });
+      }
+      updates.profilePicture = picture;
+    }
+    const account = await updateAccount(session.accountId, updates);
     if (!account) return res.status(404).json({ error: 'Account not found.' });
     res.json({ account });
   } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/account/library', async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    if (!session) return res.status(401).json({ error: 'Account authentication required.' });
+    const account = await getAccountById(session.accountId);
+    const packs = await getPacksByIds(account?.savedPacks || []);
+    res.json({ packs });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/packs/:id/view', async (req, res, next) => {
+  try {
+    const pack = await incrementViews(req.params.id);
+    if (!pack) return res.status(404).json({ error: 'Pack not found.' });
+    res.json({ views: pack.views });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/packs/:id/library', async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    if (!session) return res.status(401).json({ error: 'Sign in to save packs to your library.' });
+    const result = await toggleAccountPack(session.accountId, 'savedPacks', req.params.id);
+    if (!result) return res.status(404).json({ error: 'Account not found.' });
+    res.json({ saved: result.active });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/packs/:id/like', async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    if (!session) return res.status(401).json({ error: 'Sign in to like packs.' });
+    const result = await togglePackList(req.params.id, 'likedBy', session.accountId);
+    if (!result) return res.status(404).json({ error: 'Pack not found.' });
+    await toggleAccountPack(session.accountId, 'likedPacks', req.params.id);
+    res.json({ liked: result.active, likes: result.count });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/packs/:id/super-react', async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    if (!session) return res.status(401).json({ error: 'Sign in to send a super reaction.' });
+    const result = await togglePackList(req.params.id, 'superReactedBy', session.accountId);
+    if (!result) return res.status(404).json({ error: 'Pack not found.' });
+    res.json({ reacted: result.active, reactions: result.count });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/packs/:id/comments', async (req, res, next) => {
+  try {
+    const pack = await getPackById(req.params.id);
+    if (!pack) return res.status(404).json({ error: 'Pack not found.' });
+    res.json({ comments: pack.comments || [] });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/packs/:id/comments', async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    if (!session) return res.status(401).json({ error: 'Sign in to comment.' });
+    const comment = await addPackComment(req.params.id, session.accountId, session.username, req.body.body);
+    if (!comment) return res.status(404).json({ error: 'Pack not found.' });
+    res.status(201).json({ comment });
+  } catch (error) {
+    if (/Comments must/.test(error.message)) return res.status(400).json({ error: error.message });
     next(error);
   }
 });

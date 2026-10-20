@@ -11,9 +11,39 @@
     <p class="detail-breadcrumb"><a href="/packs">‹ Library</a> / <%= pack.category || 'Texture pack' %> / <span><%= pack.name %></span></p>
     <div class="detail-layout">
       <section class="detail-media"><div class="media-tabs"><span class="active">▧ Screenshot</span><span>◉ Clip</span></div><div class="detail-image-wrap"><img src="<%= pack.thumbnail || '/images/default-thumbnail.svg' %>" alt="<%= pack.name %> screenshot" onerror="this.onerror=null;this.src='/images/default-thumbnail.svg';"><span class="media-label">● SCREENSHOT 1 / 1</span><span class="media-resolution"><%= pack.resolution || 'PACK' %></span></div><p class="detail-description"><%= pack.description || 'No description provided for this texture pack.' %></p></section>
-      <aside class="detail-panel"><div class="detail-title"><h1><%= pack.name %></h1><p><span class="online-dot"></span> Community pack <span>·</span> <%= pack.resolution || 'Bedrock' %></p></div><div class="detail-creator"><img src="/images/default-avatar.svg" alt=""><div><span>CREATED BY</span><strong><%= pack.uploader || 'Anonymous' %></strong></div><a href="/search?q=<%= encodeURIComponent(pack.uploader || '') %>">＋ FOLLOW</a></div><div class="detail-stats"><div><strong><%= (pack.downloads || 0).toLocaleString() %></strong><span>DOWNLOADS</span></div><div><strong><%= pack.category || 'OTHER' %></strong><span>CATEGORY</span></div><div><strong><%= (pack.tags || []).length %></strong><span>TAGS</span></div></div><div class="edition-switch"><span class="active">◈ Bedrock</span><span>Java Edition</span></div><div class="version-select">✓ Minecraft Bedrock <span>⌄</span></div><% if (fileAvailable) { %><a class="detail-download" href="/packs/<%= pack._id %>/download">⇩ &nbsp; DOWNLOAD</a><% } else { %><div class="detail-unavailable">Download file unavailable</div><% } %><a class="detail-secondary" href="/packs">＋ ADD TO LIBRARY</a><div class="detail-actions"><button type="button">♡</button><button type="button">⌁</button><button type="button">◌</button><button type="button">⌯</button></div></aside>
+      <aside class="detail-panel">
+        <div class="detail-title"><h1><%= pack.name %></h1><p><span class="online-dot"></span> Community pack <span>·</span> <%= pack.resolution || 'Bedrock' %></p></div>
+        <div class="detail-creator"><img src="<%= (typeof owner !== 'undefined' && owner && owner.profilePicture) || '/images/default-avatar.svg' %>" alt="<%= pack.uploader || 'Anonymous' %> profile picture"><div><span>CREATED BY</span><strong><%= pack.uploader || 'Anonymous' %></strong></div><% if (typeof isOwner !== 'undefined' && isOwner) { %><span class="detail-owner-label">YOUR PACK</span><% } else { %><a href="/search?q=<%= encodeURIComponent(pack.uploader || '') %>">＋ FOLLOW</a><% } %></div>
+        <div class="detail-stats">
+          <div><strong><%= (pack.downloads || 0).toLocaleString() %></strong><span>DOWNLOADS</span></div>
+          <div><strong id="packViews"><%= (pack.views || 0).toLocaleString() %></strong><span>VIEWS</span></div>
+          <div><strong id="packLikes"><%= (pack.likedBy || []).length %></strong><span>LIKES</span></div>
+        </div>
+        <div class="edition-switch"><span class="active">◈ Bedrock</span><span>Java Edition</span></div>
+        <div class="version-select">✓ Minecraft Bedrock <span>⌄</span></div>
+        <% if (fileAvailable) { %><a class="detail-download" href="/packs/<%= pack._id %>/download">⇩ &nbsp; DOWNLOAD</a><% } else { %><div class="detail-unavailable">Download file unavailable</div><% } %>
+        <button class="detail-secondary" id="savePackButton" type="button">＋ ADD TO LIBRARY</button>
+        <div class="detail-actions" aria-label="Pack actions">
+          <button id="likePackButton" type="button" title="Like this pack">♡</button>
+          <button id="authorPackButton" type="button" title="View more by this author">⌁</button>
+          <button id="commentPackButton" type="button" title="Comments">◌</button>
+          <button id="superReactButton" type="button" title="Send a super reaction">⌯</button>
+        </div>
+        <p class="detail-action-status" id="packActionStatus" aria-live="polite"></p>
+      </aside>
     </div>
+    <section class="pack-comments" id="packComments" aria-labelledby="commentsTitle">
+      <div class="pack-comments-heading"><h2 id="commentsTitle">Comments</h2><span id="commentCount"><%= (pack.comments || []).length %></span></div>
+      <div id="commentList"></div>
+      <form id="commentForm">
+        <label for="commentBody" class="sr-only">Add a comment</label>
+        <textarea id="commentBody" maxlength="500" placeholder="Share your thoughts..." required></textarea>
+        <button type="submit">Post comment</button>
+      </form>
+    </section>
   </main>
   <script src="/js/main.js"></script>
+  <script>window.packId = '<%= pack._id %>';</script>
+  <script src="/js/pack-detail.js"></script>
 </body>
 </html>

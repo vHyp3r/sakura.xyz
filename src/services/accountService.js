@@ -37,6 +37,7 @@ function publicSearchAccount(account) {
     username: account.username,
     displayName: account.displayName || account.username,
     bio: account.bio || '',
+    profilePicture: account.profilePicture || '',
     equippedCosmetic: account.equippedCosmetic || null,
     cosmetic: AVATAR_COSMETICS[account.equippedCosmetic] || null,
     rank,
@@ -65,7 +66,10 @@ async function registerAccount({ username, email, password }) {
     pronouns: '',
     location: '',
     website: '',
+    profilePicture: '',
     equippedCosmetic: null,
+    savedPacks: [],
+    likedPacks: [],
     rank: 'member',
     badges: [],
     discoverable: true,
@@ -129,12 +133,26 @@ async function getAccountById(id) {
 async function updateAccount(id, updates) {
   const { ObjectId } = require('mongodb');
   if (!ObjectId.isValid(id)) return null;
-  const allowed = ['displayName', 'bio', 'pronouns', 'location', 'website', 'discoverable', 'equippedCosmetic'];
+  const allowed = ['displayName', 'bio', 'pronouns', 'location', 'website', 'discoverable', 'equippedCosmetic', 'profilePicture'];
   const changes = Object.fromEntries(allowed.filter((key) => updates[key] !== undefined).map((key) => [key, updates[key]]));
   if (changes.equippedCosmetic && !AVATAR_COSMETICS[changes.equippedCosmetic]) throw new Error('That avatar cosmetic is not available.');
   changes.updatedAt = new Date();
   await (await getAccountCollection()).updateOne({ _id: new ObjectId(id) }, { $set: changes });
   return getAccountById(id);
+}
+
+async function toggleAccountPack(id, field, packId) {
+  const { ObjectId } = require('mongodb');
+  if (!ObjectId.isValid(id) || !['savedPacks', 'likedPacks'].includes(field)) return null;
+  const collection = await getAccountCollection();
+  const account = await collection.findOne({ _id: new ObjectId(id) });
+  if (!account) return null;
+  const values = Array.isArray(account[field]) ? account[field].map(String) : [];
+  const value = String(packId);
+  const included = values.includes(value);
+  const next = included ? values.filter((item) => item !== value) : [...values, value];
+  await collection.updateOne({ _id: new ObjectId(id) }, { $set: { [field]: next, updatedAt: new Date() } });
+  return { active: !included, values: next };
 }
 
 async function searchAccounts(query, limit = 20) {
@@ -149,10 +167,10 @@ async function searchAccounts(query, limit = 20) {
       { displayName: { $regex: escapedQuery, $options: 'i' } },
     ],
   }, {
-    projection: { _id: 0, username: 1, displayName: 1, bio: 1, equippedCosmetic: 1 },
+    projection: { _id: 0, username: 1, displayName: 1, bio: 1, profilePicture: 1, equippedCosmetic: 1 },
   }).sort({ username: 1 }).limit(Math.min(Number(limit) || 20, 50)).toArray();
 
   return records.map(publicSearchAccount);
 }
 
-module.exports = { AVATAR_COSMETICS, authenticateAccount, getAccountById, registerAccount, resetAccountPassword, searchAccounts, updateAccount, updateAccountRank };
+module.exports = { AVATAR_COSMETICS, authenticateAccount, getAccountById, registerAccount, resetAccountPassword, searchAccounts, toggleAccountPack, updateAccount, updateAccountRank };
