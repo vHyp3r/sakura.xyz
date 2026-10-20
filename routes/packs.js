@@ -37,13 +37,14 @@ router.get('/:id', async (req, res, next) => {
         (pack.uploaderId && session.accountId === String(pack.uploaderId))
         || (!pack.uploaderId && session.username?.toLowerCase() === pack.uploader?.toLowerCase())
     ));
+    const storedFile = await getPackFileStream(pack.fileStorageId);
 
     res.render('packs/detail', {
         title: pack.name,
                 pack,
         owner,
         isOwner,
-        fileAvailable: Boolean((filePath && fs.existsSync(filePath)) || pack.fileStorageId),
+        fileAvailable: Boolean((filePath && fs.existsSync(filePath)) || storedFile),
     });
     } catch (error) {
         next(error);
@@ -53,12 +54,14 @@ router.get('/:id', async (req, res, next) => {
 router.get('/:id/download', async (req, res, next) => {
     try {
         const pack = await getPackById(req.params.id);
-        if (!pack || !pack.file) {
+        if (!pack) {
         return res.status(404).send('Pack file not found.');
     }
 
-        const filePath = path.join(__dirname, '..', 'public', pack.file.replace(/^\//, ''));
-        if (fs.existsSync(filePath)) {
+        const filePath = pack.file
+            ? path.join(__dirname, '..', 'public', pack.file.replace(/^\//, ''))
+            : null;
+        if (filePath && fs.existsSync(filePath)) {
             await incrementDownloads(pack._id);
             return res.download(filePath, path.basename(filePath), (error) => {
                 if (error && !res.headersSent) next(error);
