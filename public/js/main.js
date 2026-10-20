@@ -2,7 +2,27 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
   initScrollReveal();
   initSmoothScroll();
+  initAccountNavigation();
 });
+
+async function initAccountNavigation() {
+  const links = document.querySelectorAll('[data-account-link]');
+  if (!links.length) return;
+
+  try {
+    const response = await fetch('/api/account/me', { cache: 'no-store' });
+    if (!response.ok) return;
+    const result = await response.json();
+    if (!result.authenticated) return;
+
+    links.forEach((link) => {
+      link.href = '/profile';
+      link.textContent = link.classList.contains('nav-signin-link') ? '♙ Profile' : 'Profile';
+    });
+  } catch (error) {
+    console.warn('Unable to determine account navigation state.', error);
+  }
+}
 
 function initMobileNav() {
   const toggle = document.getElementById('mobile-menu-toggle');
