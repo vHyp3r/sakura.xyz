@@ -32,6 +32,18 @@
 		const accountSearch = document.querySelector('#accountSearch');
 		const accountSearchResults = document.querySelector('#accountSearchResults');
 		const savedPacks = document.querySelector('#savedPacks');
+		const profileTabs = document.querySelectorAll('[data-profile-tab]');
+		const profilePanels = document.querySelectorAll('[data-profile-panel]');
+		const profilePacks = document.querySelector('#profilePacks');
+		const profileLiked = document.querySelector('#profileLiked');
+		const profileComments = document.querySelector('#profileComments');
+		const profileMetrics = document.querySelector('#profileMetrics');
+		const profileStatElements = {
+			downloads: document.querySelector('#profileDownloads'),
+			views: document.querySelector('#profileViews'),
+			packs: document.querySelector('#profilePackCount'),
+			likes: document.querySelector('#profileLikes'),
+		};
 		const cosmeticCatalog = {
 			'rose-crown': { group: 'avatarCosmetic', label: 'Rose Crown', icon: '🌹' },
 			'moon-glasses': { group: 'avatarCosmetic', label: 'Moon Glasses', icon: '🌙' },
@@ -171,11 +183,80 @@
 				savedPacks.appendChild(link);
 			});
 		};
+		const renderPackGrid = (container, packs, emptyMessage) => {
+			if (!container) return;
+			container.replaceChildren();
+			if (!packs.length) {
+				container.innerHTML = `<p class="cosmetic-empty">${escapeHtml(emptyMessage)}</p>`;
+				return;
+			}
+			packs.forEach((pack) => {
+				const link = document.createElement('a');
+				link.className = 'saved-pack';
+				link.href = `/packs/${encodeURIComponent(pack._id)}`;
+				link.innerHTML = `<img src="${escapeHtml(pack.thumbnailData || pack.thumbnail || '/images/default-thumbnail.svg')}" alt=""><strong>${escapeHtml(pack.name)}</strong><span>${escapeHtml(pack.uploader || 'Anonymous')}</span>`;
+				container.appendChild(link);
+			});
+		};
+		const loadProfileSummary = async () => {
+			const response = await fetch('/api/account/summary', { cache: 'no-store' });
+			if (!response.ok) throw new Error('Unable to load profile activity.');
+			const summary = await response.json();
+			renderPackGrid(profilePacks, summary.packs || [], 'You have not published any packs yet.');
+			renderPackGrid(profileLiked, summary.likedPacks || [], 'You have not liked any packs yet.');
+			if (profileComments) {
+				profileComments.replaceChildren();
+				const comments = summary.comments || [];
+				profileComments.innerHTML = comments.length
+					? comments.map((comment) => `<div class="profile-list-item"><strong>${escapeHtml(comment.packName)}</strong>${escapeHtml(comment.body)}</div>`).join('')
+					: '<p class="cosmetic-empty">You have not commented on any packs yet.</p>';
+			}
+			if (profileMetrics) {
+				const stats = summary.stats || {};
+				profileMetrics.innerHTML = [['packs', 'Packs'], ['downloads', 'Downloads'], ['views', 'Views'], ['likes', 'Likes']]
+					.map(([key, label]) => `<div class="profile-metric"><strong>${Number(stats[key] || 0).toLocaleString()}</strong><span>${label}</span></div>`).join('');
+				Object.entries(profileStatElements).forEach(([key, element]) => {
+					if (element) element.textContent = Number(stats[key] || 0).toLocaleString();
+				});
+			}
+		};
+		const activateProfileTab = (tab) => {
+			profileTabs.forEach((link) => link.classList.toggle('active', link.dataset.profileTab === tab));
+			profilePanels.forEach((panel) => {
+				panel.hidden = !panel.dataset.profilePanel.split(/\s+/).includes(tab);
+			});
+		};
+		profileTabs.forEach((link) => link.addEventListener('click', (event) => {
+			event.preventDefault();
+			const tab = link.dataset.profileTab;
+			activateProfileTab(tab);
+			history.replaceState(null, '', link.hash);
+		}));
+		const initialTab = [...profileTabs].find((link) => link.hash === window.location.hash)?.dataset.profileTab || 'overview';
+		activateProfileTab(initialTab);
 		const loadSavedPacks = async () => {
 			if (!savedPacks) return;
 			const response = await fetch('/api/account/library', { cache: 'no-store' });
 			if (!response.ok) throw new Error('Unable to load saved packs.');
 			renderSavedPacks((await response.json()).packs || []);
+		};
+		const renderProfileLoadError = (message) => {
+			[profilePacks, profileLiked, profileComments, profileMetrics].forEach((container) => {
+				if (!container) return;
+				container.replaceChildren();
+				const status = document.createElement('p');
+				status.className = 'cosmetic-empty';
+				status.textContent = message;
+				container.appendChild(status);
+			});
+		};
+		const renderSavedLoadError = () => {
+			if (!savedPacks) return;
+			savedPacks.replaceChildren();
+			const status = document.createElement('p');
+			status.className = 'cosmetic-empty';
+			status.textContent = 'Unable to load saved packs. Please refresh and try again.';
+			savedPacks.appendChild(status);
 		};
 		let searchTimer;
 		accountSearch?.addEventListener('input', () => {
@@ -273,7 +354,10 @@
 			if (!authenticated) return;
 			updateAvatar();
 			updateAdminAccess();
-			try { await loadSavedPacks(); } catch (_) { renderSavedPacks([]); }
+			try { await loadSavedPacks(); } catch (_) { renderSavedLoadError(); }
+			try { await loadProfileSummary(); } catch (_) {
+				renderProfileLoadError('Unable to load profile activity. Please refresh and try again.');
+			}
 		});
 		updateAvatar();
 		applyAppearance();

@@ -22,6 +22,7 @@ const { getBalance, listBalances, setBalance } = require('../src/services/coinSe
 const { clearAccountSession, getAccountSession, setAccountSession } = require('../src/services/accountAuth');
 const { authenticateAccount, getAccountById, registerAccount, resetAccountPassword, searchAccounts, toggleAccountPack, updateAccount, updateAccountRank } = require('../src/services/accountService');
 const { addPackComment, getPackById, getPacksByIds, incrementViews, togglePackList } = require('../src/services/packService');
+const Pack = require('../models/Pack');
 const { BADGES, RANKS } = require('../src/services/ranks');
 
 const router = express.Router();
@@ -102,6 +103,48 @@ router.get('/account/library', async (req, res, next) => {
     const account = await getAccountById(session.accountId);
     const packs = await getPacksByIds(account?.savedPacks || []);
     res.json({ packs });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/account/summary', async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    if (!session) return res.status(401).json({ error: 'Account authentication required.' });
+    const account = await getAccountById(session.accountId);
+    if (!account) return res.status(404).json({ error: 'Account not found.' });
+
+    const [packs, likedPacks] = await Promise.all([
+      Pack.find({ $or: [{ uploaderId: session.accountId }, { uploader: account.username }] })
+        .select('_id name uploader thumbnail downloads views likedBy')
+        .sort({ createdAt: -1 })
+        .lean(),
+      getPacksByIds(account.likedPacks || []).then((records) => records.map(({ _id, name, uploader, thumbnail }) => ({
+        _id,
+        name,
+        uploader,
+        thumbnail,
+      }))),
+    ]);
+    const comments = await Pack.find({ 'comments.accountId': session.accountId })
+      .select('_id name comments')
+      .lean();
+    const authoredComments = comments.flatMap((pack) => (pack.comments || [])
+      .filter((comment) => String(comment.accountId) === String(session.accountId))
+      .map((comment) => ({ ...comment, packId: pack._id, packName: pack.name })));
+
+    res.json({
+      packs,
+      likedPacks,
+      comments: authoredComments,
+      stats: {
+        packs: packs.length,
+        downloads: packs.reduce((total, pack) => total + (pack.downloads || 0), 0),
+        views: packs.reduce((total, pack) => total + (pack.views || 0), 0),
+        likes: packs.reduce((total, pack) => total + (pack.likedBy || []).length, 0),
+      },
+    });
   } catch (error) {
     next(error);
   }
