@@ -275,9 +275,9 @@ router.post('/ranks/purchase', async (req, res, next) => {
     const rank = String(req.body.rank || '').trim().toLowerCase();
     const prices = { vip: 2500, mvp: 5000 };
     if (!prices[rank]) return res.status(400).json({ error: 'That rank is not available for coin purchase.' });
-    await spendCoins(session.username, prices[rank]);
+    const balance = await spendCoins(session.username, prices[rank]);
     const issued = await issueRankKey(session.username, rank);
-    res.status(201).json({ rank, key: issued.key, redeemUrl: '/redeem' });
+    res.status(201).json({ rank, key: issued.key, balance: balance.balance, redeemUrl: '/redeem' });
   } catch (error) {
     if (/coins|rank|amount|account/.test(error.message)) return res.status(400).json({ error: error.message });
     next(error);

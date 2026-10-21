@@ -33,7 +33,29 @@
 	const saveStorage = (key, value) => {
 		try { localStorage.setItem(key, value); } catch (_) { /* Keep the current session usable when storage is blocked. */ }
 	};
-	const state = { balance: Number(readStorage("sakura-coins", 1200)) || 1200, owned: readOwned(), filter: "All" };
+	const removeStorage = (key) => {
+		try { localStorage.removeItem(key); } catch (_) { /* Keep the current session usable when storage is blocked. */ }
+	};
+	const storageKey = (key, account = state.account) => `sakura:${account || "guest"}:${key}`;
+	const state = { account: null, balance: 1200, owned: [], filter: "All" };
+	const loadLocalAccountState = (migrateLegacy = false) => {
+		if (migrateLegacy && !readStorage("sakura-account-migrated", "")) {
+			const legacyOwned = readOwned();
+			const legacyBalance = Number(readStorage("sakura-coins", 1200)) || 1200;
+			saveStorage(storageKey("owned"), JSON.stringify(legacyOwned));
+			saveStorage(storageKey("coins"), legacyBalance);
+			removeStorage("sakura-owned");
+			removeStorage("sakura-coins");
+			saveStorage("sakura-account-migrated", "1");
+		}
+		try {
+			const owned = JSON.parse(readStorage(storageKey("owned"), "[]"));
+			state.owned = Array.isArray(owned) ? owned : [];
+		} catch (_) {
+			state.owned = [];
+		}
+		state.balance = Number(readStorage(storageKey("coins"), 1200)) || 1200;
+	};
 	let dailyTimer = null;
 	const root = document.createElement("section");
 	root.className = "sakura-shop";
@@ -131,7 +153,12 @@
 			});
 			const result = await response.json();
 			if (!response.ok) throw new Error(result.error || "Could not issue rank key.");
-			state.owned.push(item.id);
+			if (Number.isInteger(result.balance)) {
+				state.balance = result.balance;
+				saveStorage(storageKey("coins"), result.balance);
+			}
+			state.owned = [...new Set([...state.owned, item.id])];
+			saveStorage(storageKey("owned"), JSON.stringify(state.owned));
 			render();
 			root.querySelector(".shop-message").innerHTML = `Your key is <strong>${result.key}</strong>. <a href="${result.redeemUrl}">Go to Redeem</a> to activate it.`;
 		} catch (error) {
@@ -142,7 +169,7 @@
 	function renderDaily() {
 		const grid = root.querySelector(".shop-grid");
 		grid.replaceChildren();
-		const claimAt = Number(readStorage("sakura-daily-claim", 0)) || 0;
+		const claimAt = Number(readStorage(storageKey("daily-claim"), 0)) || 0;
 		const claimReady = Date.now() - claimAt >= 24 * 60 * 60 * 1000;
 		const resetAt = getNextEstMidnight();
 		const panel = document.createElement("section"); panel.className = "daily-panel";
@@ -150,14 +177,14 @@
 		const items = panel.querySelector(".daily-items"); getRotatedItems("daily").forEach((item) => items.appendChild(renderProductCard(item)));
 		const claimButton = panel.querySelector(".daily-claim");
 		claimButton.onclick = () => {
-			state.balance += 400; saveStorage("sakura-coins", state.balance); saveStorage("sakura-daily-claim", Date.now()); root.querySelector(".shop-message").textContent = "400 Sakura coins added to your balance!"; render();
+			state.balance += 400; saveStorage(storageKey("coins"), state.balance); saveStorage(storageKey("daily-claim"), Date.now()); root.querySelector(".shop-message").textContent = "400 Sakura coins added to your balance!"; render();
 		};
 		grid.appendChild(panel);
 		const dayKey = getEstDayKey();
 		dailyTimer = window.setInterval(() => {
 			if (state.filter !== "Daily") return;
 			if (getEstDayKey() !== dayKey) return render();
-			const claimedAt = Number(readStorage("sakura-daily-claim", 0)) || 0;
+			const claimedAt = Number(readStorage(storageKey("daily-claim"), 0)) || 0;
 			const ready = Date.now() - claimedAt >= 24 * 60 * 60 * 1000;
 			claimButton.disabled = !ready;
 			claimButton.textContent = ready ? "Claim 400 coins" : `Available in ${formatDuration(24 * 60 * 60 * 1000 - (Date.now() - claimedAt))}`;
@@ -180,25 +207,32 @@
 	function buy(item) {
 		const message = root.querySelector(".shop-message");
 		if (state.balance < item.price) { message.textContent = "You need more coins for this item."; return; }
-		state.balance -= item.price; state.owned.push(item.id);
-		saveStorage("sakura-coins", state.balance); saveStorage("sakura-owned", JSON.stringify(state.owned));
+		state.balance -= item.price; state.owned = [...new Set([...state.owned, item.id])];
+		saveStorage(storageKey("coins"), state.balance); saveStorage(storageKey("owned"), JSON.stringify(state.owned));
 		message.textContent = `${item.name} added to your collection!`; render();
 	}
 	async function loadServerBalance() {
 		try {
 			const accountResponse = await fetch("/api/account/me", { cache: "no-store" });
-			if (!accountResponse.ok) return;
+			if (!accountResponse.ok) {
+				loadLocalAccountState();
+				return;
+			}
 			const accountResult = await accountResponse.json();
-			if (!accountResult.authenticated || !accountResult.account?.username) return;
+			const username = accountResult.authenticated ? accountResult.account?.username : null;
+			const shouldMigrate = Boolean(username) && !readStorage("sakura-account-migrated", "");
+			state.account = username ? String(username).trim().toLowerCase() : null;
+			loadLocalAccountState(shouldMigrate);
+			if (!username) return;
 			const response = await fetch("/api/coins", { cache: "no-store" });
 			if (!response.ok) return;
 			const result = await response.json();
 			if (Number.isInteger(result.balance) && result.balance >= 0) {
 				state.balance = result.balance;
-				saveStorage("sakura-coins", result.balance);
+				saveStorage(storageKey("coins"), result.balance);
 			}
 		} catch (_) {
-			// The local balance remains available when the server balance is unavailable.
+			loadLocalAccountState();
 		}
 	}
 	loadServerBalance().finally(render);

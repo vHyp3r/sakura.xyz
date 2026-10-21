@@ -34,23 +34,6 @@ async function setBalance(username, balance, updatedBy) {
     throw new Error('Balance must be a whole number between 0 and 1,000,000,000.');
   }
 
-  async function spendCoins(username, amount) {
-    const normalizedUsername = normalizeUsername(username);
-    const numericAmount = Number(amount);
-    if (!normalizedUsername || !Number.isInteger(numericAmount) || numericAmount < 1) {
-      throw new Error('A valid coin amount is required.');
-    }
-    const status = await getDataStoreStatus();
-    if (!status.connected) throw new Error(status.message);
-    const result = await mongoose.connection.db.collection(COLLECTION_NAME).findOneAndUpdate(
-      { username: normalizedUsername, balance: { $gte: numericAmount } },
-      { $inc: { balance: -numericAmount }, $set: { updatedAt: new Date(), updatedBy: 'rank-shop' } },
-      { returnDocument: 'after' }
-    );
-    if (!result) throw new Error('You do not have enough Sakura coins.');
-    return result;
-  }
-
   const status = await getDataStoreStatus();
   if (!status.connected) throw new Error(status.message);
 
@@ -73,6 +56,23 @@ async function setBalance(username, balance, updatedBy) {
   );
 
   return { username: normalizedUsername, balance: numericBalance, updatedAt: now.toISOString() };
+}
+
+async function spendCoins(username, amount) {
+  const normalizedUsername = normalizeUsername(username);
+  const numericAmount = Number(amount);
+  if (!normalizedUsername || !Number.isInteger(numericAmount) || numericAmount < 1) {
+    throw new Error('A valid coin amount is required.');
+  }
+  const status = await getDataStoreStatus();
+  if (!status.connected) throw new Error(status.message);
+  const result = await mongoose.connection.db.collection(COLLECTION_NAME).findOneAndUpdate(
+    { username: normalizedUsername, balance: { $gte: numericAmount } },
+    { $inc: { balance: -numericAmount }, $set: { updatedAt: new Date(), updatedBy: 'rank-shop' } },
+    { returnDocument: 'after' }
+  );
+  if (!result) throw new Error('You do not have enough Sakura coins.');
+  return result;
 }
 
 async function listBalances(limit = 50) {
