@@ -12,7 +12,7 @@ document.querySelectorAll('[data-version]').forEach((button) => {
 
 input.addEventListener('change', () => {
     const file = input.files[0];
-    if (file) result.textContent = `${file.name} selected (${(file.size / 1024 / 1024).toFixed(1)} MB)`;
+    if (file) result.innerHTML = `<div class="success-message">${file.name} selected (${(file.size / 1024 / 1024).toFixed(1)} MB)</div>`;
 });
 
 form.addEventListener('submit', (event) => {
@@ -34,5 +34,34 @@ form.addEventListener('submit', (event) => {
         result.innerHTML = '<div class="error-message">Choose a target version.</div>';
         return;
     }
-    result.innerHTML = `<div class="success-message">${file.name} is ready for ${targetVersion.value}. Conversion service setup is valid, but no file was uploaded.</div>`;
+    result.innerHTML = '<div class="success-message">Converting pack…</div>';
+    const formData = new FormData();
+    formData.append('pack', file);
+    formData.append('targetVersion', targetVersion.value);
+    fetch('/api/conversion', { method: 'POST', body: formData })
+        .then(async (response) => {
+            if (!response.ok) {
+                const body = await response.text();
+                let message = 'Conversion failed.';
+                try {
+                    message = JSON.parse(body).error || message;
+                } catch (_) {
+                    if (body.trim()) message = body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 180);
+                }
+                throw new Error(message);
+            }
+            const blob = await response.blob();
+            const disposition = response.headers.get('Content-Disposition') || '';
+            const match = disposition.match(/filename="([^"]+)"/i);
+            const downloadName = match ? match[1] : `${file.name}.converted`;
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = downloadName;
+            link.click();
+            URL.revokeObjectURL(link.href);
+            result.innerHTML = `<div class="success-message">${downloadName} is ready and the download has started.</div>`;
+        })
+        .catch((error) => {
+            result.innerHTML = `<div class="error-message">${error.message}</div>`;
+        });
 });

@@ -56,6 +56,7 @@ const discoverRouter = require('./routes/discover');
 const randomRouter = require('./routes/random');
 const dashboardRouter = require('./routes/dashboard');
 const apiRouter = require('./routes/api');
+const converterRouter = require('./routes/converter');
 
 app.use('/', indexRouter);
 app.use('/packs', packsRouter);
@@ -64,6 +65,7 @@ app.use('/search', searchRouter);
 app.use('/discover', discoverRouter);
 app.use('/random', randomRouter);
 app.use('/dashboard', dashboardRouter);
+app.use('/api', converterRouter);
 app.use('/api', apiRouter);
 
 app.use((err, req, res, next) => {
