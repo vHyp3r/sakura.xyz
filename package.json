@@ -8,7 +8,7 @@
     "dev": "nodemon server.js",
     "build-css": "tailwindcss -i ./src/css/input.css -o ./public/css/tailwind.css",
     "watch-css": "tailwindcss -i ./src/css/input.css -o ./public/css/tailwind.css --watch",
-    "test": "node --check server.js && node --check routes/index.js && node --check routes/packs.js && node --check routes/search.js && node --check routes/discover.js && node --check routes/random.js && node --check routes/upload.js && node --check routes/converter.js && node --check src/services/packService.js && node --check src/services/packConverter.js"
+    "test": "node --check server.js && node --check routes/index.js && node --check routes/packs.js && node --check routes/search.js && node --check routes/discover.js && node --check routes/random.js && node --check routes/upload.js && node --check routes/converter.js && node --check src/services/packService.js && node --check src/services/packConverter.js && node --check models/PackView.js"
   },
   "repository": {
     "type": "git",

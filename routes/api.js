@@ -1,5 +1,6 @@
 const express = require('express');
 const multer = require('multer');
+const crypto = require('crypto');
 const {
   getDashboardSummary: getMongoDashboardSummary,
   getDataStoreStatus,
@@ -22,7 +23,7 @@ const {
 const { getBalance, listBalances, setBalance } = require('../src/services/coinService');
 const { clearAccountSession, getAccountSession, setAccountSession } = require('../src/services/accountAuth');
 const { authenticateAccount, getAccountById, registerAccount, resetAccountPassword, searchAccounts, toggleAccountPack, updateAccount, updateAccountRank } = require('../src/services/accountService');
-const { addPackComment, getPackById, getPacksByIds, incrementViews, storePackBuffer, togglePackList } = require('../src/services/packService');
+const { addPackComment, getPackById, getPacksByIds, recordPackView, storePackBuffer, togglePackList } = require('../src/services/packService');
 const Pack = require('../models/Pack');
 const { BADGES, RANKS } = require('../src/services/ranks');
 
@@ -182,9 +183,14 @@ router.get('/account/summary', async (req, res, next) => {
 
 router.post('/packs/:id/view', async (req, res, next) => {
   try {
-    const pack = await incrementViews(req.params.id);
+    const session = getAccountSession(req);
+    const visitorSource = session?.accountId
+      ? `account:${session.accountId}`
+      : `visitor:${req.ip}|${req.get('user-agent') || 'unknown'}`;
+    const visitorKey = crypto.createHash('sha256').update(visitorSource).digest('hex');
+    const pack = await recordPackView(req.params.id, visitorKey);
     if (!pack) return res.status(404).json({ error: 'Pack not found.' });
-    res.json({ views: pack.views });
+    res.json({ views: pack.views, counted: pack.counted });
   } catch (error) {
     next(error);
   }

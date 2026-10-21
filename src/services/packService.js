@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const fs = require('fs');
 const Pack = require('../../models/Pack');
+const PackView = require('../../models/PackView');
 
 function normalizeTags(tags) {
   const values = Array.isArray(tags) ? tags : String(tags || '').split(',');
@@ -79,7 +80,27 @@ async function incrementDownloads(id) {
 
 async function incrementViews(id) {
   if (!mongoose.isValidObjectId(id)) return null;
-  return Pack.findByIdAndUpdate(id, { $inc: { views: 1 } }, { new: true }).lean();
+  return Pack.findById(id).select('_id views').lean();
+}
+
+async function recordPackView(id, visitorKey) {
+  if (!mongoose.isValidObjectId(id) || !visitorKey) return null;
+  const pack = await Pack.findById(id).select('_id views').lean();
+  if (!pack) return null;
+
+  try {
+    await PackView.create({
+      packId: id,
+      visitorKey: String(visitorKey),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+  } catch (error) {
+    if (error?.code === 11000) return { ...pack, counted: false };
+    throw error;
+  }
+
+  const updated = await Pack.findByIdAndUpdate(id, { $inc: { views: 1 } }, { new: true }).lean();
+  return updated ? { ...updated, counted: true } : null;
 }
 
 async function togglePackList(id, field, accountId) {
@@ -114,6 +135,7 @@ module.exports = {
   createPack,
   incrementDownloads,
   incrementViews,
+  recordPackView,
   togglePackList,
   addPackComment,
   normalizeTags,

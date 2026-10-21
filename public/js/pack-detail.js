@@ -136,7 +136,10 @@
   });
 
   request(`/api/packs/${packId}/view`, { method: 'POST' })
-    .then((result) => { document.querySelector('#packViews').textContent = Number(result.views).toLocaleString(); })
+    .then((result) => {
+      document.querySelector('#packViews').textContent = Number(result.views).toLocaleString();
+      if (!result.counted) setStatus('View already counted for this visitor today.');
+    })
     .catch(() => {});
   loadComments().catch((error) => setStatus(error.message));
 
