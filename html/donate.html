@@ -10,11 +10,20 @@
   <nav class="section-nav" aria-label="Sakura sections"><a href="/">🌸 sakura<span>.xyz</span></a><div class="links"><a href="/shop">Shop</a><a class="active" href="/donate">Donate</a><a href="/redeem">Redeem</a></div></nav>
   <main class="sakura-shop donation-page">
     <h1>Support Sakura</h1>
-    <p class="shop-sub">Donate at least $1 USD in crypto to receive a Donator rank key after verification.</p>
+    <p class="shop-sub">Send at least $1 USD in crypto, then submit the transaction hash to receive a Donator rank key after verification.</p>
     <section class="donation-address">
       <strong>Donation address</strong>
+      <label for="currency">Currency</label>
+      <select id="currency" name="currency">
+        <option value="BTC">Bitcoin (BTC)</option>
+        <option value="LTC">Litecoin (LTC)</option>
+        <option value="ETH">Ethereum (ETH)</option>
+        <option value="SOL">Solana (SOL)</option>
+        <option value="XMR">Monero (XMR)</option>
+        <option value="USDT">USDT (Ethereum)</option>
+      </select>
       <code id="donation-address">Loading address…</code>
-      <small>Only send crypto on the configured network. Transactions are reviewed before a key is issued.</small>
+      <small>Send at least $1 USD equivalent to the selected address first. After the payment is confirmed, paste its transaction hash below. The current automatic watcher supports USDT on Ethereum.</small>
     </section>
     <form id="donation-form" class="redeem-form">
       <label for="amount">Donation amount (USD)</label>
@@ -29,9 +38,17 @@
   <script>
     const form = document.querySelector('#donation-form');
     const message = document.querySelector('#donation-message');
+    let donationInfo = { addresses: {} };
+    const currency = document.querySelector('#currency');
+    const address = document.querySelector('#donation-address');
+    const updateAddress = () => {
+      address.textContent = donationInfo.addresses?.[currency.value] || 'This currency is not configured yet.';
+    };
     fetch('/api/ranks/donation-info').then(response => response.json()).then(result => {
-      document.querySelector('#donation-address').textContent = result.address || 'Donation address is not configured yet.';
-    });
+      donationInfo = result;
+      updateAddress();
+    }).catch(() => { address.textContent = 'Unable to load donation configuration.'; });
+    currency.addEventListener('change', updateAddress);
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       message.textContent = 'Submitting donation for review…';
@@ -45,7 +62,7 @@
         message.textContent = result.error || 'Could not submit donation.';
         return;
       }
-      message.textContent = `${result.message} Keep this page open to check its status.`;
+      message.textContent = `${result.message} Donation ID: ${result.id}. Keep this page open to check its status.`;
       const poll = async () => {
         const statusResponse = await fetch(`/api/ranks/donations/${result.id}`);
         const status = await statusResponse.json();

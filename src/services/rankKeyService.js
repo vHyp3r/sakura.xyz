@@ -67,6 +67,7 @@ async function createDonationRequest(username, amount, transactionId) {
   if (!Number.isFinite(normalizedAmount) || normalizedAmount < 1) {
     throw new Error('The minimum donation is $1 USD.');
   }
+
   if (!normalizedTransactionId) throw new Error('Enter the crypto transaction ID.');
 
   const collection = (await getAccountConnection()).db.collection('rankDonations');
@@ -82,6 +83,59 @@ async function createDonationRequest(username, amount, transactionId) {
   };
   const result = await collection.insertOne(donation);
   return { id: result.insertedId.toString(), status: donation.status };
+}
+
+async function verifyDonationPayment({ id, currency, destinationAddress, amountUsd, transactionId, confirmations }) {
+  const { ObjectId } = require('mongodb');
+  if (!ObjectId.isValid(id)) throw new Error('Donation request not found.');
+  const normalizedCurrency = String(currency || '').trim().toUpperCase();
+  const normalizedTransactionId = String(transactionId || '').trim().slice(0, 160);
+  const numericAmount = Number(amountUsd);
+  const minimumConfirmations = Number(process.env.DONATION_MIN_CONFIRMATIONS || 1);
+  const expectedAddresses = {
+    BTC: process.env.DONATION_BTC_ADDRESS,
+    LTC: process.env.DONATION_LTC_ADDRESS,
+    ETH: process.env.DONATION_ETH_ADDRESS,
+    SOL: process.env.DONATION_SOL_ADDRESS,
+    XMR: process.env.DONATION_XMR_ADDRESS,
+    USDT: process.env.DONATION_USDT_ETH_ADDRESS,
+  };
+
+  if (!expectedAddresses[normalizedCurrency]) throw new Error('That currency is not configured.');
+  if (String(destinationAddress || '').trim() !== expectedAddresses[normalizedCurrency]) {
+    throw new Error('The payment destination does not match the configured wallet.');
+  }
+  if (!Number.isFinite(numericAmount) || numericAmount < 1) throw new Error('The payment is below the $1 minimum.');
+  if (!normalizedTransactionId) throw new Error('A transaction ID is required.');
+  if (!Number.isFinite(Number(confirmations)) || Number(confirmations) < minimumConfirmations) {
+    throw new Error('The payment does not have enough confirmations.');
+  }
+
+  const collection = (await getAccountConnection()).db.collection('rankDonations');
+  const donation = await collection.findOne({ _id: new ObjectId(id), status: 'pending' });
+  if (!donation) throw new Error('Donation request not found or already processed.');
+  if (numericAmount < Number(donation.amount)) throw new Error('The payment is below the requested amount.');
+
+  const duplicate = await collection.findOne({
+    transactionId: normalizedTransactionId,
+    status: 'verified',
+  });
+  if (duplicate) throw new Error('That transaction has already been processed.');
+
+  const issued = await issueRankKey(donation.username, 'donator', 'crypto-webhook');
+  await collection.updateOne({ _id: donation._id, status: 'pending' }, {
+    $set: {
+      status: 'verified',
+      currency: normalizedCurrency,
+      destinationAddress: expectedAddresses[normalizedCurrency],
+      paidAmountUsd: numericAmount,
+      transactionId: normalizedTransactionId,
+      confirmations: Number(confirmations),
+      verifiedAt: new Date(),
+      key: issued.key,
+    },
+  });
+  return { id, status: 'verified', key: issued.key };
 }
 
 async function getDonationRequest(id, username) {
@@ -113,4 +167,5 @@ module.exports = {
   getDonationRequest,
   issueRankKey,
   redeemRankKey,
+  verifyDonationPayment,
 };

@@ -123,6 +123,10 @@ npm run dev
 - `POST /api/account/login` - Sign in
 - `GET /api/account/me` - Read the signed-in account
 - `POST /api/account/logout` - Sign out
+- `GET /api/ranks/donation-info` - Read configured donation addresses
+- `POST /api/ranks/donations` - Create a donation request while signed in
+- `GET /api/ranks/donations/:id` - Read the signed-in user's donation status
+- `POST /api/ranks/donations/webhook` - Verify a signed wallet watcher event and issue a Donator key
 
 - `GET /` - Home page
 - `GET /packs` - List all texture packs
@@ -133,6 +137,31 @@ npm run dev
 - `GET /search` - Search texture packs
 - `GET /discover` - Discover popular packs
 - `GET /random` - Redirect to random pack
+
+### Wallet donation webhook
+
+Configure the wallet addresses and `DONATION_WEBHOOK_SECRET` in `.env` using
+the variables documented in `.env.example`. A wallet watcher must first create
+a donation request through `/api/ranks/donations`, then send a signed JSON
+event to `/api/ranks/donations/webhook`:
+
+```json
+{
+  "id": "donation-request-id",
+  "currency": "USDT",
+  "destinationAddress": "configured Ethereum USDT address",
+  "amountUsd": 1.25,
+  "transactionId": "blockchain-transaction-id",
+  "confirmations": 12
+}
+```
+
+The watcher signs `${timestamp}.${JSON.stringify(body)}` with HMAC-SHA256
+using `DONATION_WEBHOOK_SECRET`, then sends the hex digest in
+`x-donation-signature` and the Unix timestamp in `x-donation-timestamp`.
+USDT is interpreted as an Ethereum payment. The endpoint checks the configured
+destination, minimum amount, confirmations, and transaction replay before
+issuing a one-time Donator key.
 
 ## Account database
 

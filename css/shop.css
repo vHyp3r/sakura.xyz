@@ -118,6 +118,8 @@ body {
 .donation-address { display: grid; gap: 0.45rem; max-width: 44rem; margin-top: 1.5rem; padding: 1rem; border: 1px solid rgba(244, 114, 182, 0.2); border-radius: 0.75rem; background: rgba(236, 72, 153, 0.08); }
 .donation-address code { overflow-wrap: anywhere; color: var(--shop-pink-light); }
 .donation-address small { color: var(--shop-muted); }
+.donation-address label { color: var(--shop-muted); font-size: 0.8rem; font-weight: 700; }
+.donation-address select { padding: 0.65rem 0.75rem; border: 1px solid var(--shop-border); border-radius: 0.6rem; background: var(--shop-surface-strong); color: var(--shop-ink); font: inherit; }
 .daily-panel { grid-column: 1 / -1; padding: 1.25rem; border: 1px solid rgba(244, 114, 182, 0.2); border-radius: 1rem; background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(17, 17, 22, 0.92)); }
 .daily-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
 .daily-head h2 { margin: 0.2rem 0; font-size: 1.35rem; }

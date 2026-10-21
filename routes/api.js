@@ -26,7 +26,13 @@ const { authenticateAccount, getAccountById, registerAccount, resetAccountPasswo
 const { addPackComment, getPackById, getPacksByIds, recordPackView, storePackBuffer, togglePackList } = require('../src/services/packService');
 const Pack = require('../models/Pack');
 const { BADGES, RANKS } = require('../src/services/ranks');
-const { approveDonation, createDonationRequest, getDonationRequest, issueRankKey, redeemRankKey } = require('../src/services/rankKeyService');
+const {
+  approveDonation,
+  createDonationRequest,
+  getDonationRequest,
+  redeemRankKey,
+  verifyDonationPayment,
+} = require('../src/services/rankKeyService');
 
 const router = express.Router();
 const packEditUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 300 * 1024 * 1024 } });
@@ -310,11 +316,44 @@ router.post('/ranks/donations', async (req, res, next) => {
 });
 
 router.get('/ranks/donation-info', (req, res) => {
+  const addresses = {
+    BTC: process.env.DONATION_BTC_ADDRESS || '',
+    LTC: process.env.DONATION_LTC_ADDRESS || '',
+    ETH: process.env.DONATION_ETH_ADDRESS || '',
+    SOL: process.env.DONATION_SOL_ADDRESS || '',
+    XMR: process.env.DONATION_XMR_ADDRESS || '',
+    USDT: process.env.DONATION_USDT_ETH_ADDRESS || '',
+  };
   res.json({
-    address: process.env.DONATION_CRYPTO_ADDRESS || '',
-    network: process.env.DONATION_CRYPTO_NETWORK || '',
+    addresses,
+    networks: { USDT: 'Ethereum' },
     minimumUsd: 1,
   });
+});
+
+router.post('/ranks/donations/webhook', async (req, res, next) => {
+  try {
+    const secret = process.env.DONATION_WEBHOOK_SECRET;
+    const timestamp = String(req.get('x-donation-timestamp') || '');
+    const signature = String(req.get('x-donation-signature') || '');
+    if (!secret || !timestamp || !signature) return res.status(401).json({ error: 'Webhook authentication is not configured.' });
+    const timestampNumber = Number(timestamp);
+    if (!Number.isFinite(timestampNumber) || Math.abs(Date.now() - timestampNumber * 1000) > 5 * 60 * 1000) {
+      return res.status(401).json({ error: 'Webhook timestamp is expired.' });
+    }
+    const payload = `${timestamp}.${JSON.stringify(req.body)}`;
+    const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+    if (signature.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
+      return res.status(401).json({ error: 'Invalid webhook signature.' });
+    }
+    const result = await verifyDonationPayment(req.body);
+    res.json(result);
+  } catch (error) {
+    if (/configured|destination|minimum|transaction|confirmations|processed|requested|not found/.test(error.message)) {
+      return res.status(400).json({ error: error.message });
+    }
+    next(error);
+  }
 });
 
 router.get('/ranks/donations/:id', async (req, res, next) => {
