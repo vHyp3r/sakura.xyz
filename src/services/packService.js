@@ -46,6 +46,16 @@ async function storePackFile(filePath, filename, contentType = 'application/octe
   });
 }
 
+async function storePackBuffer(buffer, filename, contentType = 'application/octet-stream') {
+  if (mongoose.connection.readyState !== 1) throw new Error('MongoDB must be connected to store pack files.');
+  const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'packFiles' });
+  return new Promise((resolve, reject) => {
+    const upload = bucket.openUploadStream(filename, { contentType });
+    upload.on('error', reject).on('finish', () => resolve(upload.id));
+    upload.end(buffer);
+  });
+}
+
 async function getPackFileStream(fileStorageId) {
   if (!fileStorageId || mongoose.connection.readyState !== 1) return null;
   if (!mongoose.isValidObjectId(fileStorageId)) return null;
@@ -99,6 +109,7 @@ module.exports = {
   getPackById,
   getPacksByIds,
   storePackFile,
+  storePackBuffer,
   getPackFileStream,
   createPack,
   incrementDownloads,

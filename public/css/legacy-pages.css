@@ -100,8 +100,9 @@
 .detail-stats strong { color:#fff; font-size:15px; }
 .detail-stats span { margin-top:4px; color:#77818a; font:9px ui-monospace,monospace; }
 .edition-switch { display:flex; gap:4px; margin:0 18px 10px; padding:4px; border:1px solid #30363b; border-radius:8px; }
-.edition-switch span { flex:1; padding:7px 4px; border-radius:5px; color:#8c959e; font-size:10px; text-align:center; }
+.edition-switch span,.edition-switch button { flex:1; padding:7px 4px; border:0; border-radius:5px; background:transparent; color:#8c959e; font:inherit; font-size:10px; text-align:center; cursor:pointer; }
 .edition-switch .active { background:rgba(236,72,153,.13); color:#f9a8d4; }
+.edition-switch button:disabled { cursor:not-allowed; opacity:.45; }
 .version-select { display:flex; justify-content:space-between; margin:0 18px 10px; padding:11px; border:1px solid #30363b; border-radius:8px; color:#d9dde1; font-size:11px; }
 .detail-download,.detail-unavailable,.detail-secondary { display:block; margin:0 18px 10px; padding:12px; border-radius:8px; text-align:center; text-decoration:none; font-size:12px; font-weight:700; }
 .detail-download { background:#ec4899; color:#160811; }
@@ -113,6 +114,11 @@
 .detail-actions button { width:100%; padding:9px; border:1px solid #30363b; border-radius:8px; background:#20252a; color:#aeb5bc; cursor:pointer; }
 .detail-actions button:hover,.detail-actions button:focus-visible { border-color:#ec4899; color:#f9a8d4; }
 .detail-action-status { min-height:18px; margin:0; padding:0 18px 14px; color:#f9a8d4; font-size:11px; }
+.pack-edit-form { display:grid; gap:8px; margin:0 18px 16px; padding:12px; border:1px solid rgba(236,72,153,.35); border-radius:10px; }
+.pack-edit-form label { display:grid; gap:4px; color:#aeb5bd; font-size:11px; }
+.pack-edit-form input { width:100%; }
+.pack-edit-form button { padding:8px; border:0; border-radius:7px; background:#ec4899; color:#160811; cursor:pointer; }
+.pack-edit-form p { min-height:1em; margin:0; color:#f9a8d4; font-size:11px; }
 .pack-comments { margin-top:28px; padding:22px; border:1px solid #2b3035; border-radius:15px; background:#191d20; }
 .pack-comments-heading { display:flex; justify-content:space-between; align-items:center; }
 .pack-comments h2 { margin:0; color:#fff; font:700 18px 'Space Grotesk',sans-serif; }

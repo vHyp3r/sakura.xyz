@@ -19,8 +19,8 @@
           <div><strong id="packViews"><%= (pack.views || 0).toLocaleString() %></strong><span>VIEWS</span></div>
           <div><strong id="packLikes"><%= (pack.likedBy || []).length %></strong><span>LIKES</span></div>
         </div>
-        <div class="edition-switch"><span class="active">◈ Bedrock</span><span>Java Edition</span></div>
-        <div class="version-select">✓ Minecraft Bedrock <span>⌄</span></div>
+        <div class="edition-switch"><button type="button" class="active" data-edition="bedrock">◈ Bedrock</button><button type="button" data-edition="java" <%= pack.javaFileStorageId ? '' : 'disabled' %>>Java Edition</button></div>
+        <div class="version-select" id="versionSelect">✓ Minecraft Bedrock <span><%= pack.bedrockVersion || 'Version not specified' %></span></div>
         <% if (fileAvailable) { %><a class="detail-download" href="/packs/<%= pack._id %>/download">⇩ &nbsp; DOWNLOAD</a><% } else { %><div class="detail-unavailable">Download file unavailable</div><% } %>
         <button class="detail-secondary" id="savePackButton" type="button">＋ ADD TO LIBRARY</button>
         <div class="detail-actions" aria-label="Pack actions">
@@ -30,6 +30,16 @@
           <button id="superReactButton" type="button" title="Send a super reaction">⌯</button>
         </div>
         <p class="detail-action-status" id="packActionStatus" aria-live="polite"></p>
+        <% if (isOwner) { %>
+          <form class="pack-edit-form" id="packEditForm" enctype="multipart/form-data">
+            <strong>Update your pack</strong>
+            <label>Bedrock version<input name="bedrockVersion" value="<%= pack.bedrockVersion || '' %>" placeholder="e.g. 1.21.11"></label>
+            <label>Java version<input name="javaVersion" value="<%= pack.javaVersion || '' %>" placeholder="e.g. 1.21.1"></label>
+            <label>Java pack (.zip)<input name="javaFile" type="file" accept=".zip"></label>
+            <button type="submit">Save pack details</button>
+            <p id="packEditStatus" aria-live="polite"></p>
+          </form>
+        <% } %>
       </aside>
     </div>
     <section class="pack-comments" id="packComments" aria-labelledby="commentsTitle">
@@ -44,6 +54,7 @@
   </main>
   <script src="/js/main.js"></script>
   <script>window.packId = '<%= pack._id %>';</script>
-  <script src="/js/pack-detail.js"></script>
+  <script>window.packJavaAvailable = <%= Boolean(pack.javaFileStorageId) %>; window.packIsOwner = <%= Boolean(isOwner) %>; window.packBedrockVersion = <%- JSON.stringify(pack.bedrockVersion || '') %>; window.packJavaVersion = <%- JSON.stringify(pack.javaVersion || '') %>;</script>
+  <script src="/js/pack-detail.js?v=20261021-2"></script>
 </body>
 </html>

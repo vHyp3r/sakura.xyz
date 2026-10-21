@@ -12,6 +12,11 @@
   const commentCount = document.querySelector('#commentCount');
   const commentForm = document.querySelector('#commentForm');
   const commentBody = document.querySelector('#commentBody');
+  const editionButtons = document.querySelectorAll('[data-edition]');
+  const versionSelect = document.querySelector('#versionSelect');
+  const packEditForm = document.querySelector('#packEditForm');
+  const packEditStatus = document.querySelector('#packEditStatus');
+  let selectedEdition = 'bedrock';
 
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
@@ -24,7 +29,11 @@
   };
 
   const request = async (url, options = {}) => {
-    const response = await fetch(url, { ...options, headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } });
+    const isFormData = options.body instanceof FormData;
+    const response = await fetch(url, {
+      ...options,
+      headers: isFormData ? (options.headers || {}) : { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || 'Unable to complete that action.');
     return result;
@@ -98,6 +107,33 @@
       loadComments().catch((error) => setStatus(error.message));
     }
   };
+
+  editionButtons.forEach((button) => button.addEventListener('click', () => {
+    if (button.disabled) return;
+    selectedEdition = button.dataset.edition;
+    editionButtons.forEach((item) => item.classList.toggle('active', item === button));
+    const version = selectedEdition === 'java'
+      ? (window.packJavaVersion || 'Version not specified')
+      : (window.packBedrockVersion || 'Version not specified');
+    versionSelect.innerHTML = `✓ Minecraft ${selectedEdition === 'java' ? 'Java' : 'Bedrock'} <span>${escapeHtml(version)}</span>`;
+    const download = document.querySelector('.detail-download');
+    if (download) download.href = `/packs/${packId}/download${selectedEdition === 'java' ? '?edition=java' : ''}`;
+  }));
+
+  packEditForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    packEditStatus.textContent = 'Saving…';
+    try {
+      const result = await request(`/api/packs/${packId}`, { method: 'PATCH', body: new FormData(packEditForm) });
+      window.packBedrockVersion = result.pack.bedrockVersion || '';
+      window.packJavaVersion = result.pack.javaVersion || '';
+      const javaButton = document.querySelector('[data-edition="java"]');
+      if (javaButton && result.pack.javaFileStorageId) javaButton.disabled = false;
+      packEditStatus.textContent = 'Pack details saved.';
+    } catch (error) {
+      packEditStatus.textContent = error.message;
+    }
+  });
 
   request(`/api/packs/${packId}/view`, { method: 'POST' })
     .then((result) => { document.querySelector('#packViews').textContent = Number(result.views).toLocaleString(); })

@@ -58,8 +58,12 @@ router.get('/:id/download', async (req, res, next) => {
         return res.status(404).send('Pack file not found.');
     }
 
-        const filePath = pack.file
-            ? path.join(__dirname, '..', 'public', pack.file.replace(/^\//, ''))
+        const isJava = req.query.edition === 'java';
+        const fileStorageId = isJava ? pack.javaFileStorageId : pack.fileStorageId;
+        const storedPath = isJava ? pack.javaFile : pack.file;
+        const originalFileName = isJava ? pack.originalJavaFileName : pack.originalFileName;
+        const filePath = storedPath
+            ? path.join(__dirname, '..', 'public', storedPath.replace(/^\//, ''))
             : null;
         if (filePath && fs.existsSync(filePath)) {
             await incrementDownloads(pack._id);
@@ -68,7 +72,7 @@ router.get('/:id/download', async (req, res, next) => {
             });
         }
 
-        const storedFile = await getPackFileStream(pack.fileStorageId);
+        const storedFile = await getPackFileStream(fileStorageId);
         if (!storedFile) {
             return res.status(404).render('error', {
                 title: 'Pack File Unavailable',
@@ -78,7 +82,7 @@ router.get('/:id/download', async (req, res, next) => {
 
         await incrementDownloads(pack._id);
         res.setHeader('Content-Type', storedFile.file.contentType || 'application/octet-stream');
-        res.setHeader('Content-Disposition', `attachment; filename="${path.basename(pack.originalFileName || storedFile.file.filename)}"`);
+        res.setHeader('Content-Disposition', `attachment; filename="${path.basename(originalFileName || storedFile.file.filename)}"`);
         storedFile.bucket.openDownloadStream(storedFile.file._id).on('error', next).pipe(res);
     } catch (error) {
         next(error);

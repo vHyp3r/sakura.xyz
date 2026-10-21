@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 const {
   getDashboardSummary: getMongoDashboardSummary,
   getDataStoreStatus,
@@ -21,11 +22,40 @@ const {
 const { getBalance, listBalances, setBalance } = require('../src/services/coinService');
 const { clearAccountSession, getAccountSession, setAccountSession } = require('../src/services/accountAuth');
 const { authenticateAccount, getAccountById, registerAccount, resetAccountPassword, searchAccounts, toggleAccountPack, updateAccount, updateAccountRank } = require('../src/services/accountService');
-const { addPackComment, getPackById, getPacksByIds, incrementViews, togglePackList } = require('../src/services/packService');
+const { addPackComment, getPackById, getPacksByIds, incrementViews, storePackBuffer, togglePackList } = require('../src/services/packService');
 const Pack = require('../models/Pack');
 const { BADGES, RANKS } = require('../src/services/ranks');
 
 const router = express.Router();
+const packEditUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 300 * 1024 * 1024 } });
+
+router.patch('/packs/:id', packEditUpload.single('javaFile'), async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    const pack = await getPackById(req.params.id);
+    if (!session) return res.status(401).json({ error: 'Account authentication required.' });
+    if (!pack) return res.status(404).json({ error: 'Pack not found.' });
+    const ownsPack = (pack.uploaderId && String(pack.uploaderId) === String(session.accountId))
+      || (!pack.uploaderId && pack.uploader?.toLowerCase() === session.username?.toLowerCase());
+    if (!ownsPack) return res.status(403).json({ error: 'Only the pack owner can edit this pack.' });
+    const updates = {
+      bedrockVersion: String(req.body.bedrockVersion || '').trim().slice(0, 40),
+      javaVersion: String(req.body.javaVersion || '').trim().slice(0, 40),
+    };
+    if (req.file) {
+      if (!/\.zip$/i.test(req.file.originalname)) return res.status(400).json({ error: 'Java Edition files must be .zip archives.' });
+      updates.javaFileStorageId = await storePackBuffer(req.file.buffer, req.file.originalname, req.file.mimetype || 'application/zip');
+      updates.javaFile = `/uploads/java-${Date.now()}-${req.file.originalname.replace(/[^a-z0-9._-]/gi, '-')}`;
+      updates.originalJavaFileName = req.file.originalname;
+    }
+    const updated = await Pack.findByIdAndUpdate(req.params.id, { $set: updates }, { new: true })
+      .select('_id name bedrockVersion javaVersion javaFileStorageId originalJavaFileName')
+      .lean();
+    res.json({ pack: updated });
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.post('/account/register', async (req, res, next) => {
   try {
