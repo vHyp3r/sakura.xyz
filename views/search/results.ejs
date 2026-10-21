@@ -37,6 +37,17 @@
                         Search
                     </button>
                 </form>
+                <div class="mb-8">
+                    <p class="mb-3 text-sm font-medium text-gray-500">Popular search terms</p>
+                    <div class="flex flex-wrap gap-2">
+                        <% searchTerms.forEach(function(term) { %>
+                            <a href="/search?q=<%= encodeURIComponent(term) %>"
+                                class="rounded-full bg-pink-50 px-3 py-1.5 text-sm font-medium text-pink-700 transition-colors hover:bg-pink-100">
+                                <%= term %>
+                            </a>
+                        <% }); %>
+                    </div>
+                </div>
 
                 <% if (results.length > 0) { %>
                     <div class="mb-6">

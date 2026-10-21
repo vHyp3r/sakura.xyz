@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Donate for Donator</title>
+  <link rel="stylesheet" href="/admin-assets/shop.css">
+</head>
+<body>
+  <nav class="section-nav" aria-label="Sakura sections"><a href="/">🌸 sakura<span>.xyz</span></a><div class="links"><a href="/shop">Shop</a><a class="active" href="/donate">Donate</a><a href="/redeem">Redeem</a></div></nav>
+  <main class="sakura-shop donation-page">
+    <h1>Support Sakura</h1>
+    <p class="shop-sub">Donate at least $1 USD in crypto to receive a Donator rank key after verification.</p>
+    <section class="donation-address">
+      <strong>Donation address</strong>
+      <code id="donation-address">Loading address…</code>
+      <small>Only send crypto on the configured network. Transactions are reviewed before a key is issued.</small>
+    </section>
+    <form id="donation-form" class="redeem-form">
+      <label for="amount">Donation amount (USD)</label>
+      <input id="amount" name="amount" type="number" min="1" step="0.01" required>
+      <label for="transaction-id">Crypto transaction ID</label>
+      <input id="transaction-id" name="transactionId" required maxlength="160" placeholder="Transaction hash">
+      <button class="shop-buy" type="submit">Submit donation</button>
+    </form>
+    <p id="donation-message" class="shop-message" aria-live="polite"></p>
+    <p><a href="/redeem">Already have a key? Redeem it here.</a></p>
+  </main>
+  <script>
+    const form = document.querySelector('#donation-form');
+    const message = document.querySelector('#donation-message');
+    fetch('/api/ranks/donation-info').then(response => response.json()).then(result => {
+      document.querySelector('#donation-address').textContent = result.address || 'Donation address is not configured yet.';
+    });
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      message.textContent = 'Submitting donation for review…';
+      const response = await fetch('/api/ranks/donations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: form.amount.value, transactionId: form.transactionId.value })
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        message.textContent = result.error || 'Could not submit donation.';
+        return;
+      }
+      message.textContent = `${result.message} Keep this page open to check its status.`;
+      const poll = async () => {
+        const statusResponse = await fetch(`/api/ranks/donations/${result.id}`);
+        const status = await statusResponse.json();
+        if (status.donation?.status === 'approved' && status.donation.key) {
+          message.textContent = `Verified! Your Donator key is ${status.donation.key}. Redeem it now at /redeem.`;
+          return;
+        }
+        window.setTimeout(poll, 10000);
+      };
+      poll();
+    });
+  </script>
+</body>
+</html>

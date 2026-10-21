@@ -20,12 +20,13 @@ const {
   requireAdmin,
   setAdminSession,
 } = require('../src/services/adminAuth');
-const { getBalance, listBalances, setBalance } = require('../src/services/coinService');
+const { getBalance, listBalances, setBalance, spendCoins } = require('../src/services/coinService');
 const { clearAccountSession, getAccountSession, setAccountSession } = require('../src/services/accountAuth');
 const { authenticateAccount, getAccountById, registerAccount, resetAccountPassword, searchAccounts, toggleAccountPack, updateAccount, updateAccountRank } = require('../src/services/accountService');
 const { addPackComment, getPackById, getPacksByIds, recordPackView, storePackBuffer, togglePackList } = require('../src/services/packService');
 const Pack = require('../models/Pack');
 const { BADGES, RANKS } = require('../src/services/ranks');
+const { approveDonation, createDonationRequest, getDonationRequest, issueRankKey, redeemRankKey } = require('../src/services/rankKeyService');
 
 const router = express.Router();
 const packEditUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 300 * 1024 * 1024 } });
@@ -267,6 +268,67 @@ router.get('/coins', async (req, res, next) => {
   }
 });
 
+router.post('/ranks/purchase', async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    if (!session) return res.status(401).json({ error: 'Account authentication required.' });
+    const rank = String(req.body.rank || '').trim().toLowerCase();
+    const prices = { vip: 2500, mvp: 5000 };
+    if (!prices[rank]) return res.status(400).json({ error: 'That rank is not available for coin purchase.' });
+    await spendCoins(session.username, prices[rank]);
+    const issued = await issueRankKey(session.username, rank);
+    res.status(201).json({ rank, key: issued.key, redeemUrl: '/redeem' });
+  } catch (error) {
+    if (/coins|rank|amount|account/.test(error.message)) return res.status(400).json({ error: error.message });
+    next(error);
+  }
+});
+
+router.post('/ranks/redeem', async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    if (!session) return res.status(401).json({ error: 'Account authentication required.' });
+    const redeemed = await redeemRankKey(req.body.key, session.username);
+    const account = await updateAccountRank(session.username, redeemed.rank);
+    res.json({ redeemed: true, rank: account.rank });
+  } catch (error) {
+    if (/valid rank key|invalid|redeemed|account/.test(error.message)) return res.status(400).json({ error: error.message });
+    next(error);
+  }
+});
+
+router.post('/ranks/donations', async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    if (!session) return res.status(401).json({ error: 'Account authentication required.' });
+    const donation = await createDonationRequest(session.username, req.body.amount, req.body.transactionId);
+    res.status(201).json({ ...donation, message: 'Donation submitted for verification. Your Donator key will appear here after approval.' });
+  } catch (error) {
+    if (/minimum|transaction|already/.test(error.message)) return res.status(400).json({ error: error.message });
+    next(error);
+  }
+});
+
+router.get('/ranks/donation-info', (req, res) => {
+  res.json({
+    address: process.env.DONATION_CRYPTO_ADDRESS || '',
+    network: process.env.DONATION_CRYPTO_NETWORK || '',
+    minimumUsd: 1,
+  });
+});
+
+router.get('/ranks/donations/:id', async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    if (!session) return res.status(401).json({ error: 'Account authentication required.' });
+    const donation = await getDonationRequest(req.params.id, session.username);
+    if (!donation) return res.status(404).json({ error: 'Donation request not found.' });
+    res.json({ donation });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get('/admin/balances', requireAdmin, async (req, res, next) => {
   try {
     res.json({ balances: await listBalances(req.query.limit) });
@@ -313,6 +375,17 @@ router.post('/admin/accounts/rank', requireAdmin, async (req, res, next) => {
     const account = await updateAccountRank(req.body.identifier, req.body.rank, req.body.badges);
     if (!account) return res.status(404).json({ error: 'Account not found.' });
     res.json({ updated: true, account });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/admin/rank-donations/:id/approve', requireAdmin, async (req, res, next) => {
+  try {
+    const session = getAdminSession(req);
+    const result = await approveDonation(req.params.id, session.username);
+    if (!result) return res.status(404).json({ error: 'Pending donation not found.' });
+    res.json(result);
   } catch (error) {
     next(error);
   }

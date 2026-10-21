@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redeem a rank key</title>
+  <link rel="stylesheet" href="/admin-assets/shop.css">
+</head>
+<body>
+  <nav class="section-nav" aria-label="Sakura sections"><a href="/">🌸 sakura<span>.xyz</span></a><div class="links"><a href="/shop">Shop</a><a class="active" href="/redeem">Redeem</a><a href="/profile">Profile</a></div></nav>
+  <main class="sakura-shop redeem-page">
+    <h1>Redeem a rank key</h1>
+    <p class="shop-sub">Paste the key you received from the shop or a verified donation.</p>
+    <form id="redeem-form" class="redeem-form">
+      <label for="rank-key">Rank key</label>
+      <input id="rank-key" name="key" required pattern="[A-Za-z0-9]{5}(?:-[A-Za-z0-9]{5}){2}" placeholder="AAAAA-A8A6-99999" autocomplete="off">
+      <button class="shop-buy" type="submit">Redeem key</button>
+    </form>
+    <p id="redeem-message" class="shop-message" aria-live="polite"></p>
+  </main>
+  <script>
+    const form = document.querySelector('#redeem-form');
+    const message = document.querySelector('#redeem-message');
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      message.textContent = 'Redeeming key…';
+      const response = await fetch('/api/ranks/redeem', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: form.key.value })
+      });
+      const result = await response.json();
+      message.textContent = response.ok ? `Success! Your ${result.rank.label} rank is now active.` : (result.error || 'Could not redeem this key.');
+      if (response.ok) form.reset();
+    });
+  </script>
+</body>
+</html>

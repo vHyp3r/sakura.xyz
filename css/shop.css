@@ -103,11 +103,21 @@ body {
 .shop-meta { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 0.5rem; }
 .shop-type { font-size: 0.8rem; }
 .shop-period { display: inline-block; padding: 0.22rem 0.5rem; border-radius: 999px; background: rgba(236, 72, 153, 0.12); color: var(--shop-pink-light); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.shop-rank { display: inline-block; margin-top: 0.2rem; padding: 0.22rem 0.5rem; border-radius: 999px; background: color-mix(in srgb, var(--rank-color) 18%, transparent); color: var(--rank-color); font-size: 0.72rem; font-weight: 700; }
+.shop-benefits { min-height: 3.4rem; margin: 0.65rem 0 1rem; padding-left: 1rem; color: var(--shop-muted); font-size: 0.78rem; }
+.shop-benefits li + li { margin-top: 0.2rem; }
 .shop-buy { width: 100%; margin-top: auto; padding: 0.7rem; border: 0; border-radius: 0.6rem; background: linear-gradient(to right, #ec4899, #db2777); color: #fff; font-weight: 700; cursor: pointer; }
 .shop-buy:hover:not(:disabled), .shop-buy:focus-visible { background: linear-gradient(to right, #f472b6, #ec4899); transform: translateY(-1px); outline: 2px solid rgba(249, 168, 212, 0.55); outline-offset: 2px; }
 .shop-buy:disabled, .daily-claim:disabled { background: rgba(255, 255, 255, 0.1); color: #6b7280; cursor: not-allowed; }
 .shop-message { min-height: 1.3em; color: var(--shop-pink-light); font-size: 0.9rem; }
 .shop-message:empty { visibility: hidden; }
+.redeem-form { display: grid; gap: 0.75rem; max-width: 34rem; margin-top: 1.5rem; }
+.redeem-form label { color: var(--shop-muted); font-size: 0.85rem; font-weight: 700; }
+.redeem-form input { width: 100%; padding: 0.75rem 0.85rem; border: 1px solid var(--shop-border); border-radius: 0.6rem; background: rgba(255, 255, 255, 0.05); color: var(--shop-ink); font: inherit; }
+.redeem-form input:focus { border-color: var(--shop-pink-light); outline: 2px solid rgba(249, 168, 212, 0.25); outline-offset: 2px; }
+.donation-address { display: grid; gap: 0.45rem; max-width: 44rem; margin-top: 1.5rem; padding: 1rem; border: 1px solid rgba(244, 114, 182, 0.2); border-radius: 0.75rem; background: rgba(236, 72, 153, 0.08); }
+.donation-address code { overflow-wrap: anywhere; color: var(--shop-pink-light); }
+.donation-address small { color: var(--shop-muted); }
 .daily-panel { grid-column: 1 / -1; padding: 1.25rem; border: 1px solid rgba(244, 114, 182, 0.2); border-radius: 1rem; background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(17, 17, 22, 0.92)); }
 .daily-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
 .daily-head h2 { margin: 0.2rem 0; font-size: 1.35rem; }

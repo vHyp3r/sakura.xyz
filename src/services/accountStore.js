@@ -47,6 +47,7 @@ async function getAccountCollection() {
 }
 
 module.exports = {
+  getAccountConnection,
   getAccountCollection,
   getAccountMongoUri,
   isAccountStoreConfigured,

@@ -7,7 +7,10 @@
 		{ id: "lavender", name: "Lavender Dream", type: "Themes", period: "monthly", price: 500, icon: "💜", color: "#d9c6f7" },
 		{ id: "sunset", name: "Soft Sunset", type: "Themes", period: "monthly", price: 450, icon: "🌅", color: "#ffc69b" },
 		{ id: "starlight", name: "Starlight", type: "Themes", period: "seasonal", price: 550, icon: "✨", color: "#e0f7ff" },
-		{ id: "sakura-classic", name: "Sakura Classic", type: "Themes", period: "permanent", price: 150, icon: "🌸", color: "#ffd6e7" }
+		{ id: "sakura-classic", name: "Sakura Classic", type: "Themes", period: "permanent", price: 150, icon: "🌸", color: "#ffd6e7" },
+		{ id: "rank-donator", name: "Donator", type: "Ranks", period: "permanent", price: null, icon: "✦", color: "#43c7df", rank: "Donator", donation: true, benefits: ["$1+ crypto donation", "Donator badge"] },
+		{ id: "rank-vip", name: "VIP", type: "Ranks", period: "permanent", price: 2500, icon: "♛", color: "#3d9700", rank: "VIP", benefits: ["VIP badge", "Exclusive profile styling"] },
+		{ id: "rank-mvp", name: "MVP", type: "Ranks", period: "permanent", price: 5000, icon: "★", color: "#ff8500", rank: "MVP", benefits: ["MVP badge", "Priority community perks"] }
     ];
 	const periodLabels = { daily: "Daily", weekly: "Weekly", monthly: "Monthly", seasonal: "Seasonal", permanent: "Permanent" };
 
@@ -37,7 +40,7 @@
 	root.innerHTML = `<h1>🌸 Sakura Shop</h1><p class="shop-sub">Make your space feel like yours.</p><div class="shop-bar"><div class="shop-tabs"></div><div class="shop-balance"></div></div><div class="shop-message" aria-live="polite"></div><div class="shop-grid"></div>`;
 	(document.querySelector("#shop") || document.body).appendChild(root);
 
-	const tabs = ["All", "Daily", "Weekly", "Monthly", "Seasonal", "Permanent", "Avatar cosmetics", "Backgrounds", "Themes"];
+	const tabs = ["All", "Daily", "Weekly", "Monthly", "Seasonal", "Permanent", "Avatar cosmetics", "Backgrounds", "Themes", "Ranks"];
 	const tabsEl = root.querySelector(".shop-tabs");
 	tabs.forEach(tab => { const button = document.createElement("button"); button.textContent = tab; button.onclick = () => { state.filter = tab; render(); }; tabsEl.appendChild(button); });
 
@@ -109,9 +112,31 @@
 
 	function renderProductCard(item) {
 		const owned = state.owned.includes(item.id), card = document.createElement("article"); card.className = "shop-card";
-		card.innerHTML = `<div class="shop-art" style="background:${item.color}">${item.icon}</div><div class="shop-card-body"><div class="shop-meta"><span class="shop-type">${item.type}</span><span class="shop-period">${periodLabels[item.period]}</span></div><h3>${item.name}</h3><strong>🪙 ${item.price}</strong><button class="shop-buy" ${owned ? "disabled" : ""}>${owned ? "Owned ✓" : "Buy now"}</button></div>`;
-		if (!owned) card.querySelector("button").onclick = () => buy(item);
+		const benefits = item.benefits ? `<ul class="shop-benefits">${item.benefits.map((benefit) => `<li>${benefit}</li>`).join("")}</ul>` : "";
+		const price = item.donation ? "Crypto donation" : `🪙 ${item.price}`;
+		card.innerHTML = `<div class="shop-art" style="background:${item.color}">${item.icon}</div><div class="shop-card-body"><div class="shop-meta"><span class="shop-type">${item.type}</span><span class="shop-period">${periodLabels[item.period]}</span></div><h3>${item.name}</h3>${item.rank ? `<span class="shop-rank" style="--rank-color:${item.color}">${item.rank} rank</span>` : ""}${benefits}<strong>${price}</strong><button class="shop-buy" ${owned ? "disabled" : ""}>${owned ? "Owned ✓" : item.donation ? "Donate crypto" : item.rank ? "Buy rank" : "Buy now"}</button></div>`;
+		if (!owned) card.querySelector("button").onclick = () => item.donation ? (window.location.href = "/donate") : buyRank(item);
 		return card;
+	}
+
+	async function buyRank(item) {
+		const message = root.querySelector(".shop-message");
+		if (!item.rank) return buy(item);
+		message.textContent = "Issuing your rank key…";
+		try {
+			const response = await fetch("/api/ranks/purchase", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ rank: item.rank })
+			});
+			const result = await response.json();
+			if (!response.ok) throw new Error(result.error || "Could not issue rank key.");
+			state.owned.push(item.id);
+			render();
+			root.querySelector(".shop-message").innerHTML = `Your key is <strong>${result.key}</strong>. <a href="${result.redeemUrl}">Go to Redeem</a> to activate it.`;
+		} catch (error) {
+			message.textContent = error.message;
+		}
 	}
 
 	function renderDaily() {

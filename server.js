@@ -24,6 +24,8 @@ app.get('/validate', (req, res) => res.sendFile(path.join(__dirname, 'html', 'va
 app.get(['/admin', '/admin/overview', '/admin/collections', '/admin/activity', '/admin/balances'], requireAdmin, (req, res) => res.sendFile(path.join(__dirname, 'html', 'adminPanel.html')));
 app.get('/profile', requireAccount, (req, res) => res.sendFile(path.join(__dirname, 'html', 'profile.html')));
 app.get('/shop', (req, res) => res.sendFile(path.join(__dirname, 'html', 'shop.html')));
+app.get('/redeem', (req, res) => res.sendFile(path.join(__dirname, 'html', 'redeem.html')));
+app.get('/donate', (req, res) => res.sendFile(path.join(__dirname, 'html', 'donate.html')));
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
