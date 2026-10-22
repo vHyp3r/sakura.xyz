@@ -17,6 +17,11 @@
       <button class="shop-buy" type="submit">Redeem key</button>
     </form>
     <p id="redeem-message" class="shop-message" aria-live="polite"></p>
+    <section id="my-keys">
+      <h2>My rank keys</h2>
+      <p class="shop-sub">Keys purchased or issued to this account remain available here.</p>
+      <div id="my-keys-list" class="shop-message" aria-live="polite">Loading your keys…</div>
+    </section>
     <p><a href="#key-status" id="show-status">Check whether a key has already been redeemed</a></p>
     <section id="key-status" hidden>
       <form id="status-form" class="redeem-form">
@@ -33,6 +38,23 @@
     const statusSection = document.querySelector('#key-status');
     const statusForm = document.querySelector('#status-form');
     const statusMessage = document.querySelector('#status-message');
+    const keysList = document.querySelector('#my-keys-list');
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+    const loadKeys = async () => {
+      const response = await fetch('/api/ranks/keys');
+      if (response.status === 401) {
+        keysList.textContent = 'Sign in to view your rank keys.';
+        return;
+      }
+      const result = await response.json();
+      if (!response.ok) {
+        keysList.textContent = result.error || 'Could not load your keys.';
+        return;
+      }
+      keysList.innerHTML = result.keys.length
+        ? result.keys.map((item) => `<div><strong>${escapeHtml(item.key || 'Unavailable')}</strong> — ${escapeHtml(item.rank)} — ${item.status === 'redeemed' ? 'Redeemed' : 'Available'}<small> ${new Date(item.createdAt).toLocaleString()}</small></div>`).join('')
+        : 'No rank keys have been issued to this account yet.';
+    };
     document.querySelector('#show-status').addEventListener('click', () => {
       statusSection.hidden = false;
       document.querySelector('#status-key').focus();
@@ -48,6 +70,7 @@
       const result = await response.json();
       message.textContent = response.ok ? `Success! Your ${result.rank.label} rank is now active.` : (result.error || 'Could not redeem this key.');
       if (response.ok) form.reset();
+      if (response.ok) loadKeys();
     });
     statusForm.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -60,6 +83,7 @@
           ? 'This key has already been redeemed and cannot be used again.'
           : 'This key is not valid.';
     });
+    loadKeys();
   </script>
 </body>
 </html>

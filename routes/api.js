@@ -39,6 +39,7 @@ const {
   getDonationRequest,
   getRankKeyStatus,
   issueRankKey,
+  listRankKeys,
   redeemRankKey,
   verifyDonationPayment,
 } = require('../src/services/rankKeyService');
@@ -323,6 +324,16 @@ router.post('/ranks/redeem', async (req, res, next) => {
 router.get('/ranks/key-status', async (req, res, next) => {
   try {
     res.json(await getRankKeyStatus(req.query.key));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/ranks/keys', async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    if (!session) return res.status(401).json({ error: 'Account authentication required.' });
+    res.json({ keys: await listRankKeys(session.username) });
   } catch (error) {
     next(error);
   }
