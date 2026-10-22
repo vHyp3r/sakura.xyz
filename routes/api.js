@@ -27,6 +27,13 @@ const { addPackComment, getPackById, getPacksByIds, recordPackView, storePackBuf
 const Pack = require('../models/Pack');
 const { BADGES, RANKS } = require('../src/services/ranks');
 const {
+  createShopItem,
+  deleteShopItem,
+  getPublicShopItems,
+  listShopItems,
+  updateShopItem,
+} = require('../src/services/shopCatalogService');
+const {
   approveDonation,
   createDonationRequest,
   getDonationRequest,
@@ -93,6 +100,14 @@ router.get('/account/me', async (req, res, next) => {
     const session = getAccountSession(req);
     const account = session ? await getAccountById(session.accountId) : null;
     res.json({ authenticated: Boolean(account), account });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/shop/catalog', async (req, res, next) => {
+  try {
+    res.json({ items: await getPublicShopItems() });
   } catch (error) {
     next(error);
   }
@@ -408,6 +423,41 @@ router.post('/admin/accounts/reset-password', requireAdmin, async (req, res, nex
 
 router.get('/admin/ranks', requireAdmin, (req, res) => {
   res.json({ ranks: RANKS, badges: BADGES });
+});
+
+router.get('/admin/shop/items', requireAdmin, async (req, res, next) => {
+  try {
+    res.json({ items: await listShopItems() });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/admin/shop/items', requireAdmin, async (req, res, next) => {
+  try {
+    res.status(201).json({ item: await createShopItem(req.body) });
+  } catch (error) {
+    if (/required|period|price/.test(error.message)) return res.status(400).json({ error: error.message });
+    next(error);
+  }
+});
+
+router.patch('/admin/shop/items/:id', requireAdmin, async (req, res, next) => {
+  try {
+    res.json({ item: await updateShopItem(req.params.id, req.body) });
+  } catch (error) {
+    if (/required|period|price|not found/.test(error.message)) return res.status(400).json({ error: error.message });
+    next(error);
+  }
+});
+
+router.delete('/admin/shop/items/:id', requireAdmin, async (req, res, next) => {
+  try {
+    if (!await deleteShopItem(req.params.id)) return res.status(404).json({ error: 'Shop item not found.' });
+    res.json({ deleted: true });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.post('/admin/accounts/rank', requireAdmin, async (req, res, next) => {

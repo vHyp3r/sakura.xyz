@@ -1,5 +1,5 @@
 (() => {
-	const products = [
+	let products = [
 		{ id: "rose-crown", name: "Rose Crown", type: "Avatar cosmetics", period: "daily", price: 240, icon: "🌹", color: "#f7b6ca" },
 		{ id: "moon-glasses", name: "Moon Glasses", type: "Avatar cosmetics", period: "daily", price: 180, icon: "🌙", color: "#b7c8ff" },
 		{ id: "cloud-room", name: "Cloud Room", type: "Backgrounds", period: "weekly", price: 320, icon: "☁️", color: "#c7e8f5" },
@@ -12,6 +12,17 @@
 		{ id: "rank-vip", name: "VIP", type: "Ranks", period: "permanent", price: 2500, icon: "♛", color: "#3d9700", rank: "VIP", benefits: ["VIP badge", "Exclusive profile styling"] },
 		{ id: "rank-mvp", name: "MVP", type: "Ranks", period: "permanent", price: 5000, icon: "★", color: "#ff8500", rank: "MVP", benefits: ["MVP badge", "Priority community perks"] }
     ];
+    async function loadCatalogItems() {
+    	try {
+    		const response = await fetch("/api/shop/catalog", { cache: "no-store" });
+    		if (!response.ok) return;
+    		const result = await response.json();
+    		if (!Array.isArray(result.items)) return;
+    		products = [...products, ...result.items.map((item) => ({ ...item, custom: true }))];
+    	} catch (_) {
+    		// The built-in catalog remains available if the database is offline.
+    	}
+    }
 	const periodLabels = { daily: "Daily", weekly: "Weekly", monthly: "Monthly", seasonal: "Seasonal", permanent: "Permanent" };
 
 	const readStorage = (key, fallback) => {
@@ -235,5 +246,5 @@
 			loadLocalAccountState();
 		}
 	}
-	loadServerBalance().finally(render);
+	Promise.all([loadServerBalance(), loadCatalogItems()]).finally(render);
 })();

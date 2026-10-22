@@ -94,11 +94,34 @@ function switchView(view, updateUrl = true) {
 	$('#pageTitle').textContent = view === 'overview' ? 'Good morning, admin.' : view[0].toUpperCase() + view.slice(1);
 	if (updateUrl && window.location.pathname !== `/admin/${view}`) window.history.pushState({}, '', `/admin/${view}`);
 	if (view === 'balances') loadBalances();
+	if (view === 'shop') loadShopItems();
+}
+
+async function loadShopItems() {
+	const rows = $('#shopItemRows');
+	if (!rows) return;
+	try {
+		const response = await fetch('/api/admin/shop/items');
+		const result = await response.json();
+		if (!response.ok) throw new Error(result.error || 'Could not load shop items.');
+		rows.innerHTML = result.items.length ? result.items.map((item) => `<tr><td>${escapeHtml(item.icon)} ${escapeHtml(item.name)}<small>${escapeHtml(item.type)}</small></td><td>${escapeHtml(item.period)}</td><td>${item.price === null ? '—' : Number(item.price).toLocaleString()}</td><td>${item.active ? 'Yes' : 'No'}</td><td><button class="text-button shop-delete" data-id="${escapeHtml(item.id)}">Delete</button></td></tr>`).join('') : '<tr><td colspan="5">No custom shop items yet.</td></tr>';
+		$$('.shop-delete').forEach((button) => button.addEventListener('click', async () => {
+			if (!window.confirm('Delete this shop item?')) return;
+			const deleteResponse = await fetch(`/api/admin/shop/items/${encodeURIComponent(button.dataset.id)}`, { method: 'DELETE' });
+			if (!deleteResponse.ok) {
+				const error = await deleteResponse.json();
+				throw new Error(error.error || 'Could not delete shop item.');
+			}
+			loadShopItems();
+		}));
+	} catch (error) {
+		rows.innerHTML = `<tr><td colspan="5">${escapeHtml(error.message)}</td></tr>`;
+	}
 }
 
 function setInitialView() {
 	const routeView = window.location.pathname.split('/').filter(Boolean).pop();
-	if (['collections', 'activity', 'balances'].includes(routeView)) switchView(routeView, false);
+	if (['collections', 'activity', 'balances', 'shop'].includes(routeView)) switchView(routeView, false);
 	else switchView('overview', false);
 }
 
@@ -153,6 +176,30 @@ function setupInteractions() {
 			status.textContent = `${result.username} now has ${Number(result.balance).toLocaleString()} Sakura coins.`;
 			status.className = 'balance-status is-success';
 			loadBalances();
+		} catch (error) {
+			status.textContent = error.message;
+			status.className = 'balance-status is-error';
+		} finally {
+			submit.disabled = false;
+		}
+	});
+	$('#shopItemForm')?.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		const form = event.currentTarget;
+		const status = $('#shopItemStatus');
+		const submit = form.querySelector('button');
+		const values = Object.fromEntries(new FormData(form));
+		submit.disabled = true;
+		status.textContent = 'Creating shop item...';
+		status.className = 'balance-status';
+		try {
+			const response = await fetch('/api/admin/shop/items', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values) });
+			const result = await response.json();
+			if (!response.ok) throw new Error(result.error || 'Could not create shop item.');
+			status.textContent = `${result.item.name} added. Rotation is automatic.`;
+			status.className = 'balance-status is-success';
+			form.reset();
+			loadShopItems();
 		} catch (error) {
 			status.textContent = error.message;
 			status.className = 'balance-status is-error';

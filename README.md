@@ -127,6 +127,20 @@ npm run dev
 - `POST /api/ranks/donations` - Create a donation request while signed in
 - `GET /api/ranks/donations/:id` - Read the signed-in user's donation status
 - `POST /api/ranks/donations/webhook` - Verify a signed wallet watcher event and issue a Donator key
+- `GET /api/shop/catalog` - Read the active, automatically rotated custom shop items
+- `GET /api/admin/shop/items` - List custom shop items
+- `POST /api/admin/shop/items` - Create a custom shop item
+- `PATCH /api/admin/shop/items/:id` - Update a custom shop item
+- `DELETE /api/admin/shop/items/:id` - Delete a custom shop item
+
+### Shop rotation
+
+Administrators can open **Admin → Shop rotation** to create custom shop items.
+Each item has a rotation period and slot count. Active items are deterministically
+shuffled using the current Eastern Time period, so the same selection is shown to
+everyone during that period and changes automatically at the next daily, weekly,
+monthly, or seasonal boundary. Permanent items remain available. The built-in rank
+items remain available alongside custom items.
 
 - `GET /` - Home page
 - `GET /packs` - List all texture packs
