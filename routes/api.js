@@ -38,6 +38,7 @@ const {
   createDonationRequest,
   getDonationRequest,
   getRankKeyStatus,
+  generateGiveawayKeys,
   issueRankKey,
   listRankKeys,
   redeemRankKey,
@@ -443,6 +444,15 @@ router.post('/admin/accounts/reset-password', requireAdmin, async (req, res, nex
 
 router.get('/admin/ranks', requireAdmin, (req, res) => {
   res.json({ ranks: RANKS, badges: BADGES });
+});
+
+router.post('/admin/ranks/giveaway-keys', requireAdmin, async (req, res, next) => {
+  try {
+    res.status(201).json(await generateGiveawayKeys(req.body.rank, req.body.count));
+  } catch (error) {
+    if (/rank|between|configured/.test(error.message)) return res.status(400).json({ error: error.message });
+    next(error);
+  }
 });
 
 router.get('/admin/shop/items', requireAdmin, async (req, res, next) => {

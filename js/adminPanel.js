@@ -263,6 +263,41 @@ function setupInteractions() {
 			submit.disabled = false;
 		}
 	});
+	$('#giveawayKeyForm')?.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		const form = event.currentTarget;
+		const status = $('#giveawayKeyStatus');
+		const output = $('#giveawayKeyOutput');
+		const submit = form.querySelector('button');
+		submit.disabled = true;
+		status.textContent = 'Generating keys...';
+		status.className = 'balance-status';
+		output.hidden = true;
+		try {
+			const response = await fetch('/api/admin/ranks/giveaway-keys', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(Object.fromEntries(new FormData(form))),
+			});
+			const responseText = await response.text();
+			let result;
+			try {
+				result = JSON.parse(responseText);
+			} catch (_) {
+				throw new Error(`The admin API returned HTML instead of JSON (HTTP ${response.status}). Restart the server and try again.`);
+			}
+			if (!response.ok) throw new Error(result.error || 'Could not generate keys.');
+			status.textContent = `${result.keys.length} ${result.rank.toUpperCase()} key(s) generated.`;
+			status.className = 'balance-status is-success';
+			output.textContent = result.keys.join('\n');
+			output.hidden = false;
+		} catch (error) {
+			status.textContent = error.message;
+			status.className = 'balance-status is-error';
+		} finally {
+			submit.disabled = false;
+		}
+	});
 	$('#globalSearch').addEventListener('input', (event) => {
 		const query = event.target.value.toLowerCase();
 		$$('.browser-item').forEach((item) => { item.hidden = !item.dataset.collection.toLowerCase().includes(query); });

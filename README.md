@@ -131,6 +131,7 @@ npm run dev
 - `GET /api/ranks/keys` - List rank keys issued to the signed-in account, including redeemed status
 - `GET /api/shop/catalog` - Read the active, automatically rotated custom shop items
 - `GET /api/admin/shop/items` - List custom shop items
+- `POST /api/admin/ranks/giveaway-keys` - Generate unassigned rank keys for giveaways
 - `POST /api/admin/shop/items` - Create a custom shop item
 - `PATCH /api/admin/shop/items/:id` - Update a custom shop item
 - `DELETE /api/admin/shop/items/:id` - Delete a custom shop item

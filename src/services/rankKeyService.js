@@ -70,6 +70,33 @@ async function issueRankKey(username, rank, source = 'shop') {
   return { key, rank: normalizedRank };
 }
 
+async function generateGiveawayKeys(rank, count = 1) {
+  const normalizedRank = normalizeRank(rank);
+  const quantity = Number(count);
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100) {
+    throw new Error('Generate between 1 and 100 keys at a time.');
+  }
+
+  const collection = await getRankKeyCollection();
+  const records = [];
+  const keys = [];
+  for (let index = 0; index < quantity; index += 1) {
+    const key = generateKey();
+    keys.push(key);
+    records.push({
+      keyHash: hashKey(key),
+      encryptedKey: encryptKey(key),
+      username: null,
+      rank: normalizedRank,
+      source: 'admin-giveaway',
+      redeemedAt: null,
+      createdAt: new Date(),
+    });
+  }
+  await collection.insertMany(records, { ordered: true });
+  return { rank: normalizedRank, keys };
+}
+
 async function redeemRankKey(key, username) {
   const normalizedKey = String(key || '').trim().toUpperCase();
   if (!RANK_KEY_PATTERN.test(normalizedKey)) throw new Error('Enter a valid rank key.');
@@ -226,6 +253,7 @@ module.exports = {
   getDonationRequest,
   listRankKeys,
   getRankKeyStatus,
+  generateGiveawayKeys,
   issueRankKey,
   redeemRankKey,
   verifyDonationPayment,
