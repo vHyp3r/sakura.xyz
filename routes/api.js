@@ -30,6 +30,7 @@ const {
   approveDonation,
   createDonationRequest,
   getDonationRequest,
+  issueRankKey,
   redeemRankKey,
   verifyDonationPayment,
 } = require('../src/services/rankKeyService');
