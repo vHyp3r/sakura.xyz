@@ -58,7 +58,23 @@ async function redeemRankKey(key, username) {
     { returnDocument: 'after' }
   );
   if (!result) throw new Error('That key is invalid or has already been redeemed.');
-  return { rank: result.rank, username: normalizedUsername };
+  const redeemedKey = result.value || result;
+  if (!RANKS.has(String(redeemedKey.rank || '').toLowerCase())) {
+    throw new Error('That key contains an unsupported rank.');
+  }
+  return { rank: String(redeemedKey.rank).toLowerCase(), username: normalizedUsername };
+}
+
+async function getRankKeyStatus(key) {
+  const normalizedKey = String(key || '').trim().toUpperCase();
+  if (!RANK_KEY_PATTERN.test(normalizedKey)) return { status: 'invalid' };
+
+  const record = await (await getRankKeyCollection()).findOne(
+    { keyHash: hashKey(normalizedKey) },
+    { projection: { redeemedAt: 1 } },
+  );
+  if (!record) return { status: 'invalid' };
+  return { status: record.redeemedAt ? 'redeemed' : 'available' };
 }
 
 async function createDonationRequest(username, amount, transactionId) {
@@ -165,6 +181,7 @@ module.exports = {
   approveDonation,
   createDonationRequest,
   getDonationRequest,
+  getRankKeyStatus,
   issueRankKey,
   redeemRankKey,
   verifyDonationPayment,

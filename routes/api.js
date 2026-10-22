@@ -37,6 +37,7 @@ const {
   approveDonation,
   createDonationRequest,
   getDonationRequest,
+  getRankKeyStatus,
   issueRankKey,
   redeemRankKey,
   verifyDonationPayment,
@@ -315,6 +316,14 @@ router.post('/ranks/redeem', async (req, res, next) => {
     res.json({ redeemed: true, rank: account.rank });
   } catch (error) {
     if (/valid rank key|invalid|redeemed|account/.test(error.message)) return res.status(400).json({ error: error.message });
+    next(error);
+  }
+});
+
+router.get('/ranks/key-status', async (req, res, next) => {
+  try {
+    res.json(await getRankKeyStatus(req.query.key));
+  } catch (error) {
     next(error);
   }
 });

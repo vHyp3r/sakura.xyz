@@ -17,10 +17,26 @@
       <button class="shop-buy" type="submit">Redeem key</button>
     </form>
     <p id="redeem-message" class="shop-message" aria-live="polite"></p>
+    <p><a href="#key-status" id="show-status">Check whether a key has already been redeemed</a></p>
+    <section id="key-status" hidden>
+      <form id="status-form" class="redeem-form">
+        <label for="status-key">Key to check</label>
+        <input id="status-key" name="key" required pattern="[A-Za-z0-9]{5}(?:-[A-Za-z0-9]{5}){2}" placeholder="BE606-4OFU8-XK26L" autocomplete="off">
+        <button class="shop-buy" type="submit">Check key status</button>
+      </form>
+      <p id="status-message" class="shop-message" aria-live="polite"></p>
+    </section>
   </main>
   <script>
     const form = document.querySelector('#redeem-form');
     const message = document.querySelector('#redeem-message');
+    const statusSection = document.querySelector('#key-status');
+    const statusForm = document.querySelector('#status-form');
+    const statusMessage = document.querySelector('#status-message');
+    document.querySelector('#show-status').addEventListener('click', () => {
+      statusSection.hidden = false;
+      document.querySelector('#status-key').focus();
+    });
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       message.textContent = 'Redeeming key…';
@@ -32,6 +48,17 @@
       const result = await response.json();
       message.textContent = response.ok ? `Success! Your ${result.rank.label} rank is now active.` : (result.error || 'Could not redeem this key.');
       if (response.ok) form.reset();
+    });
+    statusForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      statusMessage.textContent = 'Checking key…';
+      const response = await fetch(`/api/ranks/key-status?key=${encodeURIComponent(statusForm.key.value)}`);
+      const result = await response.json();
+      statusMessage.textContent = result.status === 'available'
+        ? 'This key is valid and available to redeem.'
+        : result.status === 'redeemed'
+          ? 'This key has already been redeemed and cannot be used again.'
+          : 'This key is not valid.';
     });
   </script>
 </body>
