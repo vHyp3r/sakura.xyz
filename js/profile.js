@@ -44,6 +44,7 @@
 			packs: document.querySelector('#profilePackCount'),
 			likes: document.querySelector('#profileLikes'),
 		};
+		let accountUsername = null;
 		const cosmeticCatalog = {
 			'rose-crown': { group: 'avatarCosmetic', label: 'Rose Crown', icon: '🌹' },
 			'moon-glasses': { group: 'avatarCosmetic', label: 'Moon Glasses', icon: '🌙' },
@@ -125,7 +126,8 @@
 		const renderCosmetics = () => {
 			const owned = (() => {
 				try {
-					const value = JSON.parse(localStorage.getItem('sakura-owned') || '[]');
+					const key = accountUsername ? `sakura:${accountUsername}:owned` : 'sakura-owned';
+					const value = JSON.parse(localStorage.getItem(key) || '[]');
 					return Array.isArray(value) ? value : [];
 				} catch (_) { return []; }
 			})();
@@ -310,6 +312,7 @@
 				return false;
 			}
 			const account = result.account;
+			accountUsername = String(account.username || '').trim().toLowerCase();
 			const localPhoto = readStorage(avatarPhotoKey, '');
 			if (account.profilePicture) {
 				saveStorage(avatarPhotoKey, account.profilePicture);
@@ -347,6 +350,7 @@
 			}
 			Object.entries(fields).forEach(([key, field]) => { if (field && account[key] !== undefined) field.value = account[key]; });
 			if (accountIdentity) accountIdentity.textContent = `Signed in as ${account.email}`;
+			renderCosmetics();
 			return true;
 		};
 
