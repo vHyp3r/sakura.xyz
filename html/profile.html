@@ -99,9 +99,7 @@
 		.profile-hero-avatar { display:grid; place-items:center; width:104px; height:104px; margin-top:0; flex:none; border:5px solid #15191c; border-radius:18px; background:linear-gradient(135deg,#f9a8d4,#be185d); color:#fff; font-size:32px; font-weight:800; }
 		.profile-hero-copy { min-width:0; padding-top:0; }
 		.profile-hero-kicker { margin:0 0 4px; color:#f9a8d4; font-size:12px; }
-		.profile-hero-copy h1 { display:flex; align-items:center; gap:8px; margin:0; color:#fff; font-size:28px; }
-		.profile-hero-cosmetic { display:none; font-size:24px; line-height:1; }
-		.profile-hero-cosmetic.is-equipped { display:inline-block; }
+		.profile-hero-copy h1 { margin:0; color:#fff; font-size:28px; }
 		.profile-hero-handle { margin:4px 0 0; color:var(--muted); font-size:13px; }
 		.profile-hero-actions { display:flex; gap:8px; margin-left:auto; padding-top:16px; }
 		.profile-stat-row { display:grid; grid-template-columns:repeat(5,1fr); border-top:1px solid var(--line); }
@@ -135,21 +133,6 @@
 		.admin-access p { color:#aeb5bd; }
 		.admin-access .button { border-color:#4a5159; color:#f4f5f6; background:#1b2024; }
 		.cosmetic-field, .account-result { border-color:var(--line); background:#101316; }
-		.saved-packs-card { margin-bottom:18px; }
-		.profile-panel[hidden] { display:none; }
-		.profile-list { display:grid; gap:10px; padding:20px 24px 24px; }
-		.profile-list-item { padding:13px 14px; border:1px solid var(--line); border-radius:10px; background:#101316; color:var(--muted); }
-		.profile-list-item strong { display:block; color:#fff; margin-bottom:3px; }
-		.profile-metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); }
-		.profile-metric { padding:18px; background:#101316; }
-		.profile-metric strong { display:block; color:#ec4899; font-size:22px; }
-		.profile-metric span { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.08em; }
-		.saved-packs-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; padding:20px 24px 24px; }
-		.saved-pack { overflow:hidden; border:1px solid var(--line); border-radius:10px; background:#101316; text-decoration:none; }
-		.saved-pack img { display:block; width:100%; aspect-ratio:1.5; object-fit:cover; }
-		.saved-pack strong, .saved-pack span { display:block; padding:0 12px; }
-		.saved-pack strong { padding-top:10px; color:#fff; }
-		.saved-pack span { padding-bottom:12px; color:var(--muted); font-size:12px; }
 		.danger { color:#fb7185; }
 		@media (max-width:700px) { .profile-hero-main { align-items:flex-start; flex-wrap:wrap; padding:0 18px 20px; } .profile-hero-actions { width:100%; margin-left:0; padding-top:0; } .profile-stat-row { grid-template-columns:repeat(2,1fr); } .profile-stat:nth-child(odd) { border-right:1px solid var(--line); } .profile-stat:nth-child(even) { border-right:0; } }
 	</style>
@@ -161,22 +144,12 @@
 			<div class="profile-hero-cover" id="profileHeroCover"><label class="cover-upload" for="bannerInput">↥ Change banner<input id="bannerInput" type="file" accept="image/jpeg,image/png,image/gif"></label></div>
 			<div class="profile-hero-main">
 				<div class="profile-hero-avatar" id="profileHeroAvatar">SK</div>
-				<div class="profile-hero-copy"><p class="profile-hero-kicker">Your creator profile</p><h1><span id="profileHeroName">Sakura creator</span><span id="profileHeroCosmetic" class="profile-hero-cosmetic" aria-label="Equipped avatar cosmetic"></span></h1><p class="profile-hero-handle" id="profileHeroHandle">@loading</p></div>
+				<div class="profile-hero-copy"><p class="profile-hero-kicker">Your creator profile</p><h1 id="profileHeroName">Sakura creator</h1><p class="profile-hero-handle" id="profileHeroHandle">@loading</p></div>
 				<div class="profile-hero-actions"><a class="button" href="/profile">Settings</a><button class="button" id="heroLogoutButton" type="button">Sign out</button></div>
 			</div>
-			<div class="profile-stat-row" aria-label="Profile statistics"><div class="profile-stat"><strong id="profileFollowers">0</strong><span>Followers</span></div><div class="profile-stat"><strong id="profileDownloads">0</strong><span>Downloads</span></div><div class="profile-stat"><strong id="profileViews">0</strong><span>Views</span></div><div class="profile-stat"><strong id="profilePackCount">0</strong><span>Packs</span></div><div class="profile-stat"><strong id="profileLikes">0</strong><span>Likes</span></div></div>
+			<div class="profile-stat-row" aria-label="Profile statistics"><div class="profile-stat"><strong>0</strong><span>Followers</span></div><div class="profile-stat"><strong>0</strong><span>Downloads</span></div><div class="profile-stat"><strong>0</strong><span>Views</span></div><div class="profile-stat"><strong>0</strong><span>Packs</span></div><div class="profile-stat"><strong>0</strong><span>Likes</span></div></div>
 		</section>
-		<nav class="profile-tabs" aria-label="Profile sections"><a class="active" href="#overview" data-profile-tab="overview">Overview</a><a href="#saved-packs" data-profile-tab="saved">Saved</a><a href="#profile-packs" data-profile-tab="packs">Packs</a><a href="#profile-analytics" data-profile-tab="analytics">Analytics</a><a href="#profile-comments" data-profile-tab="comments">Comments</a><a href="#profile-earn" data-profile-tab="earn">Earn</a><a href="#find-people" data-profile-tab="audience">Audience</a><a href="#profile-liked" data-profile-tab="liked">Liked</a><a href="#profile-collections" data-profile-tab="collections">Collections</a></nav>
-		<section class="card saved-packs-card profile-panel" id="saved-packs" data-profile-panel="overview saved">
-			<div class="card-head"><h2>Saved packs</h2><p>Packs you added to your personal library.</p></div>
-			<div class="saved-packs-grid" id="savedPacks"><p class="cosmetic-empty">Loading saved packs...</p></div>
-		</section>
-		<section class="card profile-panel" id="profile-packs" data-profile-panel="packs" hidden><div class="card-head"><h2>Your packs</h2><p>Manage the texture packs published from your account.</p></div><div class="saved-packs-grid" id="profilePacks"><p class="cosmetic-empty">Loading your packs...</p></div></section>
-		<section class="card profile-panel" id="profile-analytics" data-profile-panel="analytics" hidden><div class="card-head"><h2>Analytics</h2><p>Performance totals for your published packs.</p></div><div class="profile-metrics" id="profileMetrics"></div></section>
-		<section class="card profile-panel" id="profile-comments" data-profile-panel="comments" hidden><div class="card-head"><h2>Comments</h2><p>Comments you have left on community packs.</p></div><div class="profile-list" id="profileComments"><p class="cosmetic-empty">Loading comments...</p></div></section>
-		<section class="card profile-panel" id="profile-earn" data-profile-panel="earn" hidden><div class="card-head"><h2>Earn</h2><p>Creator earnings tools will appear here as monetization becomes available.</p></div><div class="profile-list"><div class="profile-list-item"><strong>Creator status</strong>Keep publishing packs and building your audience to unlock future creator rewards.</div></div></section>
-		<section class="card profile-panel" id="profile-liked" data-profile-panel="liked" hidden><div class="card-head"><h2>Liked packs</h2><p>Packs you have liked across Sakura.</p></div><div class="saved-packs-grid" id="profileLiked"><p class="cosmetic-empty">Loading liked packs...</p></div></section>
-		<section class="card profile-panel" id="profile-collections" data-profile-panel="collections" hidden><div class="card-head"><h2>Collections</h2><p>Organize saved packs into collections.</p></div><div class="profile-list"><div class="profile-list-item"><strong>Personal library</strong>Your saved packs are available from the Saved tab.</div></div></section>
+		<nav class="profile-tabs" aria-label="Profile sections"><a class="active" href="/profile">Overview</a><a href="#appearance">Packs</a><a href="#notifications">Analytics</a><a href="#account">Comments</a><a href="#appearance">Earn</a><a href="#find-people">Audience</a><a href="#find-people">Liked</a><a href="#appearance">Collections</a></nav>
 		<header>
 			<div><p class="profile-hero-kicker">Creator console</p><h1>Welcome back, <span id="consoleName">creator</span></h1><p class="subtitle">Manage your profile, uploads, and community presence.</p></div>
 		</header>
@@ -205,7 +178,7 @@
 					</form>
 				</div>
 				<div class="card" id="account"><strong>Account preferences</strong><p id="accountIdentity">Your profile settings are saved to your account.</p><button class="button" id="logoutButton" type="button">Sign out</button></div>
-								<div class="card profile-panel" id="find-people" data-profile-panel="audience"><div class="card-head"><h2>Find people</h2><p>Search discoverable Sakura profiles by username or display name.</p></div><div class="account-search"><label for="accountSearch">Search profiles<input id="accountSearch" type="search" minlength="2" placeholder="Try a username"></label><div id="accountSearchResults" class="account-search-results" aria-live="polite"></div></div></div>
+								<div class="card" id="find-people"><div class="card-head"><h2>Find people</h2><p>Search discoverable Sakura profiles by username or display name.</p></div><div class="account-search"><label for="accountSearch">Search profiles<input id="accountSearch" type="search" minlength="2" placeholder="Try a username"></label><div id="accountSearchResults" class="account-search-results" aria-live="polite"></div></div></div>
 				<div class="card" id="notifications"><div class="privacy"><div><h3>Show email address</h3><p>Let other members contact you by email.</p></div><label class="switch"><input id="showEmail" data-setting="showEmail" type="checkbox"><span class="slider"></span></label></div></div>
 				<div class="card"><div class="privacy"><div><h3>Profile discoverability</h3><p>Allow your profile to appear in search results.</p></div><label class="switch"><input id="discoverable" data-setting="discoverable" type="checkbox" checked><span class="slider"></span></label></div></div>
 				<div class="card" id="appearance"><div class="card-head"><h2>Cosmetics</h2><p>Equip items you own from the Sakura Shop.</p></div><div class="cosmetic-grid"><div class="cosmetic-field"><label for="avatarCosmetic">Avatar cosmetic<select id="avatarCosmetic"><option value="">Default initials</option></select></label></div><div class="cosmetic-field"><label for="profileBackground">Profile background<select id="profileBackground"><option value="">Default background</option></select></label></div><div class="cosmetic-field"><label for="profileTheme">Profile theme<select id="profileTheme"><option value="">Default theme</option></select></label></div></div><div class="cosmetic-status" id="cosmeticStatus">Visit the Shop to unlock cosmetics.</div></div>
@@ -213,6 +186,6 @@
 			</section>
 		</div>
 	</main>
-	<script src="/profile-assets/profile.js?v=20261021" defer></script>
+	<script src="/profile-assets/profile.js?v=20261006" defer></script>
 </body>
 </html>

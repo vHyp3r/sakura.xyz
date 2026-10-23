@@ -81,18 +81,19 @@
   function render() {
     spriteContext.clearRect(0, 0, sprite.width, sprite.height);
     state.layers.forEach((layer) => drawSpritePattern(layer.pattern, colorValue(layer.color)));
-    spriteContext.fillStyle = '#7b5234';
-    spriteContext.fillRect(2, 0, 2, 40);
-    spriteContext.fillRect(0, 0, 20, 2);
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.imageSmoothingEnabled = false;
     context.fillStyle = '#dbe5df';
     context.fillRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(sprite, 30, 20, 260, 440);
+    const bannerWidth = 220;
+    const bannerHeight = 440;
+    const bannerX = (canvas.width - bannerWidth) / 2;
+    const bannerY = (canvas.height - bannerHeight) / 2;
+    context.drawImage(sprite, bannerX, bannerY, bannerWidth, bannerHeight);
     if (document.querySelector('#grid-toggle').checked) {
       context.strokeStyle = '#ffffff28'; context.lineWidth = 1;
-      for (let x = 30; x <= 290; x += 13) { context.beginPath(); context.moveTo(x, 46); context.lineTo(x, 462); context.stroke(); }
-      for (let y = 42; y <= 460; y += 11) { context.beginPath(); context.moveTo(30, y); context.lineTo(290, y); context.stroke(); }
+      for (let x = bannerX; x <= bannerX + bannerWidth; x += bannerWidth / 20) { context.beginPath(); context.moveTo(x, bannerY); context.lineTo(x, bannerY + bannerHeight); context.stroke(); }
+      for (let y = bannerY; y <= bannerY + bannerHeight; y += bannerHeight / 40) { context.beginPath(); context.moveTo(bannerX, y); context.lineTo(bannerX + bannerWidth, y); context.stroke(); }
     }
     renderLayers(); updateCommand(); updateShare();
   }
@@ -101,6 +102,7 @@
     document.querySelector('#layer-count').textContent = `${state.layers.length} layer${state.layers.length === 1 ? '' : 's'}`;
     layers.querySelectorAll('.layer').forEach((item) => item.addEventListener('click', () => { state.selected = Number(item.dataset.index); syncControls(); render(); }));
     layers.querySelectorAll('[data-delete]').forEach((button) => button.addEventListener('click', (event) => { event.stopPropagation(); if (state.layers.length === 1) return; state.layers.splice(Number(button.dataset.delete), 1); state.selected = Math.min(state.selected, state.layers.length - 1); render(); }));
+    patternArea.querySelectorAll('.pattern').forEach((button) => button.classList.toggle('active', button.dataset.pattern === state.layers[state.selected].pattern));
   }
   function syncControls() { colorSelect.value = state.layers[state.selected].color; palette.querySelectorAll('.color').forEach((button) => button.classList.toggle('active', button.dataset.color === colorSelect.value)); }
   function updateCommand() {
@@ -112,8 +114,15 @@
   function colorId(color) { return color; }
   function updateShare() { document.querySelector('#share-link').value = `${location.origin}${location.pathname}#${btoa(JSON.stringify(state.layers)).replace(/=/g, '')}`; }
   function loadSaved() { const saved = JSON.parse(localStorage.getItem(savedKey) || '[]'); document.querySelector('#saved').innerHTML = saved.length ? saved.map((item, index) => `<div class="saved-item"><span>${item.name}</span><button data-load="${index}">Load</button></div>`).join('') : '<div class="empty">No saved banners yet.</div>'; document.querySelectorAll('[data-load]').forEach((button) => button.addEventListener('click', () => { state.layers = saved[button.dataset.load].layers; state.selected = 0; render(); })); }
-  document.querySelector('#add-layer').addEventListener('click', () => { state.layers.push({ pattern: patternArea.querySelector('.active')?.dataset.pattern || 'stripe', color: colorSelect.value }); state.selected = state.layers.length - 1; render(); });
-  patternArea.querySelectorAll('.pattern').forEach((button) => button.addEventListener('click', () => { patternArea.querySelectorAll('.pattern').forEach((item) => item.classList.remove('active')); button.classList.add('active'); }));
+  document.querySelector('#add-layer').addEventListener('click', () => {
+    state.layers.push({ pattern: 'stripe_bottom', color: colorSelect.value });
+    state.selected = state.layers.length - 1;
+    render();
+  });
+  patternArea.querySelectorAll('.pattern').forEach((button) => button.addEventListener('click', () => {
+    state.layers[state.selected].pattern = button.dataset.pattern;
+    render();
+  }));
   palette.querySelectorAll('.color').forEach((button) => button.addEventListener('click', () => { state.layers[state.selected].color = button.dataset.color; syncControls(); render(); }));
   colorSelect.addEventListener('change', () => { state.layers[state.selected].color = colorSelect.value; render(); });
   document.querySelector('#grid-toggle').addEventListener('change', render);
