@@ -133,7 +133,7 @@ async function listRankKeys(username) {
   const normalizedUsername = String(username || '').trim().toLowerCase();
   if (!normalizedUsername) throw new Error('An account is required to view rank keys.');
   const records = await (await getRankKeyCollection()).find(
-    { username: normalizedUsername },
+    { $or: [{ username: normalizedUsername }, { redeemedBy: normalizedUsername }] },
     { projection: { rank: 1, source: 1, encryptedKey: 1, redeemedAt: 1, redeemedBy: 1, createdAt: 1 } },
   ).sort({ createdAt: -1 }).limit(100).toArray();
   return records.map((record) => ({

@@ -128,7 +128,7 @@ npm run dev
 - `GET /api/ranks/donations/:id` - Read the signed-in user's donation status
 - `POST /api/ranks/donations/webhook` - Verify a signed wallet watcher event and issue a Donator key
 - `GET /api/ranks/key-status?key=...` - Check whether a rank key is available, redeemed, or invalid without consuming it
-- `GET /api/ranks/keys` - List rank keys issued to the signed-in account, including redeemed status
+- `GET /api/ranks/keys` - List rank keys issued to or redeemed by the signed-in account, including redeemed status
 - `GET /api/shop/catalog` - Read the active, automatically rotated custom shop items
 - `GET /api/admin/shop/items` - List custom shop items
 - `POST /api/admin/ranks/giveaway-keys` - Generate unassigned rank keys for giveaways
