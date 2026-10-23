@@ -156,6 +156,10 @@ items remain available alongside custom items.
 - `GET /random` - Redirect to random pack
 - `GET /banner-maker` - Open the client-side banner and cape maker
 
+The banner maker uses the MIT-licensed 20×40 pattern masks from
+[apehum/mc-banner-generator](https://github.com/apehum/mc-banner-generator).
+The required license notice is included at `public/banner-patterns/LICENSE`.
+
 ### Wallet donation webhook
 
 Configure the wallet addresses and `DONATION_WEBHOOK_SECRET` in `.env` using

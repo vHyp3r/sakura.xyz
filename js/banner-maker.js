@@ -16,11 +16,14 @@
     ['small_stripes', 'Small stripes'], ['cross', 'Cross'], ['straight_cross', 'Straight cross'],
     ['triangle_bottom', 'Triangle bottom'], ['triangle_top', 'Triangle top'],
     ['triangles_bottom', 'Triangles bottom'], ['triangles_top', 'Triangles top'],
-    ['diagonal_left', 'Diagonal up left'], ['diagonal_right', 'Diagonal up right'],
+    ['diagonal_left', 'Diagonal left'], ['diagonal_right', 'Diagonal right'],
+    ['diagonal_up_left', 'Diagonal up left'], ['diagonal_up_right', 'Diagonal up right'],
     ['circle', 'Circle'], ['rhombus', 'Rhombus'], ['border', 'Border'],
     ['gradient', 'Gradient'], ['gradient_up', 'Gradient up'], ['bricks', 'Bricks'],
     ['creeper', 'Creeper'], ['skull', 'Skull'], ['flower', 'Flower'],
     ['mojang', 'Mojang'], ['globe', 'Globe'], ['piglin', 'Piglin'], ['flow', 'Flow'],
+    ['curly_border', 'Curly border'], ['guster', 'Guster'],
+    ['half_horizontal', 'Half horizontal'], ['half_horizontal_bottom', 'Half horizontal bottom'],
   ];
   const state = { layers: [{ pattern: 'base', color: 'white' }], selected: 0, command: 'banner' };
   const canvas = document.querySelector('#preview');
@@ -34,61 +37,46 @@
   const colorSelect = document.querySelector('#color');
   const patternArea = document.querySelector('#patterns');
   const savedKey = 'sakura-banner-designs';
+  const patternImages = new Map();
   const colorValue = (name) => colors.find(([id]) => id === name)?.[1] || '#f4f4f1';
   const patternLabel = (name) => patterns.find(([id]) => id === name)?.[1] || name;
 
   colorSelect.innerHTML = colors.map(([id, label]) => `<option value="${id}">${label.replace('_', ' ')}</option>`).join('');
   palette.innerHTML = colors.map(([id, value]) => `<button class="color" data-color="${id}" title="${id.replace('_', ' ')}" style="background:${value}"></button>`).join('');
   patternArea.innerHTML = patterns.map(([id, label]) => `<button class="pattern" data-pattern="${id}" title="${label}"><span></span></button>`).join('');
+  patternArea.querySelectorAll('.pattern').forEach((button) => {
+    button.querySelector('span').style.backgroundImage = `url("/banner-patterns/${button.dataset.pattern}.png")`;
+    button.querySelector('span').style.backgroundSize = '100% 100%';
+    button.querySelector('span').style.imageRendering = 'pixelated';
+  });
+
+  async function loadPatternImages() {
+    await Promise.all(patterns.map(([id]) => new Promise((resolve) => {
+      const image = new Image();
+      image.onload = () => { patternImages.set(id, image); resolve(); };
+      image.onerror = resolve;
+      image.src = `/banner-patterns/${id}.png`;
+    })));
+  }
 
   function drawSpritePattern(type, fill) {
-    spriteContext.fillStyle = fill;
-    if (type === 'base') return spriteContext.fillRect(0, 2, 20, 32);
-    const draw = (x, y) => spriteContext.fillRect(x, y, 1, 1);
-    for (let y = 2; y < 34; y += 1) {
-      for (let x = 0; x < 20; x += 1) {
-        const nx = x / 19;
-        const ny = (y - 2) / 31;
-        let active = false;
-        if (type === 'stripe_bottom') active = ny > 0.72;
-        if (type === 'stripe_top') active = ny < 0.28;
-        if (type === 'stripe_left') active = nx < 0.28;
-        if (type === 'stripe_right') active = nx > 0.72;
-        if (type === 'square_bottom_left') active = nx < 0.48 && ny > 0.52;
-        if (type === 'square_bottom_right') active = nx > 0.52 && ny > 0.52;
-        if (type === 'square_top_left') active = nx < 0.48 && ny < 0.48;
-        if (type === 'square_top_right') active = nx > 0.52 && ny < 0.48;
-        if (type === 'half_vertical') active = nx < 0.5;
-        if (type === 'half_vertical_right') active = nx > 0.5;
-        if (type === 'stripe_center') active = nx > 0.38 && nx < 0.62;
-        if (type === 'stripe_middle') active = ny > 0.38 && ny < 0.62;
-        if (type === 'stripe_downright') active = Math.abs(nx - ny) < 0.16;
-        if (type === 'stripe_downleft') active = Math.abs(nx - (1 - ny)) < 0.16;
-        if (type === 'small_stripes') active = (Math.floor(nx * 8) % 2 === 0) && ny > 0.12 && ny < 0.88;
-        if (type === 'cross') active = Math.abs(nx - 0.5) < 0.12 || Math.abs(ny - 0.5) < 0.12;
-        if (type === 'straight_cross') active = Math.abs(nx - 0.5) < 0.1 || Math.abs(ny - 0.5) < 0.1;
-        if (type === 'triangle_bottom') active = ny > 0.55 && nx > (ny - 0.55) * 1.7 && nx < 1 - (ny - 0.55) * 1.7;
-        if (type === 'triangle_top') active = ny < 0.45 && nx > ny * 1.7 && nx < 1 - ny * 1.7;
-        if (type === 'triangles_bottom') active = (ny > 0.55 && nx > (ny - 0.55) * 1.7 && nx < 1 - (ny - 0.55) * 1.7) || (ny > 0.55 && nx > 0.44 && nx < 0.56);
-        if (type === 'triangles_top') active = (ny < 0.45 && nx > ny * 1.7 && nx < 1 - ny * 1.7) || (ny < 0.45 && nx > 0.44 && nx < 0.56);
-        if (type === 'diagonal_left') active = Math.abs(nx - ny) < 0.12;
-        if (type === 'diagonal_right') active = Math.abs(nx - (1 - ny)) < 0.12;
-        if (type === 'circle') active = ((nx - 0.5) ** 2) / 0.16 + ((ny - 0.5) ** 2) / 0.3 < 1;
-        if (type === 'rhombus') active = Math.abs(nx - 0.5) / 0.38 + Math.abs(ny - 0.5) / 0.46 < 1;
-        if (type === 'border') active = nx < 0.1 || nx > 0.9 || ny < 0.1 || ny > 0.9;
-        if (type === 'gradient') active = ny > nx * 0.9;
-        if (type === 'gradient_up') active = ny < 1 - nx * 0.9;
-        if (type === 'bricks') active = (Math.floor(ny * 8) % 2 === 0) ? Math.floor(nx * 5) % 2 === 0 : Math.floor(nx * 5) % 2 === 1;
-        if (type === 'creeper') active = (nx > 0.35 && nx < 0.65 && ny > 0.2 && ny < 0.8) || (nx > 0.18 && nx < 0.38 && ny > 0.32 && ny < 0.48) || (nx > 0.62 && nx < 0.82 && ny > 0.32 && ny < 0.48);
-        if (type === 'skull') active = ((nx - 0.5) ** 2) / 0.14 + ((ny - 0.48) ** 2) / 0.22 < 1 && !((nx > 0.32 && nx < 0.43 || nx > 0.57 && nx < 0.68) && ny > 0.35 && ny < 0.55);
-        if (type === 'flower') active = ((nx - 0.5) ** 2) / 0.2 + ((ny - 0.48) ** 2) / 0.25 < 1 || (nx > 0.44 && nx < 0.56 && ny > 0.55);
-        if (type === 'mojang') active = Math.abs(nx - 0.5) < 0.16 && ny > 0.2 && ny < 0.8 || (ny > 0.35 && ny < 0.48 && nx > 0.2 && nx < 0.8);
-        if (type === 'globe') active = ((nx - 0.5) ** 2) / 0.2 + ((ny - 0.5) ** 2) / 0.3 < 1 && (Math.abs(nx - 0.5) < 0.08 || Math.abs(ny - 0.5) < 0.08);
-        if (type === 'piglin') active = ((nx - 0.5) ** 2) / 0.2 + ((ny - 0.48) ** 2) / 0.25 < 1 && !(ny > 0.4 && ny < 0.55 && nx > 0.35 && nx < 0.65);
-        if (type === 'flow') active = Math.abs(nx - (0.5 + Math.sin(ny * 8) * 0.2)) < 0.14;
-        if (active) draw(x, y);
-      }
+    const image = patternImages.get(type);
+    if (!image) return;
+    const mask = document.createElement('canvas');
+    mask.width = 20;
+    mask.height = 40;
+    const maskContext = mask.getContext('2d');
+    maskContext.drawImage(image, 0, 0);
+    const pixels = maskContext.getImageData(0, 0, 20, 40);
+    const [red, green, blue] = fill.match(/\w\w/g).map((value) => parseInt(value, 16));
+    for (let index = 0; index < pixels.data.length; index += 4) {
+      const brightness = pixels.data[index] / 255;
+      pixels.data[index] = red * brightness;
+      pixels.data[index + 1] = green * brightness;
+      pixels.data[index + 2] = blue * brightness;
     }
+    maskContext.putImageData(pixels, 0, 0);
+    spriteContext.drawImage(mask, 0, 0);
   }
   function render() {
     spriteContext.clearRect(0, 0, sprite.width, sprite.height);
@@ -137,5 +125,6 @@
   document.querySelector('#copy-share').addEventListener('click', () => navigator.clipboard?.writeText(document.querySelector('#share-link').value));
   document.querySelectorAll('[data-command]').forEach((button) => button.addEventListener('click', () => { state.command = button.dataset.command; document.querySelectorAll('[data-command]').forEach((item) => item.classList.toggle('active', item === button)); updateCommand(); }));
   if (location.hash.length > 1) { try { state.layers = JSON.parse(atob(location.hash.slice(1))); } catch (_) {} }
-  loadSaved(); syncControls(); render();
+  loadSaved(); syncControls();
+  loadPatternImages().then(render);
 })();
