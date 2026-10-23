@@ -12,6 +12,10 @@
   const state = { layers: [{ pattern: 'base', color: 'white' }], selected: 0, command: 'banner' };
   const canvas = document.querySelector('#preview');
   const context = canvas.getContext('2d');
+  const sprite = document.createElement('canvas');
+  sprite.width = 20;
+  sprite.height = 40;
+  const spriteContext = sprite.getContext('2d');
   const palette = document.querySelector('#palette');
   const layers = document.querySelector('#layers');
   const colorSelect = document.querySelector('#color');
@@ -24,28 +28,37 @@
   palette.innerHTML = colors.map(([id, value]) => `<button class="color" data-color="${id}" title="${id.replace('_', ' ')}" style="background:${value}"></button>`).join('');
   patternArea.innerHTML = patterns.map(([id, label]) => `<button class="pattern" data-pattern="${id}" title="${label}"><span></span></button>`).join('');
 
-  function drawPattern(type, fill) {
-    context.fillStyle = fill;
-    if (type === 'base') return context.fillRect(50, 30, 220, 330);
-    context.save();
-    context.translate(50, 30);
-    context.beginPath();
-    if (type === 'stripe') context.moveTo(0, 0), context.lineTo(75, 0), context.lineTo(220, 330), context.lineTo(145, 330);
-    if (type === 'cross') { context.moveTo(0, 60); context.lineTo(30, 30); context.lineTo(220, 300); context.lineTo(190, 330); context.closePath(); context.moveTo(190, 0); context.lineTo(220, 30); context.lineTo(30, 330); context.lineTo(0, 300); }
-    if (type === 'circle') { context.arc(110, 165, 75, 0, Math.PI * 2); }
-    if (type === 'border') { context.rect(0, 0, 220, 330); context.rect(22, 32, 176, 266); context.fill('evenodd'); context.restore(); return; }
-    if (type === 'half') context.rect(0, 0, 110, 330);
-    if (type === 'triangle') context.moveTo(0, 0), context.lineTo(220, 0), context.lineTo(110, 330);
-    context.closePath(); context.fill(); context.restore();
+  function drawSpritePattern(type, fill) {
+    spriteContext.fillStyle = fill;
+    if (type === 'base') return spriteContext.fillRect(0, 2, 20, 32);
+    for (let y = 2; y < 34; y += 1) {
+      for (let x = 0; x < 20; x += 1) {
+        let draw = false;
+        if (type === 'stripe') draw = x >= Math.floor(y / 2) && x < Math.floor(y / 2) + 5;
+        if (type === 'cross') draw = Math.abs(x - 10) <= Math.floor(y / 5) || Math.abs(x - 10) <= Math.floor((32 - y) / 5);
+        if (type === 'circle') draw = ((x - 9.5) ** 2) / 60 + ((y - 18) ** 2) / 130 <= 1;
+        if (type === 'border') draw = x < 2 || x > 17 || y < 4 || y > 31;
+        if (type === 'half') draw = x < 10;
+        if (type === 'triangle') draw = x >= Math.floor(y / 3) && x < 20 - Math.floor(y / 3);
+        if (draw) spriteContext.fillRect(x, y, 1, 1);
+      }
+    }
   }
   function render() {
+    spriteContext.clearRect(0, 0, sprite.width, sprite.height);
+    state.layers.forEach((layer) => drawSpritePattern(layer.pattern, colorValue(layer.color)));
+    spriteContext.fillStyle = '#7b5234';
+    spriteContext.fillRect(2, 0, 2, 40);
+    spriteContext.fillRect(0, 0, 20, 2);
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = '#e8e5d9'; context.fillRect(48, 28, 224, 334);
-    state.layers.forEach((layer) => drawPattern(layer.pattern, colorValue(layer.color)));
+    context.imageSmoothingEnabled = false;
+    context.fillStyle = '#dbe5df';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(sprite, 30, 20, 260, 440);
     if (document.querySelector('#grid-toggle').checked) {
-      context.strokeStyle = '#ffffff30'; context.lineWidth = 1;
-      for (let x = 50; x <= 270; x += 22) { context.beginPath(); context.moveTo(x, 30); context.lineTo(x, 360); context.stroke(); }
-      for (let y = 30; y <= 360; y += 22) { context.beginPath(); context.moveTo(50, y); context.lineTo(270, y); context.stroke(); }
+      context.strokeStyle = '#ffffff28'; context.lineWidth = 1;
+      for (let x = 30; x <= 290; x += 13) { context.beginPath(); context.moveTo(x, 46); context.lineTo(x, 462); context.stroke(); }
+      for (let y = 42; y <= 460; y += 11) { context.beginPath(); context.moveTo(30, y); context.lineTo(290, y); context.stroke(); }
     }
     renderLayers(); updateCommand(); updateShare();
   }
