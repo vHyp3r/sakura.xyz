@@ -154,6 +154,7 @@ items remain available alongside custom items.
 - `GET /search` - Search texture packs
 - `GET /discover` - Discover popular packs
 - `GET /random` - Redirect to random pack
+- `GET /banner-maker` - Open the client-side banner and cape maker
 
 ### Wallet donation webhook
 
