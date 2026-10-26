@@ -25,6 +25,7 @@ app.get(['/admin', '/admin/overview', '/admin/collections', '/admin/activity', '
 app.get('/profile', requireAccount, (req, res) => res.sendFile(path.join(__dirname, 'html', 'profile.html')));
 app.get('/shop', (req, res) => res.sendFile(path.join(__dirname, 'html', 'shop.html')));
 app.get('/banner-maker', (req, res) => res.sendFile(path.join(__dirname, 'html', 'banner-maker.html')));
+app.get('/mobile-ui', (req, res) => res.sendFile(path.join(__dirname, 'html', 'mobile-ui.html')));
 app.get('/redeem', (req, res) => res.sendFile(path.join(__dirname, 'html', 'redeem.html')));
 app.get('/donate', (req, res) => res.sendFile(path.join(__dirname, 'html', 'donate.html')));
 

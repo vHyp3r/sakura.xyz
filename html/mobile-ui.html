@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sakura Mobile UI</title>
+  <link rel="stylesheet" href="/mobile-ui.css">
+</head>
+<body>
+  <main class="phone-shell" aria-label="Sakura mobile interface preview">
+    <header class="mobile-header">
+      <a class="brand" href="/">sakura<span>.xyz</span></a>
+      <button id="profile-button" class="profile-button" aria-label="Open profile">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="32" fill="#dedede"/><circle cx="32" cy="23" r="10" fill="#050505"/><path d="M15 51c1-11 8-17 17-17s16 6 17 17" fill="#050505"/></svg>
+      </button>
+    </header>
+    <section id="mobile-content" class="mobile-content" aria-live="polite"></section>
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <button class="nav-item active" data-view="home" aria-label="Home"><span>⌂</span></button>
+      <button class="nav-item" data-view="discover" aria-label="Discover"><span>⌕</span></button>
+      <button class="nav-item" data-view="create" aria-label="Create"><span>＋</span></button>
+      <button class="nav-item" data-view="shop" aria-label="Shop"><span>◇</span></button>
+      <button class="nav-item" data-view="profile" aria-label="Profile"><span>☻</span></button>
+    </nav>
+  </main>
+  <script src="/mobile-ui.js"></script>
+</body>
+</html>
