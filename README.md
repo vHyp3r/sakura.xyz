@@ -201,6 +201,8 @@ This project is licensed under the ISC License.
 
 - Inspired by [texturepack.be](https://texturepack.be/)
 - Built with Node.js and Express.js
+- Credits to Apehum for the original banner resources
+- Credits to PacksMC for webpage inspiration!
 
 ## Goals
 
