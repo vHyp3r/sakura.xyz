@@ -7,7 +7,7 @@ const { ethers } = require('ethers');
 
 const USDT_CONTRACT_ADDRESS = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
 const DEFAULT_RPC_URL = 'https://ethereum-rpc.publicnode.com';
-const DEFAULT_WEBHOOK_URL = 'http://localhost:3000/api/ranks/donations/webhook';
+const DEFAULT_WEBHOOK_URL = 'http://localhost:3002/api/ranks/donations/webhook';
 const DEFAULT_POLL_INTERVAL_MS = 15000;
 
 function parseArgs() {
