@@ -110,12 +110,12 @@ npm run dev
 - [x] Random pack redirect
 - [x] MongoDB integration for packs, accounts, and the admin dashboard
 - [x] User authentication/accounts
-- [ ] Pack rating and commenting system
-- [ ] Java-to-Bedrock conversion
+- [x] Pack rating and commenting system
+- [x] Java-to-Bedrock conversion
 - [ ] Discord bot integration
-- [ ] Advanced search filters
-- [ ] Pagination for large result sets
-- [ ] Pack categorization and tagging system
+- [x] Advanced search filters
+- [x] Pagination for large result sets
+- [x] Pack categorization and tagging system
 
 ## API Endpoints
 
