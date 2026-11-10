@@ -15,6 +15,7 @@
 		const bannerPhotoKey = 'sakura-profile-banner';
 		const settingsKey = 'sakura-profile-settings';
 		const appearanceKey = 'sakura-appearance';
+		let currentUsername = '';
 		const adminAccess = document.querySelector('#adminAccess');
 		const adminAccessButton = document.querySelector('#adminAccessButton');
 		const accountIdentity = document.querySelector('#accountIdentity');
@@ -81,6 +82,8 @@
 			}
 		};
 
+		const accountStorageKey = (key) => `sakura:${currentUsername || 'guest'}:${key}`;
+
 		const saveJson = (key, value) => {
 			try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) { /* Browser storage may be unavailable. */ }
 		};
@@ -111,8 +114,10 @@
 		const renderCosmetics = () => {
 			const owned = (() => {
 				try {
-					const value = JSON.parse(localStorage.getItem('sakura-owned') || '[]');
-					return Array.isArray(value) ? value : [];
+					const accountValue = JSON.parse(localStorage.getItem(accountStorageKey('owned')) || 'null');
+					if (Array.isArray(accountValue)) return accountValue;
+					const legacyValue = JSON.parse(localStorage.getItem('sakura-owned') || '[]');
+					return Array.isArray(legacyValue) ? legacyValue : [];
 				} catch (_) { return []; }
 			})();
 			const equipped = readJson(appearanceKey, {});
@@ -136,6 +141,81 @@
 			});
 			const status = document.querySelector('#cosmeticStatus');
 			if (status && owned.some(id => cosmeticCatalog[id])) status.textContent = 'Your owned cosmetics are ready to equip.';
+		};
+
+		const renderPackGrid = (container, packs, emptyMessage) => {
+			if (!container) return;
+			container.replaceChildren();
+			if (!packs.length) {
+				const empty = document.createElement('p');
+				empty.className = 'cosmetic-empty';
+				empty.textContent = emptyMessage;
+				container.appendChild(empty);
+				return;
+			}
+			packs.forEach((pack) => {
+				const link = document.createElement('a');
+				link.className = 'saved-pack';
+				link.href = `/packs/${encodeURIComponent(pack._id)}`;
+				link.innerHTML = `<img src="${escapeHtml(pack.thumbnail || '/images/default-thumbnail.svg')}" alt=""><strong>${escapeHtml(pack.name)}</strong><span>${escapeHtml(pack.uploader || 'Anonymous')}</span>`;
+				container.appendChild(link);
+			});
+		};
+
+		const loadProfileSummary = async () => {
+			const response = await fetch('/api/account/summary', { cache: 'no-store' });
+			if (!response.ok) throw new Error('Unable to load profile activity.');
+			const summary = await response.json();
+			renderPackGrid(document.querySelector('#savedPacks'), summary.savedPacks || [], 'No saved packs yet.');
+			renderPackGrid(document.querySelector('#profilePacks'), summary.packs || [], 'You have not published any packs yet.');
+			renderPackGrid(document.querySelector('#profileLiked'), summary.likedPacks || [], 'You have not liked any packs yet.');
+			const stats = summary.stats || {};
+			const statMap = {
+				downloads: '#profileDownloads',
+				views: '#profileViews',
+				packs: '#profilePackCount',
+				likes: '#profileLikes',
+			};
+			Object.entries(statMap).forEach(([key, selector]) => {
+				const element = document.querySelector(selector);
+				if (element) element.textContent = Number(stats[key] || 0).toLocaleString();
+			});
+			const metrics = document.querySelector('#profileMetrics');
+			if (metrics) {
+				metrics.innerHTML = [['packs', 'Packs'], ['downloads', 'Downloads'], ['views', 'Views'], ['likes', 'Likes']]
+					.map(([key, label]) => `<div class="profile-metric"><strong>${Number(stats[key] || 0).toLocaleString()}</strong><span>${label}</span></div>`).join('');
+			}
+			const comments = document.querySelector('#profileComments');
+			if (comments) {
+				comments.replaceChildren();
+				const items = summary.comments || [];
+				if (!items.length) {
+					comments.textContent = 'You have not commented on any packs yet.';
+				} else {
+					items.forEach((comment) => {
+						const item = document.createElement('div');
+						item.className = 'profile-list-item';
+						item.innerHTML = `<strong>${escapeHtml(comment.packName)}</strong>${escapeHtml(comment.body)}`;
+						comments.appendChild(item);
+					});
+				}
+			}
+		};
+
+		const setupProfileTabs = () => {
+			const tabs = document.querySelectorAll('[data-profile-tab]');
+			const panels = document.querySelectorAll('[data-profile-panel]');
+			const activate = (tab) => {
+				tabs.forEach((link) => link.classList.toggle('active', link.dataset.profileTab === tab));
+				panels.forEach((panel) => { panel.hidden = !panel.dataset.profilePanel.split(/\s+/).includes(tab); });
+			};
+			tabs.forEach((link) => link.addEventListener('click', (event) => {
+				event.preventDefault();
+				activate(link.dataset.profileTab);
+				history.replaceState(null, '', link.hash);
+			}));
+			const initial = [...tabs].find((link) => link.hash === window.location.hash)?.dataset.profileTab || 'overview';
+			activate(initial);
 		};
 
 		const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
@@ -206,6 +286,7 @@
 				return false;
 			}
 			const account = result.account;
+			currentUsername = String(account.username || '').trim().toLowerCase();
 			saveJson(storageKey, account);
 			const accountName = account.displayName || account.username;
 			if (profileHeroName) profileHeroName.textContent = accountName;
@@ -220,19 +301,29 @@
 				const icon = typeof badge === 'string' ? '' : `${badge.icon} `;
 				return `<span class="profile-badge">${icon}${label}</span>`;
 			}).join('');
-			if (account.equippedCosmetic) {
-				const appearance = readJson(appearanceKey, {});
-				appearance.avatarCosmetic = account.equippedCosmetic;
-				saveJson(appearanceKey, appearance);
-			}
+			const appearance = readJson(appearanceKey, {});
+			if (account.equippedCosmetic) appearance.avatarCosmetic = account.equippedCosmetic;
+			saveJson(appearanceKey, appearance);
 			Object.entries(fields).forEach(([key, field]) => { if (field && account[key] !== undefined) field.value = account[key]; });
 			if (accountIdentity) accountIdentity.textContent = `Signed in as ${account.email}`;
+			renderCosmetics();
 			return true;
 		};
 
-		loadAccount().then((authenticated) => { if (!authenticated) return; updateAvatar(); updateAdminAccess(); });
+		loadAccount().then(async (authenticated) => {
+			if (!authenticated) return;
+			updateAvatar();
+			applyAppearance();
+			updateAdminAccess();
+			try {
+				await loadProfileSummary();
+			} catch (error) {
+				setStatus(error.message);
+			}
+		});
 		updateAvatar();
 		applyAppearance();
+		setupProfileTabs();
 		renderCosmetics();
 		restoreSettings();
 		updateAdminAccess();

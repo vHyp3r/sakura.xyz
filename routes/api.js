@@ -172,11 +172,17 @@ router.get('/account/summary', async (req, res, next) => {
     const account = await getAccountById(session.accountId);
     if (!account) return res.status(404).json({ error: 'Account not found.' });
 
-    const [packs, likedPacks] = await Promise.all([
+    const [packs, savedPacks, likedPacks] = await Promise.all([
       Pack.find({ $or: [{ uploaderId: session.accountId }, { uploader: account.username }] })
         .select('_id name uploader thumbnail downloads views likedBy')
         .sort({ createdAt: -1 })
         .lean(),
+      getPacksByIds(account.savedPacks || []).then((records) => records.map(({ _id, name, uploader, thumbnail }) => ({
+        _id,
+        name,
+        uploader,
+        thumbnail,
+      }))),
       getPacksByIds(account.likedPacks || []).then((records) => records.map(({ _id, name, uploader, thumbnail }) => ({
         _id,
         name,
@@ -193,6 +199,7 @@ router.get('/account/summary', async (req, res, next) => {
 
     res.json({
       packs,
+      savedPacks,
       likedPacks,
       comments: authoredComments,
       stats: {
