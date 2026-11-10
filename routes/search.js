@@ -1,5 +1,5 @@
 const express = require('express');
-const { getPacks } = require('../src/services/packService');
+const { getPacks, searchPacks, getSearchSuggestions } = require('../src/services/packService');
 const router = express.Router();
 
 function escapeRegex(value) {
@@ -9,33 +9,51 @@ function escapeRegex(value) {
 // Search page
 router.get('/', async (req, res, next) => {
     const query = String(req.query.q || '').trim();
-    let results = [];
-    let searchTerms = ['pvp', 'bedwars', '16x', '32x', 'vanilla', 'low-fire'];
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = 20;
+    const skip = (page - 1) * limit;
 
     try {
-        const packs = await getPacks();
-        const catalogTerms = packs.flatMap((pack) => [
-            pack.category,
-            pack.resolution,
-            ...(pack.tags || []),
-        ])
-            .map((term) => String(term || '').trim().toLowerCase())
-            .filter(Boolean);
-        searchTerms = [...new Set([...searchTerms, ...catalogTerms])]
-            .sort((left, right) => left.localeCompare(right))
-            .slice(0, 18);
+        // Get search suggestions from database (not all packs)
+        const searchTerms = await getSearchSuggestions(query);
+
+        let results = [];
+        let totalResults = 0;
 
         if (query) {
-            const searchTerm = new RegExp(escapeRegex(query), 'i');
-            results = packs.filter((pack) => [pack.name, pack.category, pack.resolution, pack.uploader, pack.description, ...(pack.tags || [])]
-                .some((field) => searchTerm.test(String(field || ''))));
+            // Use database-level search with pagination
+            results = await searchPacks(query, { limit, skip, sort: { createdAt: -1 } });
+
+            // Get total count for pagination (separate query)
+            const searchTerm = query.trim();
+            const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(escapedTerm, 'i');
+            const Pack = require('../models/Pack');
+            totalResults = await Pack.countDocuments({
+                $or: [
+                    { name: regex },
+                    { description: regex },
+                    { category: regex },
+                    { resolution: regex },
+                    { uploader: regex },
+                    { tags: regex },
+                ],
+            });
         }
 
         res.render('search/results', {
-            title: `Search Results for "${query}"`,
+            title: query ? `Search Results for "${query}"` : 'Search',
             query,
             results,
             searchTerms,
+            pagination: query ? {
+                page,
+                limit,
+                total: totalResults,
+                totalPages: Math.ceil(totalResults / limit),
+                hasNext: page * limit < totalResults,
+                hasPrev: page > 1,
+            } : null,
         });
     } catch (error) {
         next(error);

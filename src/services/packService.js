@@ -70,6 +70,57 @@ async function getPopularPacks() {
   return Pack.find().sort({ downloads: -1, createdAt: -1 }).lean();
 }
 
+async function searchPacks(query, options = {}) {
+  const { limit = 50, skip = 0, sort = { createdAt: -1 } } = options;
+  if (!query || !query.trim()) return [];
+
+  const searchTerm = String(query).trim();
+  const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(escapedTerm, 'i');
+
+  return Pack.find({
+    $or: [
+      { name: regex },
+      { description: regex },
+      { category: regex },
+      { resolution: regex },
+      { uploader: regex },
+      { tags: regex },
+    ],
+  })
+    .sort(sort)
+    .skip(skip)
+    .limit(limit)
+    .lean();
+}
+
+async function getSearchSuggestions(query, limit = 18) {
+  if (!query || query.trim().length < 2) return [];
+  const searchTerm = String(query).trim().toLowerCase();
+  const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(escapedTerm, 'i');
+
+  // Aggregate unique search terms from packs
+  const packs = await Pack.find({
+    $or: [
+      { category: regex },
+      { resolution: regex },
+      { tags: regex },
+    ],
+  }).select('category resolution tags').lean();
+
+  const terms = new Set();
+  packs.forEach(pack => {
+    if (pack.category && regex.test(pack.category)) terms.add(pack.category);
+    if (pack.resolution && regex.test(pack.resolution)) terms.add(pack.resolution);
+    (pack.tags || []).forEach(tag => {
+      if (regex.test(tag)) terms.add(tag);
+    });
+  });
+
+  return [...terms].sort().slice(0, limit);
+}
+
 async function incrementDownloads(id) {
   if (!mongoose.isValidObjectId(id)) {
     return null;
@@ -139,4 +190,6 @@ module.exports = {
   togglePackList,
   addPackComment,
   normalizeTags,
+  searchPacks,
+  getSearchSuggestions,
 };

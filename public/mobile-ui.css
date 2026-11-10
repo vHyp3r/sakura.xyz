@@ -327,10 +327,13 @@ body {
 
 .nav-item {
   position: relative;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   width: min(54px, 12vw);
-  height: min(54px, 12vw);
+  height: 64px;
   justify-self: center;
   padding: 0;
   border: 0;
@@ -340,6 +343,21 @@ body {
   cursor: pointer;
   font-size: clamp(1.25rem, 5vw, 1.6rem);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-item .icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+}
+
+.nav-item .label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .nav-item span {
@@ -406,7 +424,7 @@ body {
   }
   .nav-item {
     width: 50px;
-    height: 50px;
+    height: 58px;
     border-radius: 14px;
   }
 }
@@ -437,7 +455,7 @@ body {
   }
   .nav-item {
     width: 50px;
-    height: 50px;
+    height: 58px;
   }
 }
 

@@ -2,6 +2,9 @@ require('dotenv').config();
 
 const express = require('express');
 const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const csrf = require('csurf');
 const { initFirebase, getFirebaseStatus, isFirebaseConfigured } = require('./src/config/firebase');
 const { isMongoConfigured, getDataStoreStatus } = require('./src/services/dataStore');
 const { requireAdmin } = require('./src/services/adminAuth');
@@ -9,6 +12,57 @@ const { requireAccount } = require('./src/services/accountAuth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+// Security: Fail fast if critical secrets missing in production
+if (IS_PRODUCTION) {
+  const requiredSecrets = ['ADMIN_SESSION_SECRET', 'ACCOUNT_SESSION_SECRET', 'ADMIN_PASSWORD'];
+  const missing = requiredSecrets.filter(s => !process.env[s]);
+  if (missing.length) {
+    console.error(`FATAL: Missing required environment variables: ${missing.join(', ')}`);
+    process.exit(1);
+  }
+}
+
+// Helmet for security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: ["'self'"],
+      frameAncestors: ["'none'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+  hsts: IS_PRODUCTION ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false,
+}));
+
+// Rate limiting - global
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // limit each IP to 300 requests per windowMs
+  message: { error: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(globalLimiter);
+
+// Stricter rate limiting for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20, // 20 attempts per 15 minutes
+  message: { error: 'Too many authentication attempts, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+});
+
+// CSRF protection for state-changing operations (applied selectively)
+const csrfProtection = csrf({ cookie: { httpOnly: true, sameSite: 'lax', secure: IS_PRODUCTION } });
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -17,8 +71,8 @@ app.use('/admin-assets', express.static(path.join(__dirname, 'css')));
 app.use('/admin-assets', express.static(path.join(__dirname, 'js')));
 app.use('/profile-assets', express.static(path.join(__dirname, 'js')));
 app.get('/shop-assets/shop.js', (req, res) => res.sendFile(path.join(__dirname, 'shop.js')));
-app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, 'html', 'adminLogin.html')));
-app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'html', 'accountLogin.html')));
+app.get('/admin/login', authLimiter, (req, res) => res.sendFile(path.join(__dirname, 'html', 'adminLogin.html')));
+app.get('/login', authLimiter, (req, res) => res.sendFile(path.join(__dirname, 'html', 'accountLogin.html')));
 app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'html', 'privacypolicy.html')));
 app.get('/validate', (req, res) => res.sendFile(path.join(__dirname, 'html', 'validate.html')));
 app.get(['/admin', '/admin/overview', '/admin/collections', '/admin/activity', '/admin/balances', '/admin/shop'], requireAdmin, (req, res) => res.sendFile(path.join(__dirname, 'html', 'adminPanel.html')));

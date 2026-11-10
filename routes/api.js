@@ -1,6 +1,8 @@
 const express = require('express');
 const multer = require('multer');
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
+const csrf = require('csurf');
 const {
   getDashboardSummary: getMongoDashboardSummary,
   getDataStoreStatus,
@@ -44,11 +46,30 @@ const {
   redeemRankKey,
   verifyDonationPayment,
 } = require('../src/services/rankKeyService');
+const { recordAuditLog } = require('../src/services/auditLog');
 
 const router = express.Router();
 const packEditUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 300 * 1024 * 1024 } });
 
-router.patch('/packs/:id', packEditUpload.single('javaFile'), async (req, res, next) => {
+// Stricter rate limiting for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { error: 'Too many authentication attempts, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+});
+
+// CSRF protection for state-changing operations (cookie-based)
+const csrfProtection = csrf({ cookie: { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' } });
+
+// CSRF token endpoint for frontend (needs CSRF middleware to populate req.csrfToken)
+router.get('/csrf-token', csrfProtection, (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
+
+router.patch('/packs/:id', packEditUpload.single('javaFile'), csrfProtection, async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     const pack = await getPackById(req.params.id);
@@ -76,7 +97,7 @@ router.patch('/packs/:id', packEditUpload.single('javaFile'), async (req, res, n
   }
 });
 
-router.post('/account/register', async (req, res, next) => {
+router.post('/account/register', authLimiter, csrfProtection, async (req, res, next) => {
   try {
     const account = await registerAccount(req.body);
     setAccountSession(res, req, account);
@@ -87,7 +108,7 @@ router.post('/account/register', async (req, res, next) => {
   }
 });
 
-router.post('/account/login', async (req, res, next) => {
+router.post('/account/login', authLimiter, csrfProtection, async (req, res, next) => {
   try {
     const account = await authenticateAccount(req.body.username, req.body.password);
     if (!account) return res.status(401).json({ error: 'Invalid username or password.' });
@@ -115,7 +136,7 @@ router.get('/shop/catalog', async (req, res, next) => {
     next(error);
   }
 });
-router.post('/account/logout', (req, res) => {
+router.post('/account/logout', csrfProtection, (req, res) => {
   clearAccountSession(res);
   res.json({ authenticated: false });
 });
@@ -130,7 +151,7 @@ router.get('/account/search', async (req, res, next) => {
   }
 });
 
-router.patch('/account/profile', async (req, res, next) => {
+router.patch('/account/profile', csrfProtection, async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Account authentication required.' });
@@ -214,7 +235,7 @@ router.get('/account/summary', async (req, res, next) => {
   }
 });
 
-router.post('/packs/:id/view', async (req, res, next) => {
+router.post('/packs/:id/view', csrfProtection, async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     const visitorSource = session?.accountId
@@ -229,7 +250,7 @@ router.post('/packs/:id/view', async (req, res, next) => {
   }
 });
 
-router.post('/packs/:id/library', async (req, res, next) => {
+router.post('/packs/:id/library', csrfProtection, async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Sign in to save packs to your library.' });
@@ -241,7 +262,7 @@ router.post('/packs/:id/library', async (req, res, next) => {
   }
 });
 
-router.post('/packs/:id/like', async (req, res, next) => {
+router.post('/packs/:id/like', csrfProtection, async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Sign in to like packs.' });
@@ -254,7 +275,7 @@ router.post('/packs/:id/like', async (req, res, next) => {
   }
 });
 
-router.post('/packs/:id/super-react', async (req, res, next) => {
+router.post('/packs/:id/super-react', csrfProtection, async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Sign in to send a super reaction.' });
@@ -276,7 +297,7 @@ router.get('/packs/:id/comments', async (req, res, next) => {
   }
 });
 
-router.post('/packs/:id/comments', async (req, res, next) => {
+router.post('/packs/:id/comments', csrfProtection, async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Sign in to comment.' });
@@ -300,7 +321,7 @@ router.get('/coins', async (req, res, next) => {
   }
 });
 
-router.post('/ranks/purchase', async (req, res, next) => {
+router.post('/ranks/purchase', authLimiter, csrfProtection, async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Account authentication required.' });
@@ -316,7 +337,7 @@ router.post('/ranks/purchase', async (req, res, next) => {
   }
 });
 
-router.post('/ranks/redeem', async (req, res, next) => {
+router.post('/ranks/redeem', authLimiter, csrfProtection, async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Account authentication required.' });
@@ -347,7 +368,7 @@ router.get('/ranks/keys', async (req, res, next) => {
   }
 });
 
-router.post('/ranks/donations', async (req, res, next) => {
+router.post('/ranks/donations', authLimiter, csrfProtection, async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Account authentication required.' });
@@ -382,7 +403,8 @@ router.post('/ranks/donations/webhook', async (req, res, next) => {
     const signature = String(req.get('x-donation-signature') || '');
     if (!secret || !timestamp || !signature) return res.status(401).json({ error: 'Webhook authentication is not configured.' });
     const timestampNumber = Number(timestamp);
-    if (!Number.isFinite(timestampNumber) || Math.abs(Date.now() - timestampNumber * 1000) > 5 * 60 * 1000) {
+    // Reduced replay window from 5 minutes to 60 seconds
+    if (!Number.isFinite(timestampNumber) || Math.abs(Date.now() - timestampNumber * 1000) > 60 * 1000) {
       return res.status(401).json({ error: 'Webhook timestamp is expired.' });
     }
     const payload = `${timestamp}.${JSON.stringify(req.body)}`;
@@ -420,10 +442,20 @@ router.get('/admin/balances', requireAdmin, async (req, res, next) => {
   }
 });
 
-router.post('/admin/balances', requireAdmin, async (req, res, next) => {
+router.post('/admin/balances', requireAdmin, csrfProtection, async (req, res, next) => {
   try {
     const session = getAdminSession(req);
     const result = await setBalance(req.body.username, req.body.balance, session.username);
+    // Audit log
+    await recordAuditLog({
+      actor: session.username,
+      action: 'balance.set',
+      targetType: 'user',
+      targetId: req.body.username,
+      details: { newBalance: result.balance },
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
     res.json(result);
   } catch (error) {
     if (error.code === 'COOLDOWN') {
@@ -436,10 +468,21 @@ router.post('/admin/balances', requireAdmin, async (req, res, next) => {
   }
 });
 
-router.post('/admin/accounts/reset-password', requireAdmin, async (req, res, next) => {
+router.post('/admin/accounts/reset-password', requireAdmin, csrfProtection, async (req, res, next) => {
   try {
+    const session = getAdminSession(req);
     const account = await resetAccountPassword(req.body.identifier, req.body.password);
     if (!account) return res.status(404).json({ error: 'Account not found.' });
+    // Audit log
+    await recordAuditLog({
+      actor: session.username,
+      action: 'account.password.reset',
+      targetType: 'user',
+      targetId: account.username,
+      details: {},
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
     res.json({ reset: true, account });
   } catch (error) {
     if (/required|at least/.test(error.message)) {
@@ -453,9 +496,20 @@ router.get('/admin/ranks', requireAdmin, (req, res) => {
   res.json({ ranks: RANKS, badges: BADGES });
 });
 
-router.post('/admin/ranks/giveaway-keys', requireAdmin, async (req, res, next) => {
+router.post('/admin/ranks/giveaway-keys', requireAdmin, csrfProtection, async (req, res, next) => {
   try {
-    res.status(201).json(await generateGiveawayKeys(req.body.rank, req.body.count));
+    const session = getAdminSession(req);
+    const keys = await generateGiveawayKeys(req.body.rank, req.body.count);
+    await recordAuditLog({
+      actor: session.username,
+      action: 'rank.giveaway.create',
+      targetType: 'rankKey',
+      targetId: keys[0]?.key || 'multiple',
+      details: { rank: req.body.rank, count: req.body.count, keysGenerated: keys.length },
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+    res.status(201).json(keys);
   } catch (error) {
     if (/rank|between|configured/.test(error.message)) return res.status(400).json({ error: error.message });
     next(error);
@@ -470,48 +524,102 @@ router.get('/admin/shop/items', requireAdmin, async (req, res, next) => {
   }
 });
 
-router.post('/admin/shop/items', requireAdmin, async (req, res, next) => {
+router.post('/admin/shop/items', requireAdmin, csrfProtection, async (req, res, next) => {
   try {
-    res.status(201).json({ item: await createShopItem(req.body) });
+    const session = getAdminSession(req);
+    const item = await createShopItem(req.body);
+    await recordAuditLog({
+      actor: session.username,
+      action: 'shop.item.create',
+      targetType: 'shopItem',
+      targetId: item._id?.toString() || item.id?.toString() || 'unknown',
+      details: { name: item.name, price: item.price, period: item.period, rank: item.rank },
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+    res.status(201).json({ item });
   } catch (error) {
     if (/required|period|price/.test(error.message)) return res.status(400).json({ error: error.message });
     next(error);
   }
 });
 
-router.patch('/admin/shop/items/:id', requireAdmin, async (req, res, next) => {
+router.patch('/admin/shop/items/:id', requireAdmin, csrfProtection, async (req, res, next) => {
   try {
-    res.json({ item: await updateShopItem(req.params.id, req.body) });
+    const session = getAdminSession(req);
+    const item = await updateShopItem(req.params.id, req.body);
+    if (!item) return res.status(404).json({ error: 'Shop item not found.' });
+    await recordAuditLog({
+      actor: session.username,
+      action: 'shop.item.update',
+      targetType: 'shopItem',
+      targetId: req.params.id,
+      details: { changes: req.body },
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+    res.json({ item });
   } catch (error) {
     if (/required|period|price|not found/.test(error.message)) return res.status(400).json({ error: error.message });
     next(error);
   }
 });
 
-router.delete('/admin/shop/items/:id', requireAdmin, async (req, res, next) => {
+router.delete('/admin/shop/items/:id', requireAdmin, csrfProtection, async (req, res, next) => {
   try {
-    if (!await deleteShopItem(req.params.id)) return res.status(404).json({ error: 'Shop item not found.' });
+    const session = getAdminSession(req);
+    const deleted = await deleteShopItem(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Shop item not found.' });
+    await recordAuditLog({
+      actor: session.username,
+      action: 'shop.item.delete',
+      targetType: 'shopItem',
+      targetId: req.params.id,
+      details: {},
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
     res.json({ deleted: true });
   } catch (error) {
     next(error);
   }
 });
 
-router.post('/admin/accounts/rank', requireAdmin, async (req, res, next) => {
+router.post('/admin/accounts/rank', requireAdmin, csrfProtection, async (req, res, next) => {
   try {
+    const session = getAdminSession(req);
     const account = await updateAccountRank(req.body.identifier, req.body.rank, req.body.badges);
     if (!account) return res.status(404).json({ error: 'Account not found.' });
+    // Audit log
+    await recordAuditLog({
+      actor: session.username,
+      action: 'account.rank.update',
+      targetType: 'user',
+      targetId: account.username,
+      details: { newRank: account.rank, badges: account.badges },
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
     res.json({ updated: true, account });
   } catch (error) {
     next(error);
   }
 });
 
-router.post('/admin/rank-donations/:id/approve', requireAdmin, async (req, res, next) => {
+router.post('/admin/rank-donations/:id/approve', requireAdmin, csrfProtection, async (req, res, next) => {
   try {
     const session = getAdminSession(req);
     const result = await approveDonation(req.params.id, session.username);
     if (!result) return res.status(404).json({ error: 'Pending donation not found.' });
+    await recordAuditLog({
+      actor: session.username,
+      action: 'donation.approve',
+      targetType: 'donation',
+      targetId: req.params.id,
+      details: { approved: true, donation: result },
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
     res.json(result);
   } catch (error) {
     next(error);
@@ -527,7 +635,7 @@ router.get('/admin/session', (req, res) => {
   res.json({ authenticated: Boolean(session), username: session?.username || null });
 });
 
-router.post('/admin/login', (req, res) => {
+router.post('/admin/login', authLimiter, csrfProtection, (req, res) => {
   const username = String(req.body.username || '').trim();
   const password = String(req.body.password || '');
 
@@ -535,7 +643,17 @@ router.post('/admin/login', (req, res) => {
     return res.status(503).json({ error: 'Admin login is not configured on this server. Set ADMIN_PASSWORD in Render.' });
   }
 
-  if (!isAdminUsername(username) || password !== process.env.ADMIN_PASSWORD) {
+  // Constant-time comparison to prevent timing attacks
+  const isValidUsername = isAdminUsername(username);
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  const passwordMatch = crypto.timingSafeEqual(
+    Buffer.from(password, 'utf8'),
+    Buffer.from(adminPassword, 'utf8')
+  );
+
+  if (!isValidUsername || !passwordMatch) {
+    // Always do the same work regardless of username validity
+    crypto.timingSafeEqual(Buffer.from('dummy'), Buffer.from('dummy'));
     return res.status(401).json({ error: 'Invalid admin credentials.' });
   }
 
@@ -543,7 +661,7 @@ router.post('/admin/login', (req, res) => {
   return res.json({ authenticated: true, username });
 });
 
-router.post('/admin/logout', (req, res) => {
+router.post('/admin/logout', csrfProtection, (req, res) => {
   clearAdminSession(res);
   res.json({ authenticated: false });
 });

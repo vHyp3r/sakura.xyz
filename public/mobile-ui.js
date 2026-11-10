@@ -82,7 +82,9 @@
     `;
 
     document.querySelectorAll('.nav-item').forEach((item) => {
-      item.classList.toggle('active', item.dataset.view === viewName);
+      const active = item.dataset.view === viewName;
+      item.classList.toggle('active', active);
+      item.setAttribute('aria-selected', String(active));
     });
   }
 

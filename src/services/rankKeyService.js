@@ -21,15 +21,25 @@ function hashKey(key) {
   return crypto.createHash('sha256').update(key).digest('hex');
 }
 
-function encryptionKey() {
-  const secret = process.env.ACCOUNT_SESSION_SECRET || process.env.ADMIN_SESSION_SECRET || process.env.DONATION_WEBHOOK_SECRET;
-  if (!secret) throw new Error('A key encryption secret is not configured.');
+// Dedicated encryption key for rank keys - separate from session secrets
+function getRankKeyEncryptionKey() {
+  const secret = process.env.RANK_KEY_ENCRYPTION_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('RANK_KEY_ENCRYPTION_SECRET must be set in production');
+    }
+    console.warn('WARNING: Using default RANK_KEY_ENCRYPTION_SECRET. Set RANK_KEY_ENCRYPTION_SECRET in production!');
+    return crypto.createHash('sha256').update('dev-rank-key-secret-change-in-production').digest();
+  }
+  if (secret.length < 32) {
+    throw new Error('RANK_KEY_ENCRYPTION_SECRET must be at least 32 characters');
+  }
   return crypto.createHash('sha256').update(secret).digest();
 }
 
 function encryptKey(key) {
   const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv('aes-256-gcm', encryptionKey(), iv);
+  const cipher = crypto.createCipheriv('aes-256-gcm', getRankKeyEncryptionKey(), iv);
   const encrypted = Buffer.concat([cipher.update(key, 'utf8'), cipher.final()]);
   return `${iv.toString('base64url')}.${cipher.getAuthTag().toString('base64url')}.${encrypted.toString('base64url')}`;
 }
@@ -37,7 +47,7 @@ function encryptKey(key) {
 function decryptKey(value) {
   try {
     const [ivValue, tagValue, encryptedValue] = String(value || '').split('.');
-    const decipher = crypto.createDecipheriv('aes-256-gcm', encryptionKey(), Buffer.from(ivValue, 'base64url'));
+    const decipher = crypto.createDecipheriv('aes-256-gcm', getRankKeyEncryptionKey(), Buffer.from(ivValue, 'base64url'));
     decipher.setAuthTag(Buffer.from(tagValue, 'base64url'));
     return Buffer.concat([decipher.update(Buffer.from(encryptedValue, 'base64url')), decipher.final()]).toString('utf8');
   } catch (_) {

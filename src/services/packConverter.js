@@ -3,9 +3,17 @@ const crypto = require('node:crypto');
 const AdmZip = require('adm-zip');
 const sharp = require('sharp');
 
+// Zip bomb protection limits
+const MAX_ENTRIES = 1000;
+const MAX_UNCOMPRESSED_SIZE = 100 * 1024 * 1024; // 100 MB
+const MAX_COMPRESSION_RATIO = 100; // 100:1 max ratio
+
 function safeEntryName(name) {
   const normalized = path.posix.normalize(String(name || '').replace(/\\/g, '/'));
-  return normalized && normalized !== '.' && !normalized.startsWith('../') && !normalized.includes('/../') && !path.posix.isAbsolute(normalized)
+  // Additional defense: reject any path containing '..' segment after normalization
+  const segments = normalized.split('/');
+  const hasTraversal = segments.some(seg => seg === '..' || seg === '.');
+  return normalized && normalized !== '.' && !normalized.startsWith('../') && !normalized.includes('/../') && !path.posix.isAbsolute(normalized) && !hasTraversal
     ? normalized
     : null;
 }
@@ -25,10 +33,33 @@ function convertEntryName(name, direction) {
 
 async function convertPack(buffer, filename, direction, targetVersion) {
   const input = new AdmZip(buffer);
+  const entries = input.getEntries();
+
+  // Zip bomb protection: check entry count
+  if (entries.length > MAX_ENTRIES) {
+    throw new Error(`Archive contains too many entries (max ${MAX_ENTRIES}).`);
+  }
+
+  // Zip bomb protection: check total uncompressed size and compression ratio
+  let totalUncompressed = 0;
+  let totalCompressed = 0;
+  for (const entry of entries) {
+    if (!entry.isDirectory) {
+      totalUncompressed += entry.header.size || 0;
+      totalCompressed += entry.header.compressedSize || 0;
+    }
+  }
+  if (totalUncompressed > MAX_UNCOMPRESSED_SIZE) {
+    throw new Error(`Archive uncompressed size exceeds ${MAX_UNCOMPRESSED_SIZE / 1024 / 1024} MB limit.`);
+  }
+  if (totalCompressed > 0 && totalUncompressed / totalCompressed > MAX_COMPRESSION_RATIO) {
+    throw new Error(`Archive compression ratio exceeds ${MAX_COMPRESSION_RATIO}:1 limit (possible zip bomb).`);
+  }
+
   const output = new AdmZip();
   const seen = new Set();
 
-  for (const entry of input.getEntries()) {
+  for (const entry of entries) {
     if (entry.isDirectory) continue;
     const sourceName = safeEntryName(entry.entryName);
     if (!sourceName) continue;

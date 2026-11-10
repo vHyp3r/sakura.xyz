@@ -4,7 +4,18 @@ const COOKIE_NAME = 'sakura_account_session';
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
 
 function getSecret() {
-  return process.env.ACCOUNT_SESSION_SECRET || process.env.ADMIN_SESSION_SECRET || 'change-this-development-secret';
+  const secret = process.env.ACCOUNT_SESSION_SECRET || process.env.ADMIN_SESSION_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('ACCOUNT_SESSION_SECRET must be set in production');
+    }
+    console.warn('WARNING: Using default ACCOUNT_SESSION_SECRET. Set ACCOUNT_SESSION_SECRET in production!');
+    return 'change-this-development-secret';
+  }
+  if (secret.length < 32) {
+    throw new Error('ACCOUNT_SESSION_SECRET must be at least 32 characters');
+  }
+  return secret;
 }
 
 function sign(value) {

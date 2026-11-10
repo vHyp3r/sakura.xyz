@@ -10,20 +10,20 @@
   <link rel="stylesheet" href="/mobile-ui.css">
 </head>
 <body>
-  <main class="shell" aria-label="Sakura mobile interface">
-    <header class="header" role="banner">
+  <main class="phone-shell" aria-label="Sakura mobile interface">
+    <header class="mobile-header" role="banner">
       <a class="brand" href="/" aria-label="Sakura home">
         <span class="brand-prefix">sakura</span><span class="brand-suffix">.xyz</span>
       </a>
-      <button class="btn-ghost" id="profile-btn" aria-label="Profile & settings" aria-expanded="false">
+      <button class="profile-button" id="profile-button" aria-label="Profile & settings" aria-expanded="false">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
         <span class="badge" aria-label="Notifications" hidden></span>
       </button>
     </header>
 
-    <div class="content" id="content" role="main" aria-live="polite"></div>
+    <div class="mobile-content" id="mobile-content" role="main" aria-live="polite"></div>
 
-    <nav class="nav" role="navigation" aria-label="Primary navigation">
+    <nav class="mobile-nav" role="navigation" aria-label="Primary navigation">
       <button class="nav-item" data-view="home" aria-label="Home" aria-selected="true">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span class="label">Home</span>

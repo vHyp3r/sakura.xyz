@@ -11,7 +11,18 @@ function getAdminUsernames() {
 }
 
 function getSecret() {
-  return process.env.ADMIN_SESSION_SECRET || 'change-this-development-secret';
+  const secret = process.env.ADMIN_SESSION_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('ADMIN_SESSION_SECRET must be set in production');
+    }
+    console.warn('WARNING: Using default ADMIN_SESSION_SECRET. Set ADMIN_SESSION_SECRET in production!');
+    return 'change-this-development-secret';
+  }
+  if (secret.length < 32) {
+    throw new Error('ADMIN_SESSION_SECRET must be at least 32 characters');
+  }
+  return secret;
 }
 
 function isAdminUsername(username) {

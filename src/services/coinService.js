@@ -38,22 +38,38 @@ async function setBalance(username, balance, updatedBy) {
   if (!status.connected) throw new Error(status.message);
 
   const collection = mongoose.connection.db.collection(COLLECTION_NAME);
-  const existing = await collection.findOne({ username: normalizedUsername });
   const now = new Date();
-  const cooldownUntil = existing?.updatedAt ? new Date(existing.updatedAt).getTime() + getCooldownMs() : 0;
+  const cooldownMs = getCooldownMs();
 
-  if (cooldownUntil > now.getTime()) {
-    const error = new Error('This user balance was updated recently.');
-    error.code = 'COOLDOWN';
-    error.retryAfterSeconds = Math.ceil((cooldownUntil - now.getTime()) / 1000);
-    throw error;
-  }
-
-  await collection.updateOne(
-    { username: normalizedUsername },
-    { $set: { username: normalizedUsername, balance: numericBalance, updatedAt: now, updatedBy: normalizeUsername(updatedBy) } },
-    { upsert: true }
+  // Atomic cooldown check + update using findOneAndUpdate with conditional query
+  // Only updates if: no existing record (upsert) OR existing record's updatedAt is older than cooldown
+  const cooldownCutoff = new Date(now.getTime() - cooldownMs);
+  const result = await collection.findOneAndUpdate(
+    {
+      username: normalizedUsername,
+      $or: [
+        { updatedAt: { $exists: false } }, // new record (upsert)
+        { updatedAt: { $lt: cooldownCutoff } } // old enough to update
+      ]
+    },
+    {
+      $set: { username: normalizedUsername, balance: numericBalance, updatedAt: now, updatedBy: normalizeUsername(updatedBy) }
+    },
+    { returnDocument: 'after', upsert: true }
   );
+
+  if (!result) {
+    // Check if record exists to give proper error
+    const existing = await collection.findOne({ username: normalizedUsername });
+    if (existing) {
+      const error = new Error('This user balance was updated recently.');
+      error.code = 'COOLDOWN';
+      error.retryAfterSeconds = Math.ceil((new Date(existing.updatedAt).getTime() + cooldownMs - now.getTime()) / 1000);
+      throw error;
+    }
+    // Should not happen with upsert, but handle gracefully
+    throw new Error('Failed to update balance.');
+  }
 
   return { username: normalizedUsername, balance: numericBalance, updatedAt: now.toISOString() };
 }
