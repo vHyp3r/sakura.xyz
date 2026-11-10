@@ -1,5 +1,6 @@
 {
   "enabledPlugins": {
-    "devibify@devibify": true
+    "devibify@devibify": true,
+    "ui-ux-pro-max@claude-code-ui-ux-skill": true
   }
 }
