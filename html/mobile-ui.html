@@ -3,25 +3,59 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sakura Mobile UI</title>
+  <meta name="theme-color" content="#0d1117">
+  <title>Sakura Mobile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="/mobile-ui.css">
 </head>
 <body>
-  <main class="phone-shell" aria-label="Sakura mobile interface preview">
-    <header class="mobile-header">
-      <a class="brand" href="/">sakura<span>.xyz</span></a>
-      <button id="profile-button" class="profile-button" aria-label="Open profile">
-        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="32" fill="#dedede"/><circle cx="32" cy="23" r="10" fill="#050505"/><path d="M15 51c1-11 8-17 17-17s16 6 17 17" fill="#050505"/></svg>
+  <main class="shell" aria-label="Sakura mobile interface">
+    <header class="header" role="banner">
+      <a class="brand" href="/" aria-label="Sakura home">
+        <span class="brand-prefix">sakura</span><span class="brand-suffix">.xyz</span>
+      </a>
+      <button class="btn-ghost" id="profile-btn" aria-label="Profile & settings" aria-expanded="false">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+        <span class="badge" aria-label="Notifications" hidden></span>
       </button>
     </header>
-    <section id="mobile-content" class="mobile-content" aria-live="polite"></section>
-    <nav class="mobile-nav" aria-label="Mobile navigation">
-      <button class="nav-item active" data-view="home" aria-label="Home"><span>⌂</span></button>
-      <button class="nav-item" data-view="discover" aria-label="Discover"><span>⌕</span></button>
-      <button class="nav-item" data-view="create" aria-label="Create"><span>＋</span></button>
-      <button class="nav-item" data-view="shop" aria-label="Shop"><span>◇</span></button>
-      <button class="nav-item" data-view="profile" aria-label="Profile"><span>☻</span></button>
+
+    <div class="content" id="content" role="main" aria-live="polite"></div>
+
+    <nav class="nav" role="navigation" aria-label="Primary navigation">
+      <button class="nav-item" data-view="home" aria-label="Home" aria-selected="true">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span class="label">Home</span>
+      </button>
+      <button class="nav-item" data-view="discover" aria-label="Discover" aria-selected="false">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <span class="label">Discover</span>
+      </button>
+      <button class="nav-item" data-view="create" aria-label="Create" aria-selected="false">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span class="label">Create</span>
+      </button>
+      <button class="nav-item" data-view="shop" aria-label="Shop" aria-selected="false">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="label">Shop</span>
+      </button>
+      <button class="nav-item" data-view="profile" aria-label="Profile" aria-selected="false">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="label">Profile</span>
+      </button>
     </nav>
+
+    <template id="card-template">
+      <article class="card" data-href="">
+        <div class="card-icon" aria-hidden="true"></div>
+        <div class="card-body">
+          <h3 class="card-title"></h3>
+          <p class="card-desc"></p>
+        </div>
+        <svg class="card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+      </article>
+    </template>
   </main>
   <script src="/mobile-ui.js"></script>
 </body>
