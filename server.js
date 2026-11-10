@@ -5,6 +5,7 @@ const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const csrf = require('csurf');
+const session = require('express-session');
 const { initFirebase, getFirebaseStatus, isFirebaseConfigured } = require('./src/config/firebase');
 const { isMongoConfigured, getDataStoreStatus } = require('./src/services/dataStore');
 const { requireAdmin } = require('./src/services/adminAuth');
@@ -60,6 +61,20 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   skipSuccessfulRequests: true,
 });
+
+// Session middleware (required for CSRF)
+const sessionSecret = process.env.ADMIN_SESSION_SECRET || process.env.ACCOUNT_SESSION_SECRET || 'dev-session-secret-change-in-production';
+app.use(session({
+  secret: sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: IS_PRODUCTION,
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  },
+}));
 
 // CSRF protection for state-changing operations (applied selectively)
 const csrfProtection = csrf({ cookie: { httpOnly: true, sameSite: 'lax', secure: IS_PRODUCTION } });
