@@ -150,7 +150,6 @@ router.post('/shop/purchase', authLimiter, async (req, res, next) => {
       return res.status(400).json({ error: 'This item is not purchasable with coins.' });
     }
 
-    const { spendCoins } = require('../src/services/coinService');
     const balance = await spendCoins(session.username, item.price);
 
     // Record purchase in userPurchases collection
