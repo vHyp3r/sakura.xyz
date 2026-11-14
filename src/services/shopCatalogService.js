@@ -12,6 +12,8 @@ function normalizeItem(input) {
   const benefits = Array.isArray(input.benefits)
     ? input.benefits.map((benefit) => String(benefit).trim().slice(0, 120)).filter(Boolean).slice(0, 8)
     : [];
+  // Optional cosmeticId to link shop items to profile cosmetics
+  const cosmeticId = input.cosmeticId ? String(input.cosmeticId).trim().slice(0, 50) : null;
 
   if (!name || !type) throw new Error('Item name and type are required.');
   if (!PERIODS.has(period)) throw new Error('That shop rotation period is not supported.');
@@ -29,6 +31,7 @@ function normalizeItem(input) {
     benefits,
     active: input.active !== false,
     rotationLimit: Math.min(20, Math.max(1, Number(input.rotationLimit) || 3)),
+    cosmeticId,
   };
 }
 
@@ -78,6 +81,7 @@ function publicItem(item) {
     icon: item.icon,
     color: item.color,
     benefits: item.benefits,
+    cosmeticId: item.cosmeticId,
   };
 }
 

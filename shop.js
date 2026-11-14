@@ -144,11 +144,21 @@
 	}
 
 	function renderProductCard(item) {
-		const owned = state.owned.includes(item.id), card = document.createElement("article"); card.className = "shop-card";
+		const owned = state.owned.includes(item.cosmeticId || item.id), card = document.createElement("article"); card.className = "shop-card";
 		const benefits = item.benefits ? `<ul class="shop-benefits">${item.benefits.map((benefit) => `<li>${benefit}</li>`).join("")}</ul>` : "";
 		const price = item.donation ? "Crypto donation" : `🪙 ${item.price}`;
 		card.innerHTML = `<div class="shop-art" style="background:${item.color}">${item.icon}</div><div class="shop-card-body"><div class="shop-meta"><span class="shop-type">${item.type}</span><span class="shop-period">${periodLabels[item.period]}</span></div><h3>${item.name}</h3>${item.rank ? `<span class="shop-rank" style="--rank-color:${item.color}">${item.rank} rank</span>` : ""}${benefits}<strong>${price}</strong><button class="shop-buy" ${owned ? "disabled" : ""}>${owned ? "Owned ✓" : item.donation ? "Donate crypto" : item.rank ? "Buy rank" : "Buy now"}</button></div>`;
-		if (!owned) card.querySelector("button").onclick = () => item.donation ? (window.location.href = "/donate") : buyRank(item);
+		if (!owned) {
+			card.querySelector("button").onclick = () => {
+				if (item.donation) {
+					window.location.href = "/donate";
+				} else if (item.rank) {
+					buyRank(item);
+				} else {
+					buyCosmetic(item);
+				}
+			};
+		}
 		return card;
 	}
 
@@ -218,9 +228,35 @@
 	function buy(item) {
 		const message = root.querySelector(".shop-message");
 		if (state.balance < item.price) { message.textContent = "You need more coins for this item."; return; }
-		state.balance -= item.price; state.owned = [...new Set([...state.owned, item.id])];
+		state.balance -= item.price; state.owned = [...new Set([...state.owned, item.cosmeticId || item.id])];
 		saveStorage(storageKey("coins"), state.balance); saveStorage(storageKey("owned"), JSON.stringify(state.owned));
 		message.textContent = `${item.name} added to your collection!`; render();
+	}
+
+	async function buyCosmetic(item) {
+		const message = root.querySelector(".shop-message");
+		message.textContent = "Purchasing...";
+		try {
+			const response = await fetch("/api/shop/purchase", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ itemId: item.id })
+			});
+			const result = await response.json();
+			if (!response.ok) throw new Error(result.error || "Could not purchase item.");
+			if (Number.isInteger(result.balance)) {
+				state.balance = result.balance;
+				saveStorage(storageKey("coins"), result.balance);
+			}
+			if (result.cosmeticId) {
+				state.owned = [...new Set([...state.owned, result.cosmeticId])];
+				saveStorage(storageKey("owned"), JSON.stringify(state.owned));
+			}
+			render();
+			message.textContent = `${result.itemName} added to your collection!`;
+		} catch (error) {
+			message.textContent = error.message;
+		}
 	}
 	async function loadServerBalance() {
 		try {

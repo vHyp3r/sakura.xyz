@@ -31,7 +31,7 @@
 		const consoleName = document.querySelector('#consoleName');
 		const accountSearch = document.querySelector('#accountSearch');
 		const accountSearchResults = document.querySelector('#accountSearchResults');
-		const cosmeticCatalog = {
+		let cosmeticCatalog = {
 			'rose-crown': { group: 'avatarCosmetic', label: 'Rose Crown', icon: '🌹' },
 			'moon-glasses': { group: 'avatarCosmetic', label: 'Moon Glasses', icon: '🌙' },
 			'cloud-room': { group: 'profileBackground', label: 'Cloud Room', color: '#c7e8f5' },
@@ -40,6 +40,29 @@
 			'sunset': { group: 'profileTheme', label: 'Soft Sunset', accent: '#c96b4c', soft: '#fff0e9' },
 			'starlight': { group: 'profileTheme', label: 'Starlight', accent: '#3389aa', soft: '#e9f8fc' }
 		};
+
+		async function loadCosmeticCatalog() {
+			try {
+				const response = await fetch('/api/shop/catalog', { cache: 'no-store' });
+				if (!response.ok) return;
+				const result = await response.json();
+				if (!Array.isArray(result.items)) return;
+				result.items.forEach((item) => {
+					if (item.cosmeticId && !cosmeticCatalog[item.cosmeticId]) {
+						cosmeticCatalog[item.cosmeticId] = {
+							group: item.type === 'Avatar cosmetics' ? 'avatarCosmetic' :
+								   item.type === 'Backgrounds' ? 'profileBackground' :
+								   item.type === 'Themes' ? 'profileTheme' : 'avatarCosmetic',
+							label: item.name,
+							icon: item.icon,
+							color: item.color,
+						};
+					}
+				});
+			} catch (_) {
+				// Fallback to built-in catalog
+			}
+		}
 
 		const fields = {
 			username,
@@ -306,9 +329,33 @@
 			saveJson(appearanceKey, appearance);
 			Object.entries(fields).forEach(([key, field]) => { if (field && account[key] !== undefined) field.value = account[key]; });
 			if (accountIdentity) accountIdentity.textContent = `Signed in as ${account.email}`;
+			await loadCosmeticCatalog();
+			await loadServerPurchases();
 			renderCosmetics();
 			return true;
 		};
+
+		async function loadServerPurchases() {
+			try {
+				const response = await fetch('/api/shop/purchases', { cache: 'no-store' });
+				if (!response.ok) return;
+				const result = await response.json();
+				if (Array.isArray(result.cosmeticIds) && result.cosmeticIds.length) {
+					const localOwned = (() => {
+						try {
+							const accountValue = JSON.parse(localStorage.getItem(accountStorageKey('owned')) || 'null');
+							if (Array.isArray(accountValue)) return accountValue;
+							const legacyValue = JSON.parse(localStorage.getItem('sakura-owned') || '[]');
+							return Array.isArray(legacyValue) ? legacyValue : [];
+						} catch (_) { return []; }
+					})();
+					const merged = [...new Set([...localOwned, ...result.cosmeticIds])];
+					saveJson(accountStorageKey('owned'), merged);
+				}
+			} catch (_) {
+				// Fallback to localStorage
+			}
+		}
 
 		loadAccount().then(async (authenticated) => {
 			if (!authenticated) return;

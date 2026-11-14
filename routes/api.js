@@ -131,6 +131,56 @@ router.get('/shop/catalog', async (req, res, next) => {
     next(error);
   }
 });
+
+router.post('/shop/purchase', authLimiter, async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    if (!session) return res.status(401).json({ error: 'Account authentication required.' });
+    const itemId = String(req.body.itemId || '').trim();
+    if (!itemId) return res.status(400).json({ error: 'Item ID is required.' });
+
+    const collection = await (await require('../src/services/accountStore').getAccountConnection()).db.collection('shopItems');
+    const { ObjectId } = require('mongoose').Types;
+    if (!ObjectId.isValid(itemId.replace('catalog-', ''))) {
+      return res.status(400).json({ error: 'Invalid item ID.' });
+    }
+    const item = await collection.findOne({ _id: new ObjectId(itemId.replace('catalog-', '')) });
+    if (!item || !item.active) return res.status(404).json({ error: 'Shop item not found.' });
+    if (item.price === null || item.price === undefined) {
+      return res.status(400).json({ error: 'This item is not purchasable with coins.' });
+    }
+
+    const { spendCoins } = require('../src/services/coinService');
+    const balance = await spendCoins(session.username, item.price);
+
+    // Record purchase in userPurchases collection
+    const purchasesCollection = (await require('../src/services/accountStore').getAccountConnection()).db.collection('userPurchases');
+    await purchasesCollection.updateOne(
+      { username: session.username, itemId: item._id.toString() },
+      { $setOnInsert: { username: session.username, itemId: item._id.toString(), cosmeticId: item.cosmeticId, purchasedAt: new Date(), price: item.price } },
+      { upsert: true }
+    );
+
+    res.json({ success: true, balance: balance.balance, cosmeticId: item.cosmeticId, itemName: item.name });
+  } catch (error) {
+    if (/coins|enough|required/.test(error.message)) return res.status(400).json({ error: error.message });
+    next(error);
+  }
+});
+
+router.get('/shop/purchases', async (req, res, next) => {
+  try {
+    const session = getAccountSession(req);
+    if (!session) return res.status(401).json({ error: 'Account authentication required.' });
+    const purchasesCollection = (await require('../src/services/accountStore').getAccountConnection()).db.collection('userPurchases');
+    const purchases = await purchasesCollection.find({ username: session.username }).toArray();
+    const cosmeticIds = purchases.map(p => p.cosmeticId).filter(Boolean);
+    res.json({ cosmeticIds });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post('/account/logout', (req, res) => {
   clearAccountSession(res);
   res.json({ authenticated: false });
