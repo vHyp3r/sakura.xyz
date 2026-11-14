@@ -6,16 +6,17 @@ const fs = require('fs');
 const AdmZip = require('adm-zip');
 const { createPack, storePackFile } = require('../src/services/packService');
 const { getAccountSession } = require('../src/services/accountAuth');
+const { MCPACK } = require('../src/config/limits');
 
 // Zip bomb protection limits for .mcpack uploads
-const MAX_MCPACK_ENTRIES = 5000;
-const MAX_MCPACK_UNCOMPRESSED = 200 * 1024 * 1024; // 200 MB
-const MAX_MCPACK_COMPRESSION_RATIO = 100;
+const { MAX_ENTRIES: MAX_MCPACK_ENTRIES, MAX_UNCOMPRESSED_BYTES: MAX_MCPACK_UNCOMPRESSED, MAX_COMPRESSION_RATIO: MAX_MCPACK_COMPRESSION_RATIO } = MCPACK;
 
 // Validate .mcpack file structure (must be a valid Bedrock pack with manifest.json)
-function validateMcpack(buffer) {
+// Accepts either a Buffer or a file path (for streaming)
+function validateMcpack(input) {
   try {
-    const zip = new AdmZip(buffer);
+    // If input is a string, treat as file path and read only what we need
+    const zip = typeof input === 'string' ? new AdmZip(input) : new AdmZip(input);
     const entries = zip.getEntries();
 
     // Check entry count
@@ -118,9 +119,8 @@ router.post('/', upload.fields([
         const thumbnailFile = req.files.thumbnail ? req.files.thumbnail[0] : null;
         const accountSession = getAccountSession(req);
 
-        // Validate .mcpack file content (not just extension)
-        const packBuffer = fs.readFileSync(packFile.path);
-        const validation = validateMcpack(packBuffer);
+        // Validate .mcpack file content (not just extension) - pass file path to avoid loading entire file into memory
+        const validation = validateMcpack(packFile.path);
         if (!validation.valid) {
             fs.unlink(packFile.path, () => {});
             if (thumbnailFile) fs.unlink(thumbnailFile.path, () => {});

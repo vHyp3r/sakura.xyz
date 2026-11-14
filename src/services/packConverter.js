@@ -2,11 +2,10 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const AdmZip = require('adm-zip');
 const sharp = require('sharp');
+const { PACK_CONVERTER } = require('../config/limits');
 
 // Zip bomb protection limits
-const MAX_ENTRIES = 1000;
-const MAX_UNCOMPRESSED_SIZE = 100 * 1024 * 1024; // 100 MB
-const MAX_COMPRESSION_RATIO = 100; // 100:1 max ratio
+const { MAX_ENTRIES, MAX_UNCOMPRESSED_BYTES: MAX_UNCOMPRESSED_SIZE, MAX_COMPRESSION_RATIO } = PACK_CONVERTER;
 
 function safeEntryName(name) {
   const normalized = path.posix.normalize(String(name || '').replace(/\\/g, '/'));
@@ -31,7 +30,8 @@ function convertEntryName(name, direction) {
     .replace(/^textures\//, 'assets/minecraft/textures/');
 }
 
-async function convertPack(buffer, filename, direction, targetVersion) {
+async function convertPack(buffer, filename, direction, targetVersion, options = {}) {
+  const { preserveFormat = false } = options;
   const input = new AdmZip(buffer);
   const entries = input.getEntries();
 
@@ -69,7 +69,10 @@ async function convertPack(buffer, filename, direction, targetVersion) {
     const outputName = safeEntryName(convertEntryName(sourceName, direction));
     if (!outputName || seen.has(outputName)) continue;
     let data = entry.getData();
-    if (/\.(png|jpe?g)$/i.test(outputName)) data = await sharp(data).png().toBuffer();
+    // Only re-encode if not preserving format, or if image needs conversion (e.g., JPEG -> PNG for Bedrock)
+    if (!preserveFormat && /\.(png|jpe?g)$/i.test(outputName)) {
+      data = await sharp(data).png().toBuffer();
+    }
     output.addFile(outputName, data);
     seen.add(outputName);
   }

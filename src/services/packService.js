@@ -59,9 +59,20 @@ async function storePackBuffer(buffer, filename, contentType = 'application/octe
 
 async function getPackFileStream(fileStorageId) {
   if (!fileStorageId || mongoose.connection.readyState !== 1) return null;
-  if (!mongoose.isValidObjectId(fileStorageId)) return null;
+  let id;
+  try {
+    // Handle both ObjectId instances and string representations
+    if (fileStorageId instanceof mongoose.Types.ObjectId) {
+      id = fileStorageId;
+    } else if (mongoose.isValidObjectId(fileStorageId)) {
+      id = new mongoose.Types.ObjectId(String(fileStorageId));
+    } else {
+      return null;
+    }
+  } catch {
+    return null;
+  }
   const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'packFiles' });
-  const id = new mongoose.Types.ObjectId(String(fileStorageId));
   const files = await bucket.find({ _id: id }).toArray();
   return files[0] ? { bucket, file: files[0] } : null;
 }
@@ -71,23 +82,15 @@ async function getPopularPacks() {
 }
 
 async function searchPacks(query, options = {}) {
-  const { limit = 50, skip = 0, sort = { createdAt: -1 } } = options;
+  const { limit = 50, skip = 0, sort = { score: { $meta: 'textScore' } } } = options;
   if (!query || !query.trim()) return [];
 
   const searchTerm = String(query).trim();
-  const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(escapedTerm, 'i');
 
-  return Pack.find({
-    $or: [
-      { name: regex },
-      { description: regex },
-      { category: regex },
-      { resolution: regex },
-      { uploader: regex },
-      { tags: regex },
-    ],
-  })
+  return Pack.find(
+    { $text: { $search: searchTerm } },
+    { score: { $meta: 'textScore' } }
+  )
     .sort(sort)
     .skip(skip)
     .limit(limit)
@@ -100,14 +103,11 @@ async function getSearchSuggestions(query, limit = 18) {
   const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const regex = new RegExp(escapedTerm, 'i');
 
-  // Aggregate unique search terms from packs
-  const packs = await Pack.find({
-    $or: [
-      { category: regex },
-      { resolution: regex },
-      { tags: regex },
-    ],
-  }).select('category resolution tags').lean();
+  // Aggregate unique search terms from packs using text search
+  const packs = await Pack.find(
+    { $text: { $search: searchTerm } },
+    { score: { $meta: 'textScore' } }
+  ).select('category resolution tags').lean();
 
   const terms = new Set();
   packs.forEach(pack => {
@@ -130,8 +130,11 @@ async function incrementDownloads(id) {
 }
 
 async function incrementViews(id) {
-  if (!mongoose.isValidObjectId(id)) return null;
-  return Pack.findById(id).select('_id views').lean();
+  if (!mongoose.isValidObjectId(id)) {
+    return null;
+  }
+
+  return Pack.findByIdAndUpdate(id, { $inc: { views: 1 } }, { new: true }).lean();
 }
 
 async function recordPackView(id, visitorKey) {
@@ -171,7 +174,12 @@ async function addPackComment(id, accountId, username, body) {
   const text = String(body || '').trim();
   if (!text || text.length > 500) throw new Error('Comments must be between 1 and 500 characters.');
   const comment = { accountId: String(accountId), username: String(username), body: text, createdAt: new Date() };
-  const updated = await Pack.findByIdAndUpdate(id, { $push: { comments: comment } }, { new: true }).lean();
+  // Limit comments array to last 100 entries to prevent unbounded growth
+  const updated = await Pack.findByIdAndUpdate(
+    id,
+    { $push: { comments: { $each: [comment], $slice: -100, $sort: { createdAt: 1 } } } },
+    { new: true }
+  ).lean();
   return updated ? comment : null;
 }
 

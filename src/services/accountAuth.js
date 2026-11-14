@@ -4,7 +4,7 @@ const COOKIE_NAME = 'sakura_account_session';
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
 
 function getSecret() {
-  const secret = process.env.ACCOUNT_SESSION_SECRET || process.env.ADMIN_SESSION_SECRET;
+  const secret = process.env.ACCOUNT_SESSION_SECRET;
   if (!secret) {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('ACCOUNT_SESSION_SECRET must be set in production');

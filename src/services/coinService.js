@@ -5,6 +5,8 @@ const COLLECTION_NAME = 'userBalances';
 const DEFAULT_BALANCE = 1200;
 const DEFAULT_COOLDOWN_SECONDS = 300;
 
+let balancesIndexReady = null;
+
 function getCooldownMs() {
   const seconds = Number(process.env.ADMIN_COIN_UPDATE_COOLDOWN_SECONDS);
   return (Number.isFinite(seconds) && seconds >= 0 ? seconds : DEFAULT_COOLDOWN_SECONDS) * 1000;
@@ -12,6 +14,18 @@ function getCooldownMs() {
 
 function normalizeUsername(username) {
   return String(username || '').trim().toLowerCase();
+}
+
+async function getBalancesCollection() {
+  const status = await getDataStoreStatus();
+  if (!status.connected) throw new Error(status.message);
+  const collection = mongoose.connection.db.collection(COLLECTION_NAME);
+  // Ensure unique index on username (created once)
+  if (!balancesIndexReady) {
+    balancesIndexReady = collection.createIndex({ username: 1 }, { unique: true });
+  }
+  await balancesIndexReady;
+  return collection;
 }
 
 async function getBalance(username) {
@@ -34,44 +48,74 @@ async function setBalance(username, balance, updatedBy) {
     throw new Error('Balance must be a whole number between 0 and 1,000,000,000.');
   }
 
-  const status = await getDataStoreStatus();
-  if (!status.connected) throw new Error(status.message);
-
-  const collection = mongoose.connection.db.collection(COLLECTION_NAME);
+  const collection = await getBalancesCollection();
   const now = new Date();
   const cooldownMs = getCooldownMs();
-
-  // Atomic cooldown check + update using findOneAndUpdate with conditional query
-  // Only updates if: no existing record (upsert) OR existing record's updatedAt is older than cooldown
   const cooldownCutoff = new Date(now.getTime() - cooldownMs);
-  const result = await collection.findOneAndUpdate(
-    {
-      username: normalizedUsername,
-      $or: [
-        { updatedAt: { $exists: false } }, // new record (upsert)
-        { updatedAt: { $lt: cooldownCutoff } } // old enough to update
-      ]
-    },
-    {
-      $set: { username: normalizedUsername, balance: numericBalance, updatedAt: now, updatedBy: normalizeUsername(updatedBy) }
-    },
-    { returnDocument: 'after', upsert: true }
-  );
 
-  if (!result) {
-    // Check if record exists to give proper error
-    const existing = await collection.findOne({ username: normalizedUsername });
-    if (existing) {
-      const error = new Error('This user balance was updated recently.');
-      error.code = 'COOLDOWN';
-      error.retryAfterSeconds = Math.ceil((new Date(existing.updatedAt).getTime() + cooldownMs - now.getTime()) / 1000);
-      throw error;
+  // Try atomic update: only update if document doesn't exist OR cooldown has passed
+  // Use upsert with $setOnInsert for new documents, $set for existing
+  try {
+    const result = await collection.findOneAndUpdate(
+      {
+        username: normalizedUsername,
+        $or: [
+          { updatedAt: { $exists: false } },
+          { updatedAt: { $lt: cooldownCutoff } }
+        ]
+      },
+      [
+        // Use aggregation pipeline for atomic conditional update
+        {
+          $set: {
+            username: normalizedUsername,
+            balance: numericBalance,
+            updatedAt: now,
+            updatedBy: normalizeUsername(updatedBy)
+          }
+        }
+      ],
+      { returnDocument: 'after', upsert: true }
+    );
+
+    if (!result) {
+      // Check if record exists to give proper cooldown error
+      const existing = await collection.findOne({ username: normalizedUsername });
+      if (existing) {
+        const error = new Error('This user balance was updated recently.');
+        error.code = 'COOLDOWN';
+        error.retryAfterSeconds = Math.ceil((new Date(existing.updatedAt).getTime() + cooldownMs - now.getTime()) / 1000);
+        throw error;
+      }
+      throw new Error('Failed to update balance.');
     }
-    // Should not happen with upsert, but handle gracefully
-    throw new Error('Failed to update balance.');
-  }
 
-  return { username: normalizedUsername, balance: numericBalance, updatedAt: now.toISOString() };
+    return { username: normalizedUsername, balance: numericBalance, updatedAt: now.toISOString() };
+  } catch (error) {
+    // Handle duplicate key error from concurrent upserts
+    if (error.code === 11000) {
+      // Another request created the document, retry once
+      const retry = await collection.findOneAndUpdate(
+        {
+          username: normalizedUsername,
+          updatedAt: { $lt: cooldownCutoff }
+        },
+        [
+          { $set: { balance: numericBalance, updatedAt: now, updatedBy: normalizeUsername(updatedBy) } }
+        ],
+        { returnDocument: 'after' }
+      );
+      if (!retry) {
+        const existing = await collection.findOne({ username: normalizedUsername });
+        const error2 = new Error('This user balance was updated recently.');
+        error2.code = 'COOLDOWN';
+        error2.retryAfterSeconds = Math.ceil((new Date(existing.updatedAt).getTime() + cooldownMs - now.getTime()) / 1000);
+        throw error2;
+      }
+      return { username: normalizedUsername, balance: numericBalance, updatedAt: now.toISOString() };
+    }
+    throw error;
+  }
 }
 
 async function spendCoins(username, amount) {

@@ -38,4 +38,17 @@ const packSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Text index for full-text search
+packSchema.index({
+  name: 'text',
+  description: 'text',
+  tags: 'text',
+  category: 'text',
+  resolution: 'text',
+  uploader: 'text',
+});
+
+// Compound index for popular packs sorting
+packSchema.index({ downloads: -1, createdAt: -1 });
+
 module.exports = mongoose.model('Pack', packSchema);

@@ -71,8 +71,7 @@ router.patch('/packs/:id', packEditUpload.single('javaFile'), async (req, res, n
     const pack = await getPackById(req.params.id);
     if (!session) return res.status(401).json({ error: 'Account authentication required.' });
     if (!pack) return res.status(404).json({ error: 'Pack not found.' });
-    const ownsPack = (pack.uploaderId && String(pack.uploaderId) === String(session.accountId))
-      || (!pack.uploaderId && pack.uploader?.toLowerCase() === session.username?.toLowerCase());
+    const ownsPack = pack.uploaderId && String(pack.uploaderId) === String(session.accountId);
     if (!ownsPack) return res.status(403).json({ error: 'Only the pack owner can edit this pack.' });
     const updates = {
       bedrockVersion: String(req.body.bedrockVersion || '').trim().slice(0, 40),

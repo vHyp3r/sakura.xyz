@@ -125,13 +125,13 @@ async function updateAccountRank(identifier, rank, badges) {
 }
 
 async function getAccountById(id) {
-  const { ObjectId } = require('mongodb');
+  const { ObjectId } = require('mongoose').Types;
   if (!ObjectId.isValid(id)) return null;
   return publicAccount(await (await getAccountCollection()).findOne({ _id: new ObjectId(id) }));
 }
 
 async function updateAccount(id, updates) {
-  const { ObjectId } = require('mongodb');
+  const { ObjectId } = require('mongoose').Types;
   if (!ObjectId.isValid(id)) return null;
   const allowed = ['displayName', 'bio', 'pronouns', 'location', 'website', 'discoverable', 'equippedCosmetic', 'profilePicture'];
   const changes = Object.fromEntries(allowed.filter((key) => updates[key] !== undefined).map((key) => [key, updates[key]]));
@@ -142,7 +142,7 @@ async function updateAccount(id, updates) {
 }
 
 async function toggleAccountPack(id, field, packId) {
-  const { ObjectId } = require('mongodb');
+  const { ObjectId } = require('mongoose').Types;
   if (!ObjectId.isValid(id) || !['savedPacks', 'likedPacks'].includes(field)) return null;
   const collection = await getAccountCollection();
   const account = await collection.findOne({ _id: new ObjectId(id) });

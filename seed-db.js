@@ -14,14 +14,77 @@ async function seedDatabase() {
 
     const db = mongoose.connection.db;
 
-    // Create and insert test data
+    // Create and insert test data matching Pack schema
     const packsCollection = db.collection('packs');
     await packsCollection.deleteMany({}); // Clear existing data
 
     const testPacks = [
-      { title: 'PvP Clips', description: 'Popular pvp moments', category: '2b2e', clips: [] },
-      { title: '2b2e Highlights', description: '2b2e clips', category: 'gaming', clips: [] },
-      { title: 'Sneak Peaks', description: 'wips', category: 'wips', clips: [] }
+      {
+        name: 'PvP Pack Pro',
+        description: 'High-quality PvP texture pack with custom animations',
+        category: 'pvp',
+        tags: ['pvp', 'combat', '1.21'],
+        resolution: '64x',
+        uploader: 'Admin',
+        uploaderId: '',
+        file: '/uploads/pvp-pack-pro.mcpack',
+        originalFileName: 'pvp-pack-pro.mcpack',
+        thumbnail: '/images/default-thumbnail.svg',
+        thumbnailData: '',
+        downloads: 1250,
+        views: 3400,
+        likedBy: [],
+        superReactedBy: [],
+        comments: [],
+        isPort: false,
+        isRecolor: false,
+        bedrockVersion: '1.21.11',
+        javaVersion: '',
+      },
+      {
+        name: 'Faithful 32x',
+        description: 'Faithful recreation of default textures at 32x resolution',
+        category: 'faithful',
+        tags: ['faithful', 'vanilla', '32x'],
+        resolution: '32x',
+        uploader: 'Admin',
+        uploaderId: '',
+        file: '/uploads/faithful-32x.mcpack',
+        originalFileName: 'faithful-32x.mcpack',
+        thumbnail: '/images/default-thumbnail.svg',
+        thumbnailData: '',
+        downloads: 2100,
+        views: 5200,
+        likedBy: [],
+        superReactedBy: [],
+        comments: [],
+        isPort: false,
+        isRecolor: false,
+        bedrockVersion: '1.21.11',
+        javaVersion: '',
+      },
+      {
+        name: 'Modern UI Pack',
+        description: 'Clean modern UI redesign for Bedrock Edition',
+        category: 'ui',
+        tags: ['ui', 'modern', 'clean'],
+        resolution: '16x',
+        uploader: 'Admin',
+        uploaderId: '',
+        file: '/uploads/modern-ui.mcpack',
+        originalFileName: 'modern-ui.mcpack',
+        thumbnail: '/images/default-thumbnail.svg',
+        thumbnailData: '',
+        downloads: 890,
+        views: 2100,
+        likedBy: [],
+        superReactedBy: [],
+        comments: [],
+        isPort: false,
+        isRecolor: false,
+        bedrockVersion: '1.21.11',
+        javaVersion: '',
+      },
     ];
 
     const result = await packsCollection.insertMany(testPacks);

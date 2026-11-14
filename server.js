@@ -13,6 +13,7 @@ const { requireAdmin } = require('./src/services/adminAuth');
 const { requireAccount } = require('./src/services/accountAuth');
 
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy for rate limiting and secure cookies behind proxy
 const PORT = process.env.PORT || 3000;
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -28,6 +29,11 @@ if (IS_PRODUCTION) {
     .filter((name) => process.env[name].length < 32);
   if (shortSecrets.length) {
     console.error(`FATAL: Session secrets must be at least 32 characters: ${shortSecrets.join(', ')}`);
+    process.exit(1);
+  }
+  // Ensure session secrets are different (security isolation)
+  if (process.env.ADMIN_SESSION_SECRET === process.env.ACCOUNT_SESSION_SECRET) {
+    console.error('FATAL: ADMIN_SESSION_SECRET and ACCOUNT_SESSION_SECRET must be different values');
     process.exit(1);
   }
 }
@@ -56,6 +62,7 @@ const globalLimiter = rateLimit({
   message: { error: 'Too many requests, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: true,
 });
 app.use(globalLimiter);
 
@@ -70,9 +77,10 @@ const authLimiter = rateLimit({
 });
 
 // Session middleware (required for CSRF)
-const sessionSecret = process.env.ADMIN_SESSION_SECRET || process.env.ACCOUNT_SESSION_SECRET || 'dev-session-secret-change-in-production';
+// Use a dedicated secret for CSRF session (can be either admin or account secret, but not a fallback chain)
+const csrfSessionSecret = process.env.ADMIN_SESSION_SECRET || process.env.ACCOUNT_SESSION_SECRET || 'dev-csrf-secret-change-in-production';
 app.use(session({
-  secret: sessionSecret,
+  secret: csrfSessionSecret,
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -86,17 +94,6 @@ app.use(session({
 // Cookie parser (required for CSRF cookie-based protection)
 app.use(cookieParser());
 
-// CSRF protection middleware - applied globally, tokens available on req.csrfToken()
-// Individual routes can check for valid token if needed
-const csrfProtection = csrf({ cookie: { httpOnly: true, sameSite: 'lax', secure: IS_PRODUCTION } });
-app.use(csrfProtection);
-
-// Expose CSRF token to all templates
-app.use((req, res, next) => {
-  res.locals.csrfToken = req.csrfToken();
-  next();
-});
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -104,22 +101,49 @@ app.use('/admin-assets', express.static(path.join(__dirname, 'css')));
 app.use('/admin-assets', express.static(path.join(__dirname, 'js')));
 app.use('/profile-assets', express.static(path.join(__dirname, 'js')));
 app.get('/shop-assets/shop.js', (req, res) => res.sendFile(path.join(__dirname, 'shop.js')));
+
+// CSRF protection middleware - applied selectively to routes that need it
+// (HTML form submissions). API endpoints use token auth and get CSRF via /api/csrf-token.
+const csrfProtection = csrf({ cookie: { httpOnly: true, sameSite: 'lax', secure: IS_PRODUCTION } });
+
+// CSRF wrapper that skips the donation webhook (external service callback)
+const apiCsrfProtection = (req, res, next) => {
+  if (req.path === '/api/ranks/donations/webhook') {
+    return next();
+  }
+  csrfProtection(req, res, next);
+};
+
+// Public pages that don't need CSRF (GET only)
 app.get('/admin/login', authLimiter, (req, res) => res.sendFile(path.join(__dirname, 'html', 'adminLogin.html')));
 app.get('/login', authLimiter, (req, res) => res.sendFile(path.join(__dirname, 'html', 'accountLogin.html')));
 app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'html', 'privacypolicy.html')));
 app.get('/validate', (req, res) => res.sendFile(path.join(__dirname, 'html', 'validate.html')));
-app.get(['/admin', '/admin/overview', '/admin/collections', '/admin/activity', '/admin/balances', '/admin/shop'], requireAdmin, (req, res) => res.sendFile(path.join(__dirname, 'html', 'adminPanel.html')));
-app.get('/profile', requireAccount, (req, res) => res.sendFile(path.join(__dirname, 'html', 'profile.html')));
 app.get('/shop', (req, res) => res.sendFile(path.join(__dirname, 'html', 'shop.html')));
 app.get('/banner-maker', (req, res) => res.sendFile(path.join(__dirname, 'html', 'banner-maker.html')));
 app.get('/mobile-ui', (req, res) => res.sendFile(path.join(__dirname, 'html', 'mobile-ui.html')));
 app.get('/redeem', (req, res) => res.sendFile(path.join(__dirname, 'html', 'redeem.html')));
 app.get('/donate', (req, res) => res.sendFile(path.join(__dirname, 'html', 'donate.html')));
 
+// Protected pages that serve HTML (need CSRF for forms)
+app.get(['/admin', '/admin/overview', '/admin/collections', '/admin/activity', '/admin/balances', '/admin/shop'], requireAdmin, csrfProtection, (req, res) => res.sendFile(path.join(__dirname, 'html', 'adminPanel.html')));
+app.get('/profile', requireAccount, csrfProtection, (req, res) => res.sendFile(path.join(__dirname, 'html', 'profile.html')));
+
+// Expose CSRF token to templates for routes that have CSRF protection
+app.use((req, res, next) => {
+  if (req.csrfToken) {
+    res.locals.csrfToken = req.csrfToken();
+  }
+  next();
+});
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-if (isMongoConfigured()) {
+const mongoConfigured = isMongoConfigured();
+const firebaseConfigured = isFirebaseConfigured();
+
+if (mongoConfigured) {
   getDataStoreStatus().then((status) => {
     if (status.connected) {
       console.log('MongoDB connected');
@@ -127,7 +151,8 @@ if (isMongoConfigured()) {
       console.warn(`MongoDB setup issue: ${status.message}`);
     }
   });
-} else if (isFirebaseConfigured()) {
+}
+if (firebaseConfigured) {
   initFirebase();
   const status = getFirebaseStatus();
   if (status.connected) {
@@ -135,7 +160,8 @@ if (isMongoConfigured()) {
   } else {
     console.warn(`Firebase setup issue: ${status.message}`);
   }
-} else {
+}
+if (!mongoConfigured && !firebaseConfigured) {
   console.warn('No database configured. Add MONGODB_URI or Firebase credentials.');
 }
 
@@ -151,13 +177,14 @@ const converterRouter = require('./routes/converter');
 
 app.use('/', indexRouter);
 app.use('/packs', packsRouter);
-app.use('/upload', uploadRouter);
+app.use('/upload', csrfProtection, uploadRouter);
 app.use('/search', searchRouter);
 app.use('/discover', discoverRouter);
 app.use('/random', randomRouter);
 app.use('/dashboard', dashboardRouter);
 app.use('/api', converterRouter);
-app.use('/api', apiRouter);
+// Apply CSRF to API routes that need it (csrf-token, login, register), but skip webhook
+app.use('/api', apiCsrfProtection, apiRouter);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

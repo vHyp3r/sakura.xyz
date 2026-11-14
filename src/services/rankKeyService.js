@@ -182,7 +182,7 @@ async function createDonationRequest(username, amount, transactionId) {
 }
 
 async function verifyDonationPayment({ id, currency, destinationAddress, amountUsd, transactionId, confirmations }) {
-  const { ObjectId } = require('mongodb');
+  const { ObjectId } = require('mongoose').Types;
   if (!ObjectId.isValid(id)) throw new Error('Donation request not found.');
   const normalizedCurrency = String(currency || '').trim().toUpperCase();
   const normalizedTransactionId = String(transactionId || '').trim().slice(0, 160);
@@ -235,7 +235,7 @@ async function verifyDonationPayment({ id, currency, destinationAddress, amountU
 }
 
 async function getDonationRequest(id, username) {
-  const { ObjectId } = require('mongodb');
+  const { ObjectId } = require('mongoose').Types;
   if (!ObjectId.isValid(id)) return null;
   const donation = await (await getAccountConnection()).db.collection('rankDonations').findOne({
     _id: new ObjectId(id),
@@ -245,7 +245,7 @@ async function getDonationRequest(id, username) {
 }
 
 async function approveDonation(id, approvedBy) {
-  const { ObjectId } = require('mongodb');
+  const { ObjectId } = require('mongoose').Types;
   if (!ObjectId.isValid(id)) return null;
   const collection = (await getAccountConnection()).db.collection('rankDonations');
   const donation = await collection.findOne({ _id: new ObjectId(id), status: 'pending' });

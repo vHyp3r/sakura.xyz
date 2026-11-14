@@ -3,13 +3,12 @@ const multer = require('multer');
 const path = require('node:path');
 const AdmZip = require('adm-zip');
 const { convertPack } = require('../src/services/packConverter');
+const { CONVERTER } = require('../src/config/limits');
 
 const router = express.Router();
 
 // Zip bomb protection limits for converter
-const MAX_CONVERTER_ENTRIES = 10000;
-const MAX_CONVERTER_UNCOMPRESSED = 300 * 1024 * 1024; // 300 MB
-const MAX_CONVERTER_COMPRESSION_RATIO = 100;
+const { MAX_ENTRIES: MAX_CONVERTER_ENTRIES, MAX_UNCOMPRESSED_BYTES: MAX_CONVERTER_UNCOMPRESSED, MAX_COMPRESSION_RATIO: MAX_CONVERTER_COMPRESSION_RATIO } = CONVERTER;
 
 function validateConverterInput(buffer, filename) {
   try {
@@ -88,10 +87,14 @@ router.post(['/convert', '/conversion'], (req, res, next) => {
     const direction = path.extname(req.file.originalname).toLowerCase() === '.mcpack'
       ? 'bedrock-to-java'
       : 'java-to-bedrock';
-    const converted = await convertPack(req.file.buffer, req.file.originalname, direction, targetVersion);
+    const preserveFormat = req.body.preserveFormat === 'true';
+    const converted = await convertPack(req.file.buffer, req.file.originalname, direction, targetVersion, { preserveFormat });
     res.setHeader('Content-Type', 'application/octet-stream');
     res.setHeader('Content-Disposition', `attachment; filename="${converted.filename.replace(/["\\]/g, '')}"`);
-    res.send(converted.buffer);
+    res.setHeader('Content-Length', converted.buffer.length);
+    // Stream the buffer to avoid memory pressure for large files
+    const { Readable } = require('stream');
+    Readable.from(converted.buffer).pipe(res);
   } catch (error) {
     console.error('Pack conversion failed:', error);
     // Don't expose internal error details

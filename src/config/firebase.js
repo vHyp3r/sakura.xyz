@@ -96,10 +96,6 @@ function getFirebaseStatus() {
 }
 
 function isFirebaseConfigured() {
-  if (isMongoConfigured()) {
-    return false;
-  }
-
   return Boolean(
     process.env.FIREBASE_SERVICE_ACCOUNT_JSON ||
       process.env.GOOGLE_APPLICATION_CREDENTIALS ||

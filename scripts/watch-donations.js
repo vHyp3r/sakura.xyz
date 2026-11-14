@@ -65,6 +65,7 @@ async function main() {
   const transferSignature = ethers.id('Transfer(address,address,uint256)');
   const processedTxs = new Set();
   let lastScannedBlock = 0;
+  let webhookSuccess = false;
 
   async function signPayload(body) {
     const timestamp = Math.floor(Date.now() / 1000);
@@ -90,6 +91,7 @@ async function main() {
       throw new Error(`Webhook rejected (${response.status}): ${result}`);
     }
     console.log(`Webhook accepted for ${body.transactionId}: ${result}`);
+    webhookSuccess = true;
   }
 
   async function pollTransfers() {
@@ -157,7 +159,12 @@ async function main() {
 
   await pollTransfers();
 
-  setInterval(async () => {
+  const intervalId = setInterval(async () => {
+    if (webhookSuccess) {
+      console.log('Donation processed successfully. Stopping watcher.');
+      clearInterval(intervalId);
+      process.exit(0);
+    }
     try {
       await pollTransfers();
     } catch (error) {

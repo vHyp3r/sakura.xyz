@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongodb');
+const { ObjectId } = require('mongoose').Types;
 const { getAccountConnection } = require('./accountStore');
 
 const PERIODS = new Set(['daily', 'weekly', 'monthly', 'seasonal', 'permanent']);
@@ -47,9 +47,13 @@ function hash(value) {
   return result >>> 0;
 }
 
+// Shop rotation timezone - configurable via SHOP_TIMEZONE env var (default: America/New_York)
+// IMPORTANT: All servers in a cluster MUST use the same timezone for consistent shop rotations
+const SHOP_TIMEZONE = process.env.SHOP_TIMEZONE || 'America/New_York';
+
 function periodKey(period, now = new Date()) {
   const parts = Object.fromEntries(new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/New_York',
+    timeZone: SHOP_TIMEZONE,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',

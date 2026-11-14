@@ -33,10 +33,7 @@ router.get('/:id', async (req, res, next) => {
         : null;
     const owner = pack.uploaderId ? await getAccountById(pack.uploaderId) : null;
     const session = getAccountSession(req);
-    const isOwner = Boolean(session && (
-        (pack.uploaderId && session.accountId === String(pack.uploaderId))
-        || (!pack.uploaderId && session.username?.toLowerCase() === pack.uploader?.toLowerCase())
-    ));
+    const isOwner = Boolean(session && pack.uploaderId && session.accountId === String(pack.uploaderId));
     const storedFile = await getPackFileStream(pack.fileStorageId);
 
     res.render('packs/detail', {
