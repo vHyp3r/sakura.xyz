@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const csrf = require('csurf');
 const session = require('express-session');
+const cookieParser = require('cookie-parser');
 const { initFirebase, getFirebaseStatus, isFirebaseConfigured } = require('./src/config/firebase');
 const { isMongoConfigured, getDataStoreStatus } = require('./src/services/dataStore');
 const { requireAdmin } = require('./src/services/adminAuth');
@@ -21,6 +22,12 @@ if (IS_PRODUCTION) {
   const missing = requiredSecrets.filter(s => !process.env[s]);
   if (missing.length) {
     console.error(`FATAL: Missing required environment variables: ${missing.join(', ')}`);
+    process.exit(1);
+  }
+  const shortSecrets = ['ADMIN_SESSION_SECRET', 'ACCOUNT_SESSION_SECRET']
+    .filter((name) => process.env[name].length < 32);
+  if (shortSecrets.length) {
+    console.error(`FATAL: Session secrets must be at least 32 characters: ${shortSecrets.join(', ')}`);
     process.exit(1);
   }
 }
@@ -76,8 +83,19 @@ app.use(session({
   },
 }));
 
-// CSRF protection for state-changing operations (applied selectively)
+// Cookie parser (required for CSRF cookie-based protection)
+app.use(cookieParser());
+
+// CSRF protection middleware - applied globally, tokens available on req.csrfToken()
+// Individual routes can check for valid token if needed
 const csrfProtection = csrf({ cookie: { httpOnly: true, sameSite: 'lax', secure: IS_PRODUCTION } });
+app.use(csrfProtection);
+
+// Expose CSRF token to all templates
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -143,6 +161,16 @@ app.use('/api', apiRouter);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
+
+  if (err.code === 'EBADCSRFTOKEN') {
+    if (req.path.startsWith('/api/')) {
+      return res.status(403).json({ error: 'Invalid CSRF token.' });
+    }
+    return res.status(403).render('error', {
+      title: 'Forbidden',
+      message: 'Invalid CSRF token.',
+    });
+  }
 
   if (req.path.startsWith('/api/')) {
     return res.status(500).json({

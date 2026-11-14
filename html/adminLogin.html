@@ -35,7 +35,9 @@
             button.disabled = true;
             error.textContent = '';
             try {
-                const response = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(new FormData(form))) });
+                const tokenResponse = await fetch('/api/csrf-token', { cache: 'no-store' });
+                const { csrfToken } = await tokenResponse.json();
+                const response = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken }, body: JSON.stringify(Object.fromEntries(new FormData(form))) });
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.error || 'Unable to sign in.');
                 location.href = returnTo.startsWith('/') ? returnTo : '/admin';

@@ -2,7 +2,6 @@ const express = require('express');
 const multer = require('multer');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
-const csrf = require('csurf');
 const {
   getDashboardSummary: getMongoDashboardSummary,
   getDataStoreStatus,
@@ -61,15 +60,12 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true,
 });
 
-// CSRF protection for state-changing operations (cookie-based)
-const csrfProtection = csrf({ cookie: { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' } });
-
-// CSRF token endpoint for frontend (needs CSRF middleware to populate req.csrfToken)
-router.get('/csrf-token', csrfProtection, (req, res) => {
+// CSRF token endpoint for frontend (global CSRF middleware from server.js provides req.csrfToken())
+router.get('/csrf-token', (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
 });
 
-router.patch('/packs/:id', packEditUpload.single('javaFile'), csrfProtection, async (req, res, next) => {
+router.patch('/packs/:id', packEditUpload.single('javaFile'), async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     const pack = await getPackById(req.params.id);
@@ -97,7 +93,7 @@ router.patch('/packs/:id', packEditUpload.single('javaFile'), csrfProtection, as
   }
 });
 
-router.post('/account/register', authLimiter, csrfProtection, async (req, res, next) => {
+router.post('/account/register', authLimiter, async (req, res, next) => {
   try {
     const account = await registerAccount(req.body);
     setAccountSession(res, req, account);
@@ -108,7 +104,7 @@ router.post('/account/register', authLimiter, csrfProtection, async (req, res, n
   }
 });
 
-router.post('/account/login', authLimiter, csrfProtection, async (req, res, next) => {
+router.post('/account/login', authLimiter, async (req, res, next) => {
   try {
     const account = await authenticateAccount(req.body.username, req.body.password);
     if (!account) return res.status(401).json({ error: 'Invalid username or password.' });
@@ -136,7 +132,7 @@ router.get('/shop/catalog', async (req, res, next) => {
     next(error);
   }
 });
-router.post('/account/logout', csrfProtection, (req, res) => {
+router.post('/account/logout', (req, res) => {
   clearAccountSession(res);
   res.json({ authenticated: false });
 });
@@ -151,7 +147,7 @@ router.get('/account/search', async (req, res, next) => {
   }
 });
 
-router.patch('/account/profile', csrfProtection, async (req, res, next) => {
+router.patch('/account/profile', async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Account authentication required.' });
@@ -235,7 +231,7 @@ router.get('/account/summary', async (req, res, next) => {
   }
 });
 
-router.post('/packs/:id/view', csrfProtection, async (req, res, next) => {
+router.post('/packs/:id/view', async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     const visitorSource = session?.accountId
@@ -250,7 +246,7 @@ router.post('/packs/:id/view', csrfProtection, async (req, res, next) => {
   }
 });
 
-router.post('/packs/:id/library', csrfProtection, async (req, res, next) => {
+router.post('/packs/:id/library', async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Sign in to save packs to your library.' });
@@ -262,7 +258,7 @@ router.post('/packs/:id/library', csrfProtection, async (req, res, next) => {
   }
 });
 
-router.post('/packs/:id/like', csrfProtection, async (req, res, next) => {
+router.post('/packs/:id/like', async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Sign in to like packs.' });
@@ -275,7 +271,7 @@ router.post('/packs/:id/like', csrfProtection, async (req, res, next) => {
   }
 });
 
-router.post('/packs/:id/super-react', csrfProtection, async (req, res, next) => {
+router.post('/packs/:id/super-react', async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Sign in to send a super reaction.' });
@@ -297,7 +293,7 @@ router.get('/packs/:id/comments', async (req, res, next) => {
   }
 });
 
-router.post('/packs/:id/comments', csrfProtection, async (req, res, next) => {
+router.post('/packs/:id/comments', async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Sign in to comment.' });
@@ -321,7 +317,7 @@ router.get('/coins', async (req, res, next) => {
   }
 });
 
-router.post('/ranks/purchase', authLimiter, csrfProtection, async (req, res, next) => {
+router.post('/ranks/purchase', authLimiter, async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Account authentication required.' });
@@ -337,7 +333,7 @@ router.post('/ranks/purchase', authLimiter, csrfProtection, async (req, res, nex
   }
 });
 
-router.post('/ranks/redeem', authLimiter, csrfProtection, async (req, res, next) => {
+router.post('/ranks/redeem', authLimiter, async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Account authentication required.' });
@@ -368,7 +364,7 @@ router.get('/ranks/keys', async (req, res, next) => {
   }
 });
 
-router.post('/ranks/donations', authLimiter, csrfProtection, async (req, res, next) => {
+router.post('/ranks/donations', authLimiter, async (req, res, next) => {
   try {
     const session = getAccountSession(req);
     if (!session) return res.status(401).json({ error: 'Account authentication required.' });
@@ -442,7 +438,7 @@ router.get('/admin/balances', requireAdmin, async (req, res, next) => {
   }
 });
 
-router.post('/admin/balances', requireAdmin, csrfProtection, async (req, res, next) => {
+router.post('/admin/balances', requireAdmin, async (req, res, next) => {
   try {
     const session = getAdminSession(req);
     const result = await setBalance(req.body.username, req.body.balance, session.username);
@@ -468,7 +464,7 @@ router.post('/admin/balances', requireAdmin, csrfProtection, async (req, res, ne
   }
 });
 
-router.post('/admin/accounts/reset-password', requireAdmin, csrfProtection, async (req, res, next) => {
+router.post('/admin/accounts/reset-password', requireAdmin, async (req, res, next) => {
   try {
     const session = getAdminSession(req);
     const account = await resetAccountPassword(req.body.identifier, req.body.password);
@@ -496,7 +492,7 @@ router.get('/admin/ranks', requireAdmin, (req, res) => {
   res.json({ ranks: RANKS, badges: BADGES });
 });
 
-router.post('/admin/ranks/giveaway-keys', requireAdmin, csrfProtection, async (req, res, next) => {
+router.post('/admin/ranks/giveaway-keys', requireAdmin, async (req, res, next) => {
   try {
     const session = getAdminSession(req);
     const keys = await generateGiveawayKeys(req.body.rank, req.body.count);
@@ -524,7 +520,7 @@ router.get('/admin/shop/items', requireAdmin, async (req, res, next) => {
   }
 });
 
-router.post('/admin/shop/items', requireAdmin, csrfProtection, async (req, res, next) => {
+router.post('/admin/shop/items', requireAdmin, async (req, res, next) => {
   try {
     const session = getAdminSession(req);
     const item = await createShopItem(req.body);
@@ -544,7 +540,7 @@ router.post('/admin/shop/items', requireAdmin, csrfProtection, async (req, res, 
   }
 });
 
-router.patch('/admin/shop/items/:id', requireAdmin, csrfProtection, async (req, res, next) => {
+router.patch('/admin/shop/items/:id', requireAdmin, async (req, res, next) => {
   try {
     const session = getAdminSession(req);
     const item = await updateShopItem(req.params.id, req.body);
@@ -565,7 +561,7 @@ router.patch('/admin/shop/items/:id', requireAdmin, csrfProtection, async (req, 
   }
 });
 
-router.delete('/admin/shop/items/:id', requireAdmin, csrfProtection, async (req, res, next) => {
+router.delete('/admin/shop/items/:id', requireAdmin, async (req, res, next) => {
   try {
     const session = getAdminSession(req);
     const deleted = await deleteShopItem(req.params.id);
@@ -585,7 +581,7 @@ router.delete('/admin/shop/items/:id', requireAdmin, csrfProtection, async (req,
   }
 });
 
-router.post('/admin/accounts/rank', requireAdmin, csrfProtection, async (req, res, next) => {
+router.post('/admin/accounts/rank', requireAdmin, async (req, res, next) => {
   try {
     const session = getAdminSession(req);
     const account = await updateAccountRank(req.body.identifier, req.body.rank, req.body.badges);
@@ -606,7 +602,7 @@ router.post('/admin/accounts/rank', requireAdmin, csrfProtection, async (req, re
   }
 });
 
-router.post('/admin/rank-donations/:id/approve', requireAdmin, csrfProtection, async (req, res, next) => {
+router.post('/admin/rank-donations/:id/approve', requireAdmin, async (req, res, next) => {
   try {
     const session = getAdminSession(req);
     const result = await approveDonation(req.params.id, session.username);
@@ -635,7 +631,7 @@ router.get('/admin/session', (req, res) => {
   res.json({ authenticated: Boolean(session), username: session?.username || null });
 });
 
-router.post('/admin/login', authLimiter, csrfProtection, (req, res) => {
+router.post('/admin/login', authLimiter, (req, res) => {
   const username = String(req.body.username || '').trim();
   const password = String(req.body.password || '');
 
@@ -661,7 +657,7 @@ router.post('/admin/login', authLimiter, csrfProtection, (req, res) => {
   return res.json({ authenticated: true, username });
 });
 
-router.post('/admin/logout', csrfProtection, (req, res) => {
+router.post('/admin/logout', (req, res) => {
   clearAdminSession(res);
   res.json({ authenticated: false });
 });
